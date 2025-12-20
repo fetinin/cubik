@@ -36,17 +36,18 @@ go build
    - `SendCommandNoResponse()`: Fire-and-forget command sending (used for high-frequency Matrix updates)
    - All messages formatted as JSON with `\r\n` terminator
    - Commands use structure: `{"id": <int>, "method": <string>, "params": [<array>]}`
-
-3. **Matrix LED Control (commands.go)**
-   - `ActivateFxMode()`: Enables "direct" mode required for manual LED control
-   - `UpdateLeds()`: Sends base64-encoded RGB data to update all LEDs
    - `encodeRGBColor()`: Converts single RGB color (0-255 each) to 4-char base64 string
+
+3. **Matrix Patterns and Animations (animations.go)**
    - `createSolidColor()`: Generates uniform color pattern for all LEDs
    - `createCheckerboard()`: Creates alternating red/blue pattern
    - `createGradient()`: Generates rainbow gradient across LEDs
-   - `Framebuffer` and `Digit Rendering System`: Provides high-level API for drawing digits and text on the matrix display.
 
-4. **Demo Program (main.go)**
+4. **Matrix Display and Rendering (drawing.go)**
+   - `Framebuffer` and `Digit Rendering System`: Provides high-level API for drawing digits and text on the matrix display.
+   - `DrawDigit`, `DrawNumber`, `DrawString`: Rendering functions for the matrix.
+
+5. **Demo Program (main.go)**
    - Discovers CubeLite devices on network
    - Tests power toggle functionality
    - Demonstrates Matrix LED control with animated patterns
