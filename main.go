@@ -136,9 +136,6 @@ func demoTestPatterns(device *DeviceInfo) {
 			}
 		}
 	}
-
-	fmt.Println()
-	fmt.Println("  Matrix demo complete!")
 }
 
 func demoDigitDisplay(device *DeviceInfo) {
@@ -207,21 +204,21 @@ type AnimationMode int
 
 // LightState tracks the state of a single Christmas light
 type LightState struct {
-	X, Y       int       // Position on matrix
-	On         bool      // Current on/off state
-	Color      Color     // Current color
-	NextToggle time.Time // For twinkle effect
-	BaseColor  Color     // Original color for pulse effect
-	SparkleEnd time.Time // When sparkle effect ends
+	X, Y           int   // Position on matrix
+	On             bool  // Current on/off state
+	Color          Color // Current color
+	BaseColor      Color // Original color for pulse effect
+	NextToggleTick uint  // For twinkle effect (tick-based)
+	SparkleEndTick uint  // When sparkle effect ends (tick-based)
 }
 
 // ChristmasTreeAnimator manages the animation state
 type ChristmasTreeAnimator struct {
-	Lights         []LightState
-	Frame          int
-	StartTime      time.Time
-	Mode           AnimationMode
-	LastModeSwitch time.Time
+	Lights            []LightState
+	Tick              uint
+	Mode              AnimationMode
+	LastActiveMode    AnimationMode
+	ModeDurationTicks uint
 }
 
 // Color palette for Christmas tree
@@ -240,17 +237,17 @@ var (
 
 // Light positions on the tree (10 lights total)
 var lightPositions = []struct{ X, Y int }{
-	{10, 0},                      // Row 0: 1 light (top)
-	{9, 1}, {11, 1},              // Row 1: 2 lights
-	{8, 2}, {10, 2}, {12, 2},     // Row 2: 3 lights
+	{10, 0},         // Row 0: 1 light (top)
+	{9, 1}, {11, 1}, // Row 1: 2 lights
+	{8, 2}, {10, 2}, {12, 2}, // Row 2: 3 lights
 	{7, 3}, {9, 3}, {11, 3}, {13, 3}, // Row 3: 4 lights
 }
 
 // Tree foliage coordinates by row
 var treePixels = map[int][]int{
-	0: {10},                    // Row 0: 1 pixel
-	1: {9, 10, 11},             // Row 1: 3 pixels
-	2: {8, 9, 10, 11, 12},      // Row 2: 5 pixels
+	0: {10},                      // Row 0: 1 pixel
+	1: {9, 10, 11},               // Row 1: 3 pixels
+	2: {8, 9, 10, 11, 12},        // Row 2: 5 pixels
 	3: {7, 8, 9, 10, 11, 12, 13}, // Row 3: 7 pixels
 }
 
@@ -261,7 +258,6 @@ func demoChristmasTree(device *DeviceInfo) {
 
 	animator := NewChristmasTreeAnimator(AnimationAll)
 	fb := NewFramebuffer(20, 5)
-	frameDelay := 1 * time.Second // 20 FPS
 
 	for {
 		// Update animation state
@@ -277,32 +273,31 @@ func demoChristmasTree(device *DeviceInfo) {
 			return
 		}
 
-		// Frame timing
-		time.Sleep(frameDelay)
-		animator.Frame++
+		// Pace updates to avoid device rate limiting
+		time.Sleep(1 * time.Second)
 	}
 }
 
 // NewChristmasTreeAnimator creates a new animator with initialized lights
 func NewChristmasTreeAnimator(mode AnimationMode) ChristmasTreeAnimator {
 	animator := ChristmasTreeAnimator{
-		Lights:         make([]LightState, len(lightPositions)),
-		Frame:          0,
-		StartTime:      time.Now(),
-		Mode:           mode,
-		LastModeSwitch: time.Now(),
+		Lights:            make([]LightState, len(lightPositions)),
+		Tick:              0,
+		Mode:              mode,
+		LastActiveMode:    AnimationTwinkle,
+		ModeDurationTicks: 100,
 	}
 
 	// Initialize light states with different colors
 	colors := []Color{LightRed, LightBlue, LightYellow, LightWhite}
 	for i, pos := range lightPositions {
 		animator.Lights[i] = LightState{
-			X:          pos.X,
-			Y:          pos.Y,
-			On:         true,
-			Color:      colors[i%len(colors)],
-			BaseColor:  colors[i%len(colors)],
-			NextToggle: time.Now().Add(time.Duration(rand.Intn(500)) * time.Millisecond),
+			X:              pos.X,
+			Y:              pos.Y,
+			On:             true,
+			Color:          colors[i%len(colors)],
+			BaseColor:      colors[i%len(colors)],
+			NextToggleTick: uint(rand.Intn(10)), // initial twinkle offset in ticks
 		}
 	}
 
@@ -311,20 +306,19 @@ func NewChristmasTreeAnimator(mode AnimationMode) ChristmasTreeAnimator {
 
 // Update advances the animation state
 func (a *ChristmasTreeAnimator) Update() {
-	// Switch modes every 10 seconds if AnimationAll
+	// Determine active mode based on tick (no wall-clock time).
+	activeMode := a.Mode
 	if a.Mode == AnimationAll {
-		elapsed := time.Since(a.LastModeSwitch)
-		if elapsed > 10*time.Second {
-			// Cycle through modes: Twinkle → Chase → Pulse → Sparkle
-			currentMode := (a.Frame / 200) % 4 // Switch every 10 seconds at 20 FPS
-			a.Mode = AnimationMode(currentMode)
-			a.LastModeSwitch = time.Now()
-			fmt.Printf("  Switching to animation mode: %d\n", a.Mode)
-		}
+		activeMode = AnimationMode((a.Tick / a.ModeDurationTicks) % uint(4))
+	}
+
+	if activeMode != a.LastActiveMode {
+		fmt.Printf("  Switching to animation mode: %d\n", activeMode)
+		a.LastActiveMode = activeMode
 	}
 
 	// Update based on current mode
-	switch a.Mode % 4 { // Use modulo to handle AnimationAll
+	switch activeMode % 4 { // Use modulo to handle AnimationAll
 	case AnimationTwinkle:
 		a.updateTwinkle()
 	case AnimationChase:
@@ -334,17 +328,19 @@ func (a *ChristmasTreeAnimator) Update() {
 	case AnimationSparkle:
 		a.updateSparkle()
 	}
+
+	// Advance one animation step per Update() call
+	a.Tick++
 }
 
 // updateTwinkle implements random twinkling effect
 func (a *ChristmasTreeAnimator) updateTwinkle() {
-	now := time.Now()
 	for i := range a.Lights {
-		if now.After(a.Lights[i].NextToggle) {
+		if a.Tick >= a.Lights[i].NextToggleTick {
 			a.Lights[i].On = !a.Lights[i].On
-			// Random interval 100-500ms
-			delay := time.Duration(100+rand.Intn(400)) * time.Millisecond
-			a.Lights[i].NextToggle = now.Add(delay)
+			// Random interval 2-10 ticks (was ~100-500ms at ~20 FPS)
+			delayTicks := uint(2 + rand.Intn(9))
+			a.Lights[i].NextToggleTick = a.Tick + delayTicks
 		}
 	}
 }
@@ -354,17 +350,18 @@ func (a *ChristmasTreeAnimator) updateChase() {
 	colors := []Color{LightRed, LightBlue, LightYellow, LightWhite}
 	for i := range a.Lights {
 		// Each light offset by 2 frames, color changes every 15 frames
-		offset := (a.Frame + i*2) / 15
-		a.Lights[i].Color = colors[offset%len(colors)]
+		offset := (a.Tick + uint(i*2)) / uint(15)
+		a.Lights[i].Color = colors[int(offset%uint(len(colors)))]
 		a.Lights[i].On = true
 	}
 }
 
 // updatePulse implements synchronized pulsing effect
 func (a *ChristmasTreeAnimator) updatePulse() {
-	elapsed := time.Since(a.StartTime).Seconds()
-	// Sine wave: period = 2 seconds
-	brightness := (math.Sin(elapsed*math.Pi) + 1) / 2
+	// Tick-based sine wave: period = 40 ticks (was ~2s at ~20 FPS).
+	const periodTicks uint = 40
+	phase := 2 * math.Pi * float64(a.Tick%periodTicks) / float64(periodTicks)
+	brightness := (math.Sin(phase) + 1) / 2
 
 	for i := range a.Lights {
 		base := a.Lights[i].BaseColor
@@ -379,11 +376,9 @@ func (a *ChristmasTreeAnimator) updatePulse() {
 
 // updateSparkle implements random sparkle burst effect
 func (a *ChristmasTreeAnimator) updateSparkle() {
-	now := time.Now()
-
 	// Check for sparkles ending
 	for i := range a.Lights {
-		if now.After(a.Lights[i].SparkleEnd) {
+		if a.Tick >= a.Lights[i].SparkleEndTick {
 			a.Lights[i].Color = a.Lights[i].BaseColor
 		}
 		a.Lights[i].On = true
@@ -393,7 +388,7 @@ func (a *ChristmasTreeAnimator) updateSparkle() {
 	if rand.Float64() < 0.05 {
 		sparkleIdx := rand.Intn(len(a.Lights))
 		a.Lights[sparkleIdx].Color = LightWhite
-		a.Lights[sparkleIdx].SparkleEnd = now.Add(300 * time.Millisecond)
+		a.Lights[sparkleIdx].SparkleEndTick = a.Tick + uint(6)
 	}
 }
 
