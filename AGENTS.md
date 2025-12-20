@@ -13,7 +13,7 @@ This is a Go application for discovering and controlling Yeelight CubeLite (Matr
 go build
 
 # Run the application
-go run main.go yeelight_discovery.go
+go run .
 
 # Run with pre-approval for go build
 go build
@@ -24,26 +24,27 @@ go build
 
 ### Core Components
 
-1. **Device Discovery (yeelight_discovery.go)**
+1. **Device Discovery (discovery.go)**
    - `DiscoverDevices()`: UDP multicast SSDP discovery on `239.255.255.250:1982`
    - `parseDeviceInfo()`: Parses SSDP HTTP-like response headers into `DeviceInfo` struct
    - Only processes devices with model "CubeLite"
    - Implements deduplication based on device Location
    - 3-second timeout for collecting responses
 
-2. **Command Protocol (yeelight_discovery.go)**
+2. **Command Protocol (commands.go)**
    - `SendCommand()`: Establishes TCP connection, sends JSON-RPC command, waits for response
    - `SendCommandNoResponse()`: Fire-and-forget command sending (used for high-frequency Matrix updates)
    - All messages formatted as JSON with `\r\n` terminator
    - Commands use structure: `{"id": <int>, "method": <string>, "params": [<array>]}`
 
-3. **Matrix LED Control (yeelight_discovery.go)**
+3. **Matrix LED Control (commands.go)**
    - `ActivateFxMode()`: Enables "direct" mode required for manual LED control
    - `UpdateLeds()`: Sends base64-encoded RGB data to update all LEDs
    - `encodeRGBColor()`: Converts single RGB color (0-255 each) to 4-char base64 string
    - `createSolidColor()`: Generates uniform color pattern for all LEDs
    - `createCheckerboard()`: Creates alternating red/blue pattern
    - `createGradient()`: Generates rainbow gradient across LEDs
+   - `Framebuffer` and `Digit Rendering System`: Provides high-level API for drawing digits and text on the matrix display.
 
 4. **Demo Program (main.go)**
    - Discovers CubeLite devices on network
@@ -81,7 +82,7 @@ go build
 
 ## Reference Documentation
 
-See `yeelight-protocol-guide.md` for comprehensive protocol documentation including:
+See `docs/yeelight-protocol-guide.md` for comprehensive protocol documentation including:
 - Full command reference (set_power, toggle, set_bright, set_rgb, etc.)
 - Music mode for high-frequency updates (bypasses rate limiting)
 - Multi-module Matrix layouts and image display
@@ -89,8 +90,8 @@ See `yeelight-protocol-guide.md` for comprehensive protocol documentation includ
 - Troubleshooting common issues
 
 Additional protocol documentation in:
-- `yeelight-protocol.md`
-- `yeelight_protocol_analysis.md`
+- `docs/yeelight-protocol.md`
+- `docs/yeelight_protocol_analysis.md`
 
 ## Development Notes
 
