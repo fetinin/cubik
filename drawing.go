@@ -274,4 +274,3 @@ func DrawString(fb *Framebuffer, str string, y, spacing int, alignment Alignment
 
 	return nil
 }
-

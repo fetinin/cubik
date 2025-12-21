@@ -95,4 +95,3 @@ func createGradient(numLEDs int) string {
 
 	return builder.String()
 }
-
