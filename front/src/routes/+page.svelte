@@ -130,32 +130,42 @@
 		{@const size = $matrix!}
 
 		<div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[auto_320px]">
-			<section class="rounded border border-gray-200 p-4">
-				<div class="flex items-center justify-between gap-4">
-					<div class="text-sm text-gray-600">Matrix: {size.width}×{size.height}</div>
-					<button
-						type="button"
-						class="rounded border border-gray-300 px-3 py-1.5 text-xs font-medium"
-						onclick={() => pixels.set(initPixelsForSize(size, 0x000000))}
-					>
-						Clear
-					</button>
-				</div>
+			<div class="flex flex-col gap-6">
+				<section class="rounded border border-gray-200 p-4">
+					<div class="flex items-center justify-between gap-4">
+						<div class="text-sm text-gray-600">Matrix: {size.width}×{size.height}</div>
+						<button
+							type="button"
+							class="rounded border border-gray-300 px-3 py-1.5 text-xs font-medium"
+							onclick={() => pixels.set(initPixelsForSize(size, 0x000000))}
+						>
+							Clear
+						</button>
+					</div>
 
-				<div class="mt-4 flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
-					<MatrixGrid
+					<div class="mt-4 flex flex-col gap-6 md:flex-row md:items-start">
+						<MatrixGrid
+							width={size.width}
+							height={size.height}
+							pixels={$pixels}
+							{paintColor}
+							{onPaint}
+						/>
+
+						<div class="w-full max-w-sm">
+							<ColorPickerRGB color={paintColor} onChange={(c) => (paintColor = c)} />
+						</div>
+					</div>
+				</section>
+
+				<section class="rounded border border-gray-200 p-4">
+					<AnimationPreview
 						width={size.width}
 						height={size.height}
-						pixels={$pixels}
-						{paintColor}
-						{onPaint}
+						frames={$frames.map((f) => f.pixels)}
 					/>
-
-					<div class="w-full max-w-sm">
-						<ColorPickerRGB color={paintColor} onChange={(c) => (paintColor = c)} />
-					</div>
-				</div>
-			</section>
+				</section>
+			</div>
 
 			<aside class="flex flex-col gap-6">
 				<section class="rounded border border-gray-200 p-4">
@@ -167,14 +177,6 @@
 						onReplaceSelected={() => replaceSelectedFramePixels(editor)}
 						onDeleteFrame={deleteFrame}
 						onMoveFrame={moveFrame}
-					/>
-				</section>
-
-				<section class="rounded border border-gray-200 p-4">
-					<AnimationPreview
-						width={size.width}
-						height={size.height}
-						frames={$frames.map((f) => f.pixels)}
 					/>
 				</section>
 

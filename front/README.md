@@ -5,6 +5,7 @@ A frontend single-page application for drawing and animating Yeelight CubeLite (
 ## Overview
 
 This SvelteKit application serves as the control interface for Yeelight Cube devices. It allows users to:
+
 - Draw and design patterns for the LED matrix display
 - Create and preview animations
 - Send display commands to the backend for device control

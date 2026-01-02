@@ -57,8 +57,8 @@
 		<div class="text-sm text-gray-500">Add frames to preview an animation.</div>
 	{:else}
 		<div
-			class="grid gap-1"
-			style:grid-template-columns={`repeat(${width}, 1fr)`}
+			class="grid gap-1 w-fit self-center"
+			style:grid-template-columns={`repeat(${width}, 16px)`}
 			data-testid="preview"
 		>
 			{#each Array.from({ length: width * height }) as _cell, i (i)}

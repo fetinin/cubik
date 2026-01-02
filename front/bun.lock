@@ -4,6 +4,9 @@
   "workspaces": {
     "": {
       "name": "cubik",
+      "dependencies": {
+        "emg-colorpicker": "^2.2.0",
+      },
       "devDependencies": {
         "@eslint/compat": "^1.4.0",
         "@eslint/js": "^9.39.1",
@@ -312,6 +315,8 @@
     "detect-libc": ["detect-libc@2.1.2", "", {}, "sha512-Btj2BOOO83o3WyH59e8MgXsxEQVcarkUOpEYrubB0urwnN10yQ364rsiByU11nZlqWYZm05i/of7io4mzihBtQ=="],
 
     "devalue": ["devalue@5.6.1", "", {}, "sha512-jDwizj+IlEZBunHcOuuFVBnIMPAEHvTsJj0BcIp94xYguLRVBcXO853px/MyIJvbVzWdsGvrRweIUWJw8hBP7A=="],
+
+    "emg-colorpicker": ["emg-colorpicker@2.2.0", "", { "dependencies": { "svelte": "^5.23.1" } }, "sha512-KpJDkntXCoa+QH1M6BMBKTEeJ2kTJQo1eDwo0eSOdKQxsPP41VBPH/wfKAAuW9+4CxuW1Vip290erZcgp2q2Gw=="],
 
     "enhanced-resolve": ["enhanced-resolve@5.18.4", "", { "dependencies": { "graceful-fs": "^4.2.4", "tapable": "^2.2.0" } }, "sha512-LgQMM4WXU3QI+SYgEc2liRgznaD5ojbmY3sb8LxyguVkIg5FxdpTkvk72te2R38/TGKxH634oLxXRGY6d7AP+Q=="],
 
