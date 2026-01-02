@@ -1,3 +1,11 @@
+# Cubik Frontend - Yeelight Cube Control Interface
+
+This is a SvelteKit single-page application for drawing and animating Yeelight CubeLite (Matrix) devices. The frontend provides the user interface for creating visual content and forming payloads that describe how images should be displayed on the cube's LED matrix. All actual device manipulation is performed by the backend - the frontend is responsible only for displaying information to the user and forming the display commands.
+
+This application is designed to run locally without authorization.
+
+---
+
 You are able to use the Svelte MCP server, where you have access to comprehensive Svelte 5 and SvelteKit documentation. Here's how to use the available tools effectively:
 
 ## Available MCP Tools:

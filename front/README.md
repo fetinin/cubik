@@ -1,6 +1,15 @@
-# sv
+# Cubik Frontend
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+A frontend single-page application for drawing and animating Yeelight CubeLite (Matrix) devices. This application provides an intuitive interface for creating visual content to be displayed on the 20x5 LED matrix.
+
+## Overview
+
+This SvelteKit application serves as the control interface for Yeelight Cube devices. It allows users to:
+- Draw and design patterns for the LED matrix display
+- Create and preview animations
+- Send display commands to the backend for device control
+
+The frontend handles only the user interface and payload formation - all actual device communication is handled by the Go backend. This application is designed to run locally without any authentication or authorization.
 
 ## Creating a project
 

@@ -1,5 +1,6 @@
 {
 	"name": "cubik",
+	"description": "Frontend SPA for drawing and animating Yeelight CubeLite Matrix devices",
 	"private": true,
 	"version": "0.0.1",
 	"type": "module",
