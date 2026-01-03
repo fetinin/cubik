@@ -143,19 +143,13 @@
 						</button>
 					</div>
 
-					<div class="mt-4 flex flex-col gap-6 md:flex-row md:items-start">
-						<MatrixGrid
-							width={size.width}
-							height={size.height}
-							pixels={$pixels}
-							{paintColor}
-							{onPaint}
-						/>
-
-						<div class="w-full max-w-sm">
-							<ColorPickerRGB color={paintColor} onChange={(c) => (paintColor = c)} />
-						</div>
-					</div>
+					<MatrixGrid
+						width={size.width}
+						height={size.height}
+						pixels={$pixels}
+						{paintColor}
+						{onPaint}
+					/>
 				</section>
 
 				<section class="rounded border border-gray-200 p-4">
@@ -168,6 +162,10 @@
 			</div>
 
 			<aside class="flex flex-col gap-6">
+				<section class="rounded border border-gray-200 p-4">
+					<ColorPickerRGB color={paintColor} onChange={(c) => (paintColor = c)} />
+				</section>
+
 				<section class="rounded border border-gray-200 p-4">
 					<FramesPanel
 						frames={$frames}

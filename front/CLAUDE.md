@@ -116,6 +116,7 @@ The application follows a single-page app pattern with centralized state managem
 ## Related Projects
 
 The Go backend for this project is located at `/Users/inv-denisf/dev/personal/Cubik/` which handles:
+
 - SSDP device discovery on local network
 - TCP command protocol for Yeelight devices
 - Matrix LED encoding and transmission
