@@ -19,17 +19,17 @@ export type AnimationPayload = {
 import { DefaultApi, Configuration } from '$lib/api/generated';
 import type { RGBPixel } from '$lib/api/generated';
 
+const api = new DefaultApi(
+	new Configuration({
+		basePath: 'http://localhost:8080'
+	})
+);
+
 function sleep(ms: number) {
 	return new Promise<void>((resolve) => setTimeout(resolve, ms));
 }
 
 export async function getDevices(): Promise<Device[]> {
-	const api = new DefaultApi(
-		new Configuration({
-			basePath: 'http://localhost:8080'
-		})
-	);
-
 	const response = await api.getDevices();
 	const devices = response.devices;
 	return devices.map((d) => ({ id: d.id, name: d.name, location: d.location }));
@@ -43,12 +43,6 @@ export async function getMatrixSize(_deviceId: string): Promise<MatrixSize> {
 }
 
 export async function applyAnimation(deviceId: string, payload: AnimationPayload): Promise<void> {
-	const api = new DefaultApi(
-		new Configuration({
-			basePath: 'http://localhost:8080'
-		})
-	);
-
 	const toPixel = (packed: number): RGBPixel => ({
 		r: (packed >> 16) & 0xff,
 		g: (packed >> 8) & 0xff,
@@ -60,6 +54,15 @@ export async function applyAnimation(deviceId: string, payload: AnimationPayload
 		startAnimationRequest: {
 			deviceLocation: deviceId,
 			frames: payload.frames.map((frame) => frame.map(toPixel))
+		}
+	});
+}
+
+export async function stopAnimation(deviceId: string): Promise<void> {
+	// NOTE: The backend expects device_location (yeelight://IP:PORT). We pass deviceId as the location here.
+	await api.stopAnimation({
+		stopAnimationRequest: {
+			deviceLocation: deviceId
 		}
 	});
 }

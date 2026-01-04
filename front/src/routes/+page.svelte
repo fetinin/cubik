@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { get } from 'svelte/store';
-	import { applyAnimation, getDevices, getMatrixSize } from '$lib/api/mock';
+	import { applyAnimation, getDevices, getMatrixSize, stopAnimation } from '$lib/api/mock';
 	import DeviceBar from '$lib/components/DeviceBar.svelte';
 	import AnimationPreview from '$lib/components/AnimationPreview.svelte';
 	import ColorPickerRGB from '$lib/components/ColorPickerRGB.svelte';
@@ -33,6 +33,9 @@
 	let paintColor: PackedRGB = packRGB(255, 0, 0);
 	let loading = true;
 	let error: string | null = null;
+	let stoppedNotice = false;
+	let stoppedNoticeTimeout: ReturnType<typeof setTimeout> | null = null;
+	let appliedNoticeTimeout: ReturnType<typeof setTimeout> | null = null;
 
 	async function selectDevice(deviceId: string) {
 		editor.selectedDeviceId.set(deviceId);
@@ -99,16 +102,36 @@
 		if (!deviceLocation || !size || framesList.length === 0) return;
 
 		editor.applyStatus.set({ state: 'applying' });
+		if (appliedNoticeTimeout) {
+			clearTimeout(appliedNoticeTimeout);
+			appliedNoticeTimeout = null;
+		}
 		try {
 			const payload = buildAnimationPayload(size, framesList);
 			await applyAnimation(deviceLocation, payload);
 			editor.applyStatus.set({ state: 'success' });
+			appliedNoticeTimeout = setTimeout(() => {
+				editor.applyStatus.set({ state: 'idle' });
+				appliedNoticeTimeout = null;
+			}, 2000);
 		} catch (e) {
 			editor.applyStatus.set({
 				state: 'error',
 				message: e instanceof Error ? e.message : String(e)
 			});
 		}
+	}
+
+	async function stopCurrentAnimation() {
+		const deviceLocation = get(selectedDevice)?.location ?? null;
+		if (!deviceLocation) return;
+		await stopAnimation(deviceLocation);
+		stoppedNotice = true;
+		if (stoppedNoticeTimeout) clearTimeout(stoppedNoticeTimeout);
+		stoppedNoticeTimeout = setTimeout(() => {
+			stoppedNotice = false;
+			stoppedNoticeTimeout = null;
+		}, 2000);
 	}
 </script>
 
@@ -191,15 +214,27 @@
 				<section class="rounded border border-gray-200 p-4">
 					<div class="flex items-center justify-between gap-3">
 						<div class="text-sm font-medium">Apply</div>
-						<button
-							type="button"
-							class="rounded bg-blue-600 px-3 py-1.5 text-xs font-medium text-white disabled:opacity-50"
-							onclick={applyCurrentAnimation}
-							disabled={$frames.length === 0}
-							data-testid="apply-animation"
-						>
-							Apply animation
-						</button>
+						<div class="flex items-center gap-2">
+							<button
+								type="button"
+								class="rounded bg-blue-600 px-3 py-1.5 text-xs font-medium text-white disabled:opacity-50"
+								onclick={applyCurrentAnimation}
+								disabled={$frames.length === 0}
+								data-testid="apply-animation"
+							>
+								Apply animation
+							</button>
+
+							<button
+								type="button"
+								class="rounded border border-gray-300 px-3 py-1.5 text-xs font-medium disabled:opacity-50"
+								onclick={stopCurrentAnimation}
+								disabled={!$selectedDeviceId}
+								data-testid="stop-animation"
+							>
+								Stop animation
+							</button>
+						</div>
 					</div>
 
 					<div class="mt-2 text-xs text-gray-500">Preview is 1 FPS (device limitation).</div>
@@ -212,6 +247,10 @@
 						<div class="mt-3 text-sm text-red-700">
 							Failed: {$applyStatus.message}
 						</div>
+					{/if}
+
+					{#if stoppedNotice}
+						<div class="mt-3 text-sm text-gray-600">Animation stopped.</div>
 					{/if}
 				</section>
 			</aside>
