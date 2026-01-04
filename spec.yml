@@ -1,0 +1,64 @@
+openapi: 3.1.0
+info:
+  title: Cubik API
+  description: REST API for discovering and controlling Yeelight CubeLite devices
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+paths:
+  /api/devices:
+    get:
+      operationId: getDevices
+      summary: Discover Yeelight CubeLite devices
+      description: Performs live SSDP discovery and returns currently available devices on the local network
+      responses:
+        '200':
+          description: List of discovered devices
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - devices
+                properties:
+                  devices:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Device'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+components:
+  schemas:
+    Device:
+      type: object
+      required:
+        - id
+        - name
+        - location
+      properties:
+        id:
+          type: string
+          description: Unique device identifier
+          example: "0x000000000abc1234"
+        name:
+          type: string
+          description: Human-readable device name
+          example: "Living Room Cube"
+        location:
+          type: string
+          description: Device location in format yeelight://IP:PORT
+          example: "yeelight://192.168.1.100:55443"
+    Error:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          description: Error message
+          example: "error discovering devices: network timeout"

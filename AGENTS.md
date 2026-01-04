@@ -12,12 +12,93 @@ This is a Go application for discovering and controlling Yeelight CubeLite (Matr
 # Build the application
 go build
 
-# Run the application
 go run .
+```
 
-# Run with pre-approval for go build
-go build
+## API Specification and Code Generation
+
+The project uses an **API spec-first development approach** with OpenAPI 3.1 and automatic code generation.
+
+### OpenAPI Specification
+
+The API is defined in `spec.yml` (OpenAPI 3.1 format):
+- **Endpoint**: `GET /api/devices`
+- **Server**: `http://localhost:8080`
+- **Response**: JSON array of devices with `id` and `name` fields
+- **Error handling**: 500 responses with error messages
+
+### Code Generation with ogen-go
+
+The project uses [ogen-go/ogen](https://github.com/ogen-go/ogen) for automatic Go code generation from the OpenAPI spec:
+
+```bash
+# Generate API code from spec.yml
+go generate ./...
+
+# This creates the api/ directory with ~17 auto-generated files
+# The api/ directory is gitignored as it's reproducible from spec.yml
+```
+
+**Generated code includes:**
+- Server implementation (`api.NewServer`)
+- Request/response types (`api.Device`, `api.GetDevicesOK`, `api.Error`)
+- Handler interface (`api.Handler`)
+- JSON serialization/deserialization
+- HTTP routing and middleware
+
+### API Implementation Files
+
+**Manual implementation (checked into git):**
+- `spec.yml` - OpenAPI 3.1 specification (source of truth)
+- `generate.go` - go:generate directive for code generation
+- `handler.go` - Implements `api.Handler` interface, calls `DiscoverDevices()`
+- `server.go` - HTTP server setup with CORS middleware on port 8080
+
+**Auto-generated (gitignored):**
+- `api/*.go` - Generated server code (~17 files)
+
+### Running Modes
+
+The application supports two modes via command-line flag:
+
+**Demo Mode (default):**
+```bash
 ./cubik
+```
+- Discovers devices and runs animated LED patterns
+- Original CLI demonstration behavior
+
+**Server Mode:**
+```bash
+./cubik --server
+```
+- Starts HTTP API server on port 8080
+- Endpoint: `GET http://localhost:8080/api/devices`
+- CORS enabled for frontend integration
+- Live device discovery on each API request (3-second timeout)
+
+### Modifying the API
+
+1. Update `spec.yml` with new endpoints/schemas
+2. Run `go generate ./...` to regenerate code
+3. Implement new handler methods in `handler.go`
+4. Run `go build` to compile
+
+**Example workflow:**
+```bash
+# Edit spec.yml to add new endpoint
+vim spec.yml
+
+# Regenerate API code
+go generate ./...
+
+# Implement handler method
+vim handler.go
+
+# Build and test
+go build
+./cubik --server
+curl http://localhost:8080/api/devices
 ```
 
 ## Code Architecture
@@ -47,7 +128,14 @@ go build
    - `Framebuffer` and `Digit Rendering System`: Provides high-level API for drawing digits and text on the matrix display.
    - `DrawDigit`, `DrawNumber`, `DrawString`: Rendering functions for the matrix.
 
-5. **Demo Program (main.go)**
+5. **HTTP API Server (server.go, handler.go)**
+   - `StartServer()`: Initializes HTTP server on port 8080 with CORS middleware
+   - `APIHandler`: Implements ogen-generated `api.Handler` interface
+   - `GetDevices()`: REST endpoint that calls `DiscoverDevices()` and transforms results to JSON
+   - CORS middleware allows frontend access from any origin (development mode)
+
+6. **Demo Program (main.go)**
+   - Command-line flag parsing for server vs demo mode
    - Discovers CubeLite devices on network
    - Tests power toggle functionality
    - Demonstrates Matrix LED control with animated patterns
@@ -97,8 +185,11 @@ Additional protocol documentation in:
 ## Development Notes
 
 - The project uses Go 1.25.5
-- No external dependencies beyond standard library
+- External dependencies:
+  - `github.com/ogen-go/ogen` - OpenAPI code generation
+  - Standard library for core functionality (no deps for device discovery/control)
 - Matrix devices may send multiple SSDP responses (normal for UDP reliability)
 - Some commented-out code in main.go shows previous attempts at property querying
-- Current demo runs infinite loop - user must Ctrl+C to exit
+- Demo mode runs infinite loop - user must Ctrl+C to exit
 - Yeelight cube device is limited to 60 RPS. Make sure not to exceed it
+- API code in `api/` directory is auto-generated - never edit manually, regenerate from `spec.yml`
