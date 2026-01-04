@@ -1,6 +1,7 @@
 export type Device = {
 	id: string;
 	name: string;
+	location: string;
 };
 
 export type MatrixSize = {
@@ -16,6 +17,7 @@ export type AnimationPayload = {
 };
 
 import { DefaultApi, Configuration } from '$lib/api/generated';
+import type { RGBPixel } from '$lib/api/generated';
 
 function sleep(ms: number) {
 	return new Promise<void>((resolve) => setTimeout(resolve, ms));
@@ -30,7 +32,7 @@ export async function getDevices(): Promise<Device[]> {
 
 	const response = await api.getDevices();
 	const devices = response.devices;
-	return devices.map((d) => ({ id: d.id, name: d.name }));
+	return devices.map((d) => ({ id: d.id, name: d.name, location: d.location }));
 }
 
 export async function getMatrixSize(_deviceId: string): Promise<MatrixSize> {
@@ -41,9 +43,23 @@ export async function getMatrixSize(_deviceId: string): Promise<MatrixSize> {
 }
 
 export async function applyAnimation(deviceId: string, payload: AnimationPayload): Promise<void> {
-	// Mocked backend call - later this becomes a real HTTP request
-	// Keep a small delay to simulate network + device scheduling.
-	await sleep(250);
+	const api = new DefaultApi(
+		new Configuration({
+			basePath: 'http://localhost:8080'
+		})
+	);
 
-	console.log('[mock] applyAnimation', { deviceId, payload });
+	const toPixel = (packed: number): RGBPixel => ({
+		r: (packed >> 16) & 0xff,
+		g: (packed >> 8) & 0xff,
+		b: packed & 0xff
+	});
+
+	// NOTE: The backend expects device_location (yeelight://IP:PORT). We pass deviceId as the location here.
+	await api.startAnimation({
+		startAnimationRequest: {
+			deviceLocation: deviceId,
+			frames: payload.frames.map((frame) => frame.map(toPixel))
+		}
+	});
 }

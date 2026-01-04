@@ -23,6 +23,7 @@
 	const editor = createEditorState();
 	const devices = editor.devices;
 	const selectedDeviceId = editor.selectedDeviceId;
+	const selectedDevice = editor.selectedDevice;
 	const matrix = editor.matrix;
 	const pixels = editor.pixels;
 	const frames = editor.frames;
@@ -92,15 +93,15 @@
 	}
 
 	async function applyCurrentAnimation() {
-		const deviceId = get(selectedDeviceId);
+		const deviceLocation = get(selectedDevice)?.location ?? null;
 		const size = get(matrix);
 		const framesList = get(frames);
-		if (!deviceId || !size || framesList.length === 0) return;
+		if (!deviceLocation || !size || framesList.length === 0) return;
 
 		editor.applyStatus.set({ state: 'applying' });
 		try {
 			const payload = buildAnimationPayload(size, framesList);
-			await applyAnimation(deviceId, payload);
+			await applyAnimation(deviceLocation, payload);
 			editor.applyStatus.set({ state: 'success' });
 		} catch (e) {
 			editor.applyStatus.set({
