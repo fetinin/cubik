@@ -5,6 +5,7 @@
 	import DeviceBar from '$lib/components/DeviceBar.svelte';
 	import AnimationPreview from '$lib/components/AnimationPreview.svelte';
 	import ColorPickerRGB from '$lib/components/ColorPickerRGB.svelte';
+	import ColorSelector from '$lib/components/ColorSelector.svelte';
 	import FramesPanel from '$lib/components/FramesPanel.svelte';
 	import MatrixGrid from '$lib/components/MatrixGrid.svelte';
 	import {
@@ -164,6 +165,14 @@
 			<aside class="flex flex-col gap-6">
 				<section class="rounded border border-gray-200 p-4">
 					<ColorPickerRGB color={paintColor} onChange={(c) => (paintColor = c)} />
+				</section>
+
+				<section class="rounded border border-gray-200 p-4">
+					<ColorSelector
+						pixels={$pixels}
+						selectedColor={paintColor}
+						onSelectColor={(c) => (paintColor = c)}
+					/>
 				</section>
 
 				<section class="rounded border border-gray-200 p-4">
