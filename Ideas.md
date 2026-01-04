@@ -11,3 +11,4 @@
 - Remove opacity from color picker
 - Display colors used in animation
 - Select multiple pixels and move them
+- Export/import animation button
