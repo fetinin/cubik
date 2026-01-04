@@ -19,7 +19,7 @@
 	});
 
 	// Handle color changes from picker
-	function handleColorChange(pickerColor: { hsv: any; rgb: RgbaColor | null; hex: string | null; color: any }) {
+	function handleColorChange(pickerColor: { rgb: RgbaColor | null; hex: string | null }) {
 		if (pickerColor.rgb) {
 			const packed = packRGB(pickerColor.rgb.r, pickerColor.rgb.g, pickerColor.rgb.b);
 			onChange(packed);
@@ -29,5 +29,11 @@
 
 <div class="flex flex-col gap-3">
 	<div class="text-sm font-medium">Color</div>
-	<ColorPicker bind:rgb onInput={handleColorChange} position="responsive" isDialog={false} />
+	<ColorPicker
+		bind:rgb
+		onInput={handleColorChange}
+		position="responsive"
+		isDialog={false}
+		isAlpha={false}
+	/>
 </div>

@@ -47,6 +47,25 @@ bun test
 bun run test:unit
 ```
 
+## Code Quality and Verification
+
+**CRITICAL: After making any code changes, you MUST:**
+
+1. **Run formatters and linters** to ensure code quality:
+
+   ```bash
+   bun run format  # Format code
+   bun run lint    # Lint code
+   ```
+
+2. **Verify frontend changes in the browser**:
+   - Start the dev server: `bun run dev -- --open`
+   - Manually test the changed functionality in the browser
+   - Ensure no console errors or visual regressions
+   - Verify the user-facing behavior matches expectations
+
+These steps are mandatory and should never be skipped, even for small changes.
+
 ## Testing
 
 This project uses Vitest with two test configurations:

@@ -35,7 +35,7 @@
 	});
 </script>
 
-<div class="inline-flex flex-col gap-1 flex-shrink-0" data-testid="matrix">
+<div class="inline-flex flex-shrink-0 flex-col gap-1" data-testid="matrix">
 	{#each rows as y (y)}
 		<div class="flex gap-1">
 			{#each cols as x (x)}

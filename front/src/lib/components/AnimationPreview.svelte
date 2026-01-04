@@ -57,11 +57,11 @@
 		<div class="text-sm text-gray-500">Add frames to preview an animation.</div>
 	{:else}
 		<div
-			class="grid gap-1 w-fit self-center"
+			class="grid w-fit gap-1 self-center"
 			style:grid-template-columns={`repeat(${width}, 16px)`}
 			data-testid="preview"
 		>
-			{#each Array.from({ length: width * height }) as _cell, i (i)}
+			{#each Array.from({ length: width * height }) as _, i (i)}
 				<div
 					class="h-4 w-4 rounded border border-gray-300"
 					style:background-color={packedToCss(activeFrame[i] ?? 0)}
