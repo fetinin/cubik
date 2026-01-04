@@ -1,5 +1,8 @@
 node_modules
 
+# Generated API code
+/src/api/generated
+
 # Output
 .output
 .vercel

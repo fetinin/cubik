@@ -39,7 +39,8 @@
 		"format": "prettier --write .",
 		"lint": "prettier --check . && eslint .",
 		"test:unit": "vitest",
-		"test": "npm run test:unit -- --run"
+		"test": "npm run test:unit -- --run",
+		"generate-api": "docker run --rm -v \"${PWD}/..:/workspace\" openapitools/openapi-generator-cli generate -i /workspace/spec.yml -g typescript-fetch -o /workspace/front/src/api/generated --additional-properties=supportsES6=true,npmVersion=10.0.0,typescriptThreePlus=true"
 	},
 	"type": "module",
 	"dependencies": {

@@ -16,6 +16,9 @@ This application is designed to run locally without authorization.
 # Install dependencies
 bun install
 
+# Generate TypeScript API client from OpenAPI spec
+bun run generate-api
+
 # Start development server
 bun run dev
 
@@ -75,6 +78,48 @@ This project uses Vitest with two test configurations:
 
 Tests require assertions (`expect.requireAssertions: true`).
 
+## API Client Generation
+
+The project uses automatic TypeScript client generation from the OpenAPI specification:
+
+**Generate the client:**
+```bash
+bun run generate-api
+```
+
+This runs `openapitools/openapi-generator-cli` via Docker to generate:
+- TypeScript types and models in `src/api/generated/models/`
+- API client in `src/api/generated/apis/DefaultApi.ts`
+- Runtime utilities in `src/api/generated/runtime.ts`
+
+**IMPORTANT:** Run this command whenever the backend's `spec.yml` changes to keep types in sync.
+
+**Using the generated client:**
+```typescript
+import { DefaultApi, Configuration } from '$lib/api/generated';
+
+// Create API client
+const api = new DefaultApi(new Configuration({
+  basePath: 'http://localhost:8080'
+}));
+
+// Get devices
+const response = await api.getDevices();
+console.log(response.devices); // Device[]
+
+// Start animation
+await api.startAnimation({
+  startAnimationRequest: {
+    device_location: 'yeelight://192.168.1.100:55443',
+    frames: [
+      [{ r: 255, g: 0, b: 0 }, { r: 0, g: 255, b: 0 }]
+    ]
+  }
+});
+```
+
+The generated code lives in `src/api/generated/` and is gitignored. The mock API in `src/lib/api/mock.ts` can be replaced with calls to the generated client.
+
 ## Code Architecture
 
 ### Tech Stack
@@ -84,6 +129,7 @@ Tests require assertions (`expect.requireAssertions: true`).
 - **Testing**: Vitest with Playwright browser provider
 - **Language**: TypeScript
 - **Runtime**: Bun
+- **API Client**: Auto-generated from OpenAPI spec via openapi-generator-cli
 
 ### Core Architecture
 

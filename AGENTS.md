@@ -80,17 +80,21 @@ The application supports two modes via command-line flag:
 ### Modifying the API
 
 1. Update `spec.yml` with new endpoints/schemas
-2. Run `go generate ./...` to regenerate code
-3. Implement new handler methods in `handler.go`
-4. Run `go build` to compile
+2. Run `go generate ./...` to regenerate backend code
+3. Run `cd front && bun run generate-api` to regenerate frontend client
+4. Implement new handler methods in `handler.go`
+5. Run `go build` to compile
 
 **Example workflow:**
 ```bash
 # Edit spec.yml to add new endpoint
 vim spec.yml
 
-# Regenerate API code
+# Regenerate backend API code
 go generate ./...
+
+# Regenerate frontend API client
+cd front && bun run generate-api
 
 # Implement handler method
 vim handler.go
@@ -100,6 +104,43 @@ go build
 ./cubik --server
 curl http://localhost:8080/api/devices
 ```
+
+### Frontend API Client Generation
+
+The project includes automatic TypeScript client generation for the frontend:
+
+**Generate the client:**
+```bash
+cd front
+bun run generate-api
+```
+
+This generates TypeScript types and API client code in `front/src/api/generated/` using the `openapitools/openapi-generator-cli` Docker image.
+
+**Using the generated client:**
+```typescript
+import { DefaultApi, Configuration } from '$lib/api/generated';
+
+const api = new DefaultApi(new Configuration({
+  basePath: 'http://localhost:8080'
+}));
+
+// Get devices
+const response = await api.getDevices();
+console.log(response.devices);
+
+// Start animation
+await api.startAnimation({
+  startAnimationRequest: {
+    device_location: 'yeelight://192.168.1.100:55443',
+    frames: [
+      [{ r: 255, g: 0, b: 0 }, { r: 0, g: 255, b: 0 }]
+    ]
+  }
+});
+```
+
+The generated code is gitignored and should be regenerated after any changes to `spec.yml`.
 
 ## Code Architecture
 
