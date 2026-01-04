@@ -1,7 +1,9 @@
 package main
 
 import (
+	"flag"
 	"fmt"
+	"log"
 	"math"
 	"math/rand"
 	"os"
@@ -9,6 +11,17 @@ import (
 )
 
 func main() {
+	// Parse command-line flags
+	serverMode := flag.Bool("server", false, "Run in HTTP server mode")
+	flag.Parse()
+
+	// Run HTTP API server if requested
+	if *serverMode {
+		log.Fatal(StartServer())
+		return
+	}
+
+	// Original demo mode
 	fmt.Println("Searching for Yeelight CubeLite devices...")
 	fmt.Println("Note: For TCP control to work, enable 'LAN Control' in the Yeelight app settings.")
 	fmt.Println()
