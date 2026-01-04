@@ -32,6 +32,80 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+  /animation/start:
+    post:
+      operationId: startAnimation
+      summary: Start animation playback on device
+      description: Starts playing an animation loop on the specified device. Only one animation can run per device at a time.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StartAnimationRequest'
+      responses:
+        '200':
+          description: Animation started successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StartAnimationResponse'
+        '400':
+          description: Bad request - invalid frame data or device location
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                emptyFrames:
+                  summary: No frames provided
+                  value:
+                    error: "frames array cannot be empty"
+                invalidDeviceLocation:
+                  summary: Invalid device location format
+                  value:
+                    error: "invalid device_location format"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /animation/stop:
+    post:
+      operationId: stopAnimation
+      summary: Stop animation playback on device
+      description: Stops the currently running animation on the specified device. No-op if no animation is running.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StopAnimationRequest'
+      responses:
+        '200':
+          description: Animation stopped successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StopAnimationResponse'
+        '400':
+          description: Bad request - invalid device location format
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                invalidDeviceLocation:
+                  summary: Invalid device location format
+                  value:
+                    error: "invalid device_location format"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 components:
   schemas:
     Device:
@@ -62,3 +136,88 @@ components:
           type: string
           description: Error message
           example: "error discovering devices: network timeout"
+    RGBPixel:
+      type: object
+      required:
+        - r
+        - g
+        - b
+      properties:
+        r:
+          type: integer
+          format: int32
+          minimum: 0
+          maximum: 255
+          description: Red component (0-255)
+          example: 255
+        g:
+          type: integer
+          format: int32
+          minimum: 0
+          maximum: 255
+          description: Green component (0-255)
+          example: 0
+        b:
+          type: integer
+          format: int32
+          minimum: 0
+          maximum: 255
+          description: Blue component (0-255)
+          example: 0
+      additionalProperties: false
+    AnimationFrame:
+      type: array
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/RGBPixel'
+      description: Array of RGB pixels representing a single animation frame
+    StartAnimationRequest:
+      type: object
+      required:
+        - device_location
+        - frames
+      properties:
+        device_location:
+          type: string
+          pattern: '^yeelight://[0-9.]+:[0-9]+$'
+          description: Device location in format yeelight://IP:PORT
+          example: "yeelight://192.168.1.100:55443"
+        frames:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/AnimationFrame'
+          description: Array of animation frames to play in sequence
+    StartAnimationResponse:
+      type: object
+      required:
+        - message
+        - frame_count
+      properties:
+        message:
+          type: string
+          description: Success message
+          example: "Animation started successfully"
+        frame_count:
+          type: integer
+          description: Number of frames in the animation
+          example: 30
+    StopAnimationRequest:
+      type: object
+      required:
+        - device_location
+      properties:
+        device_location:
+          type: string
+          pattern: '^yeelight://[0-9.]+:[0-9]+$'
+          description: Device location in format yeelight://IP:PORT
+          example: "yeelight://192.168.1.100:55443"
+    StopAnimationResponse:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          description: Success message
+          example: "Animation stopped successfully"
