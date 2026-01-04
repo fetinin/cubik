@@ -15,18 +15,22 @@ export type AnimationPayload = {
 	frames: number[][]; // each frame is packed RGB ints, row-major length = width*height
 };
 
+import { DefaultApi, Configuration } from '$lib/api/generated';
+
 function sleep(ms: number) {
 	return new Promise<void>((resolve) => setTimeout(resolve, ms));
 }
 
 export async function getDevices(): Promise<Device[]> {
-	// Mocked backend call
-	await sleep(200);
+	const api = new DefaultApi(
+		new Configuration({
+			basePath: 'http://localhost:8080'
+		})
+	);
 
-	return [
-		{ id: 'mock-cube-1', name: 'CubeLite (Mock #1)' },
-		{ id: 'mock-cube-2', name: 'CubeLite (Mock #2)' }
-	];
+	const response = await api.getDevices();
+	const devices = response.devices;
+	return devices.map((d) => ({ id: d.id, name: d.name }));
 }
 
 export async function getMatrixSize(_deviceId: string): Promise<MatrixSize> {
