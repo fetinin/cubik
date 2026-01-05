@@ -19,7 +19,7 @@ import type { SavedAnimation } from ''
 // TODO: Update the object below with actual values
 const example = {
   "id": 550e8400-e29b-41d4-a716-446655440000,
-  "deviceId": yeelight://192.168.1.100:55443,
+  "deviceId": 0x000000000abc1234,
   "name": Rainbow Wave,
   "frames": null,
   "createdAt": 2026-01-05T14:30:00Z,

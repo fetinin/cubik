@@ -214,27 +214,24 @@ Returns all saved animations for the specified device, ordered by most recently 
 ### Example
 
 ```ts
-import {
-  Configuration,
-  DefaultApi,
-} from '';
+import { Configuration, DefaultApi } from '';
 import type { ListAnimationsRequest } from '';
 
 async function example() {
-  console.log("🚀 Testing  SDK...");
-  const api = new DefaultApi();
+	console.log('🚀 Testing  SDK...');
+	const api = new DefaultApi();
 
-  const body = {
-    // string | Device location in format yeelight://IP:PORT
-    deviceId: yeelight://192.168.1.100:55443,
-  } satisfies ListAnimationsRequest;
+	const body = {
+		// string | Unique device identifier
+		deviceId: 0x000000000abc1234
+	} satisfies ListAnimationsRequest;
 
-  try {
-    const data = await api.listAnimations(body);
-    console.log(data);
-  } catch (error) {
-    console.error(error);
-  }
+	try {
+		const data = await api.listAnimations(body);
+		console.log(data);
+	} catch (error) {
+		console.error(error);
+	}
 }
 
 // Run the test
@@ -243,9 +240,9 @@ example().catch(console.error);
 
 ### Parameters
 
-| Name         | Type     | Description                                  | Notes                     |
-| ------------ | -------- | -------------------------------------------- | ------------------------- |
-| **deviceId** | `string` | Device location in format yeelight://IP:PORT | [Defaults to `undefined`] |
+| Name         | Type     | Description              | Notes                     |
+| ------------ | -------- | ------------------------ | ------------------------- |
+| **deviceId** | `string` | Unique device identifier | [Defaults to `undefined`] |
 
 ### Return type
 

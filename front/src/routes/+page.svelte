@@ -79,7 +79,7 @@
 	$effect(() => {
 		const device = get(selectedDevice);
 		if (device) {
-			refreshSavedAnimations(device.location);
+			refreshSavedAnimations(device.id);
 		}
 	});
 
@@ -102,7 +102,7 @@
 			} else {
 				// Save as new
 				const saved = await saveAnimation(
-					device.location,
+					device.id,
 					name,
 					framesList.map((f) => f.pixels)
 				);
@@ -110,7 +110,7 @@
 				currentAnimationName = saved.name;
 			}
 
-			await refreshSavedAnimations(device.location);
+			await refreshSavedAnimations(device.id);
 		} catch (e) {
 			console.error('Failed to save animation:', e);
 		}
@@ -153,7 +153,7 @@
 
 			const device = get(selectedDevice);
 			if (device) {
-				await refreshSavedAnimations(device.location);
+				await refreshSavedAnimations(device.id);
 			}
 		} catch (e) {
 			console.error('Failed to delete animation:', e);
@@ -383,7 +383,13 @@
 							<button
 								type="button"
 								class="flex-1 rounded border border-gray-300 px-3 py-1.5 text-xs font-medium"
-								onclick={() => (showLoadModal = true)}
+								onclick={async () => {
+									const device = get(selectedDevice);
+									if (device) {
+										await refreshSavedAnimations(device.id);
+									}
+									showLoadModal = true;
+								}}
 								data-testid="load-animation"
 							>
 								Load Animation

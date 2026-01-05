@@ -211,29 +211,6 @@ func (s *SaveAnimationRequest) Validate() error {
 	var failures []validate.FieldError
 	if err := func() error {
 		if err := (validate.String{
-			MinLength:     0,
-			MinLengthSet:  false,
-			MaxLength:     0,
-			MaxLengthSet:  false,
-			Email:         false,
-			Hostname:      false,
-			Regex:         regexMap["^yeelight://[0-9.]+:[0-9]+$"],
-			MinNumeric:    0,
-			MinNumericSet: false,
-			MaxNumeric:    0,
-			MaxNumericSet: false,
-		}).Validate(string(s.DeviceID)); err != nil {
-			return errors.Wrap(err, "string")
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "device_id",
-			Error: err,
-		})
-	}
-	if err := func() error {
-		if err := (validate.String{
 			MinLength:     1,
 			MinLengthSet:  true,
 			MaxLength:     100,
@@ -326,29 +303,6 @@ func (s *SavedAnimation) Validate() error {
 	}
 
 	var failures []validate.FieldError
-	if err := func() error {
-		if err := (validate.String{
-			MinLength:     0,
-			MinLengthSet:  false,
-			MaxLength:     0,
-			MaxLengthSet:  false,
-			Email:         false,
-			Hostname:      false,
-			Regex:         regexMap["^yeelight://[0-9.]+:[0-9]+$"],
-			MinNumeric:    0,
-			MinNumericSet: false,
-			MaxNumeric:    0,
-			MaxNumericSet: false,
-		}).Validate(string(s.DeviceID)); err != nil {
-			return errors.Wrap(err, "string")
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "device_id",
-			Error: err,
-		})
-	}
 	if err := func() error {
 		if err := (validate.String{
 			MinLength:     1,

@@ -28,7 +28,7 @@ import {
  */
 export interface SaveAnimationRequest {
 	/**
-	 * Device location to save animation for
+	 * Unique device identifier
 	 * @type {string}
 	 * @memberof SaveAnimationRequest
 	 */

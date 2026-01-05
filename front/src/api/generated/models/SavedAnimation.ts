@@ -34,7 +34,7 @@ export interface SavedAnimation {
 	 */
 	id: string;
 	/**
-	 * Device location this animation is saved for
+	 * Unique device identifier this animation is saved for
 	 * @type {string}
 	 * @memberof SavedAnimation
 	 */

@@ -15,7 +15,7 @@ import type { SaveAnimationRequest } from ''
 
 // TODO: Update the object below with actual values
 const example = {
-  "deviceId": yeelight://192.168.1.100:55443,
+  "deviceId": 0x000000000abc1234,
   "name": Rainbow Wave,
   "frames": null,
 } satisfies SaveAnimationRequest

@@ -202,7 +202,7 @@ func (*SaveAnimationInternalServerError) saveAnimationRes() {}
 
 // Ref: #/components/schemas/SaveAnimationRequest
 type SaveAnimationRequest struct {
-	// Device location to save animation for.
+	// Unique device identifier.
 	DeviceID string `json:"device_id"`
 	// Name for the animation.
 	Name string `json:"name"`
@@ -285,7 +285,7 @@ func (*SaveAnimationResponse) saveAnimationRes() {}
 type SavedAnimation struct {
 	// Unique animation identifier.
 	ID string `json:"id"`
-	// Device location this animation is saved for.
+	// Unique device identifier this animation is saved for.
 	DeviceID string `json:"device_id"`
 	// User-provided name for the animation.
 	Name string `json:"name"`

@@ -162,9 +162,8 @@ paths:
           required: true
           schema:
             type: string
-            pattern: '^yeelight://[0-9.]+:[0-9]+$'
-          description: Device location in format yeelight://IP:PORT
-          example: "yeelight://192.168.1.100:55443"
+          description: Unique device identifier
+          example: "0x000000000abc1234"
       responses:
         '200':
           description: List of saved animations
@@ -440,9 +439,8 @@ components:
           example: "550e8400-e29b-41d4-a716-446655440000"
         device_id:
           type: string
-          pattern: '^yeelight://[0-9.]+:[0-9]+$'
-          description: Device location this animation is saved for
-          example: "yeelight://192.168.1.100:55443"
+          description: Unique device identifier this animation is saved for
+          example: "0x000000000abc1234"
         name:
           type: string
           minLength: 1
@@ -475,9 +473,8 @@ components:
       properties:
         device_id:
           type: string
-          pattern: '^yeelight://[0-9.]+:[0-9]+$'
-          description: Device location to save animation for
-          example: "yeelight://192.168.1.100:55443"
+          description: Unique device identifier
+          example: "0x000000000abc1234"
         name:
           type: string
           minLength: 1

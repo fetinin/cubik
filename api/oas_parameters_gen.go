@@ -148,7 +148,7 @@ func decodeGetAnimationParams(args [1]string, argsEscaped bool, r *http.Request)
 
 // ListAnimationsParams is parameters of listAnimations operation.
 type ListAnimationsParams struct {
-	// Device location in format yeelight://IP:PORT.
+	// Unique device identifier.
 	DeviceID string
 }
 
@@ -194,26 +194,6 @@ func decodeListAnimationsParams(args [1]string, argsEscaped bool, r *http.Reques
 				}
 
 				params.DeviceID = c
-				return nil
-			}(); err != nil {
-				return err
-			}
-			if err := func() error {
-				if err := (validate.String{
-					MinLength:     0,
-					MinLengthSet:  false,
-					MaxLength:     0,
-					MaxLengthSet:  false,
-					Email:         false,
-					Hostname:      false,
-					Regex:         regexMap["^yeelight://[0-9.]+:[0-9]+$"],
-					MinNumeric:    0,
-					MinNumericSet: false,
-					MaxNumeric:    0,
-					MaxNumericSet: false,
-				}).Validate(string(params.DeviceID)); err != nil {
-					return errors.Wrap(err, "string")
-				}
 				return nil
 			}(); err != nil {
 				return err
