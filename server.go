@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
@@ -28,9 +29,11 @@ func corsMiddleware(next http.Handler) http.Handler {
 }
 
 // StartServer initializes and runs the HTTP API server on port 8080
-func StartServer(ctx context.Context) error {
-	// Create handler implementation
-	handler := &APIHandler{}
+func StartServer(ctx context.Context, db *sql.DB) error {
+	// Create handler implementation with DB dependency
+	handler := &APIHandler{
+		db: db,
+	}
 
 	// Create ogen server with handler
 	srv, err := api.NewServer(handler)

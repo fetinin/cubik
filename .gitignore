@@ -2,3 +2,8 @@
 
 # Compiled executable
 cubik
+
+# SQLite database files
+cubik.db
+cubik.db-shm
+cubik.db-wal
