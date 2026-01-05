@@ -37,7 +37,7 @@
 				<p class="mb-4 text-sm text-gray-600">No saved animations for this device.</p>
 			{:else}
 				<ul class="mb-4 max-h-96 space-y-2 overflow-y-auto" data-testid="animations-list">
-					{#each animations as anim}
+					{#each animations as anim (anim.id)}
 						<li class="rounded border border-gray-200 p-3">
 							<div class="flex items-center justify-between gap-3">
 								<div class="flex-1">

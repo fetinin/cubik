@@ -70,9 +70,6 @@ export async function stopAnimation(deviceId: string): Promise<void> {
 // Import SavedAnimation type for animation storage functions
 import type { SavedAnimation } from '$lib/api/generated';
 
-// Helper to convert API format to packed RGB
-const fromPixel = (pixel: RGBPixel): number => (pixel.r << 16) | (pixel.g << 8) | pixel.b;
-
 export async function saveAnimation(
 	deviceId: string,
 	name: string,

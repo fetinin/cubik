@@ -43,10 +43,10 @@
 	const selectedFrameId = editor.selectedFrameId;
 	const applyStatus = editor.applyStatus;
 
-	let paintColor: PackedRGB = packRGB(255, 0, 0);
-	let loading = true;
-	let error: string | null = null;
-	let stoppedNotice = false;
+	let paintColor = $state<PackedRGB>(packRGB(255, 0, 0));
+	let loading = $state(true);
+	let error = $state<string | null>(null);
+	let stoppedNotice = $state(false);
 	let stoppedNoticeTimeout: ReturnType<typeof setTimeout> | null = null;
 	let appliedNoticeTimeout: ReturnType<typeof setTimeout> | null = null;
 
