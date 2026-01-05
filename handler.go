@@ -84,59 +84,141 @@ func (h *APIHandler) StopAnimation(ctx context.Context, req *api.StopAnimationRe
 // SaveAnimation implements POST /animation/save
 // Saves animation frames to the database
 func (h *APIHandler) SaveAnimation(ctx context.Context, req *api.SaveAnimationRequest) (api.SaveAnimationRes, error) {
-	// TODO: Convert API frames to internal Color format
-	// TODO: Save to database using storage layer
-	// TODO: Return saved animation with generated UUID and timestamps
+	// Convert API frames to internal Color format
+	frames := make([][]Color, len(req.Frames))
+	for i, apiFrame := range req.Frames {
+		frames[i] = ConvertAPIFrameToColors(apiFrame)
+	}
 
-	return &api.SaveAnimationInternalServerError{
-		Error: "not implemented yet",
+	// Save to database
+	animation, err := SaveAnimation(h.db, req.DeviceID, req.Name, frames)
+	if err != nil {
+		return &api.SaveAnimationInternalServerError{
+			Error: fmt.Sprintf("failed to save animation: %v", err),
+		}, nil
+	}
+
+	// Convert to API format and return
+	return &api.SaveAnimationResponse{
+		ID:        animation.ID,
+		Message:   "Animation saved successfully",
+		Animation: convertToAPIAnimation(animation),
 	}, nil
 }
 
 // ListAnimations implements GET /animation/list/{device_id}
 // Returns all saved animations for a device
 func (h *APIHandler) ListAnimations(ctx context.Context, params api.ListAnimationsParams) (api.ListAnimationsRes, error) {
-	// TODO: Query database for animations by device_id
-	// TODO: Convert internal format to API format
-	// TODO: Order by updated_at DESC
+	// Query database for animations by device_id (ordered by updated_at DESC)
+	animations, err := ListAnimationsByDevice(h.db, params.DeviceID)
+	if err != nil {
+		return &api.Error{
+			Error: fmt.Sprintf("failed to list animations: %v", err),
+		}, nil
+	}
+
+	// Convert to API format
+	apiAnimations := make([]api.SavedAnimation, len(animations))
+	for i, anim := range animations {
+		apiAnimations[i] = convertToAPIAnimation(anim)
+	}
 
 	return &api.ListAnimationsResponse{
-		Animations: []api.SavedAnimation{},
+		Animations: apiAnimations,
 	}, nil
 }
 
 // GetAnimation implements GET /animation/{id}
 // Retrieves a specific saved animation by ID
 func (h *APIHandler) GetAnimation(ctx context.Context, params api.GetAnimationParams) (api.GetAnimationRes, error) {
-	// TODO: Query database for animation by ID (params.ID)
-	// TODO: Return 404 if not found
-	// TODO: Convert internal format to API format
+	// Query database for animation by ID
+	animation, err := GetAnimation(h.db, params.ID)
+	if err == ErrNotFound {
+		return &api.GetAnimationNotFound{
+			Error: "animation not found",
+		}, nil
+	}
+	if err != nil {
+		return &api.GetAnimationInternalServerError{
+			Error: fmt.Sprintf("failed to get animation: %v", err),
+		}, nil
+	}
 
-	return &api.GetAnimationNotFound{
-		Error: "not implemented yet",
+	return &api.GetAnimationResponse{
+		Animation: convertToAPIAnimation(animation),
 	}, nil
 }
 
 // UpdateAnimation implements PUT /animation/{id}
 // Updates an existing saved animation
 func (h *APIHandler) UpdateAnimation(ctx context.Context, req *api.UpdateAnimationRequest, params api.UpdateAnimationParams) (api.UpdateAnimationRes, error) {
-	// TODO: Convert API frames to internal Color format
-	// TODO: Update animation in database by params.ID
-	// TODO: Return 404 if not found
-	// TODO: Update updated_at timestamp
+	// Convert API frames to internal Color format
+	frames := make([][]Color, len(req.Frames))
+	for i, apiFrame := range req.Frames {
+		frames[i] = ConvertAPIFrameToColors(apiFrame)
+	}
 
-	return &api.UpdateAnimationNotFound{
-		Error: "not implemented yet",
+	// Update animation in database
+	animation, err := UpdateAnimation(h.db, params.ID, req.Name, frames)
+	if err == ErrNotFound {
+		return &api.UpdateAnimationNotFound{
+			Error: "animation not found",
+		}, nil
+	}
+	if err != nil {
+		return &api.UpdateAnimationInternalServerError{
+			Error: fmt.Sprintf("failed to update animation: %v", err),
+		}, nil
+	}
+
+	return &api.UpdateAnimationResponse{
+		Message:   "Animation updated successfully",
+		Animation: convertToAPIAnimation(animation),
 	}, nil
 }
 
 // DeleteAnimation implements DELETE /animation/{id}
 // Deletes a saved animation from the database
 func (h *APIHandler) DeleteAnimation(ctx context.Context, params api.DeleteAnimationParams) (api.DeleteAnimationRes, error) {
-	// TODO: Delete animation from database by params.ID
-	// TODO: Return 404 if not found
+	// Delete animation from database
+	err := DeleteAnimation(h.db, params.ID)
+	if err == ErrNotFound {
+		return &api.DeleteAnimationNotFound{
+			Error: "animation not found",
+		}, nil
+	}
+	if err != nil {
+		return &api.DeleteAnimationInternalServerError{
+			Error: fmt.Sprintf("failed to delete animation: %v", err),
+		}, nil
+	}
 
-	return &api.DeleteAnimationNotFound{
-		Error: "not implemented yet",
+	return &api.DeleteAnimationResponse{
+		Message: "Animation deleted successfully",
 	}, nil
+}
+
+// convertToAPIAnimation converts internal SavedAnimation to API format
+func convertToAPIAnimation(anim *SavedAnimation) api.SavedAnimation {
+	// Convert [][]Color to []api.AnimationFrame
+	apiFrames := make([]api.AnimationFrame, len(anim.Frames))
+	for i, frame := range anim.Frames {
+		apiFrames[i] = make(api.AnimationFrame, len(frame))
+		for j, color := range frame {
+			apiFrames[i][j] = api.RGBPixel{
+				R: int32(color.R),
+				G: int32(color.G),
+				B: int32(color.B),
+			}
+		}
+	}
+
+	return api.SavedAnimation{
+		ID:        anim.ID,
+		DeviceID:  anim.DeviceID,
+		Name:      anim.Name,
+		Frames:    apiFrames,
+		CreatedAt: anim.CreatedAt,
+		UpdatedAt: anim.UpdatedAt,
+	}
 }

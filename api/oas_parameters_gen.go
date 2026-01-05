@@ -7,7 +7,6 @@ import (
 	"net/url"
 
 	"github.com/go-faster/errors"
-	"github.com/google/uuid"
 	"github.com/ogen-go/ogen/conv"
 	"github.com/ogen-go/ogen/middleware"
 	"github.com/ogen-go/ogen/ogenerrors"
@@ -18,7 +17,7 @@ import (
 // DeleteAnimationParams is parameters of deleteAnimation operation.
 type DeleteAnimationParams struct {
 	// Animation UUID.
-	ID uuid.UUID
+	ID string
 }
 
 func unpackDeleteAnimationParams(packed middleware.Parameters) (params DeleteAnimationParams) {
@@ -27,7 +26,7 @@ func unpackDeleteAnimationParams(packed middleware.Parameters) (params DeleteAni
 			Name: "id",
 			In:   "path",
 		}
-		params.ID = packed[key].(uuid.UUID)
+		params.ID = packed[key].(string)
 	}
 	return params
 }
@@ -57,7 +56,7 @@ func decodeDeleteAnimationParams(args [1]string, argsEscaped bool, r *http.Reque
 					return err
 				}
 
-				c, err := conv.ToUUID(val)
+				c, err := conv.ToString(val)
 				if err != nil {
 					return err
 				}
@@ -84,7 +83,7 @@ func decodeDeleteAnimationParams(args [1]string, argsEscaped bool, r *http.Reque
 // GetAnimationParams is parameters of getAnimation operation.
 type GetAnimationParams struct {
 	// Animation UUID.
-	ID uuid.UUID
+	ID string
 }
 
 func unpackGetAnimationParams(packed middleware.Parameters) (params GetAnimationParams) {
@@ -93,7 +92,7 @@ func unpackGetAnimationParams(packed middleware.Parameters) (params GetAnimation
 			Name: "id",
 			In:   "path",
 		}
-		params.ID = packed[key].(uuid.UUID)
+		params.ID = packed[key].(string)
 	}
 	return params
 }
@@ -123,7 +122,7 @@ func decodeGetAnimationParams(args [1]string, argsEscaped bool, r *http.Request)
 					return err
 				}
 
-				c, err := conv.ToUUID(val)
+				c, err := conv.ToString(val)
 				if err != nil {
 					return err
 				}
@@ -236,7 +235,7 @@ func decodeListAnimationsParams(args [1]string, argsEscaped bool, r *http.Reques
 // UpdateAnimationParams is parameters of updateAnimation operation.
 type UpdateAnimationParams struct {
 	// Animation UUID.
-	ID uuid.UUID
+	ID string
 }
 
 func unpackUpdateAnimationParams(packed middleware.Parameters) (params UpdateAnimationParams) {
@@ -245,7 +244,7 @@ func unpackUpdateAnimationParams(packed middleware.Parameters) (params UpdateAni
 			Name: "id",
 			In:   "path",
 		}
-		params.ID = packed[key].(uuid.UUID)
+		params.ID = packed[key].(string)
 	}
 	return params
 }
@@ -275,7 +274,7 @@ func decodeUpdateAnimationParams(args [1]string, argsEscaped bool, r *http.Reque
 					return err
 				}
 
-				c, err := conv.ToUUID(val)
+				c, err := conv.ToString(val)
 				if err != nil {
 					return err
 				}

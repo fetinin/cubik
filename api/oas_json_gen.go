@@ -1199,7 +1199,7 @@ func (s *SaveAnimationResponse) Encode(e *jx.Encoder) {
 func (s *SaveAnimationResponse) encodeFields(e *jx.Encoder) {
 	{
 		e.FieldStart("id")
-		json.EncodeUUID(e, s.ID)
+		e.Str(s.ID)
 	}
 	{
 		e.FieldStart("message")
@@ -1229,8 +1229,8 @@ func (s *SaveAnimationResponse) Decode(d *jx.Decoder) error {
 		case "id":
 			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
-				v, err := json.DecodeUUID(d)
-				s.ID = v
+				v, err := d.Str()
+				s.ID = string(v)
 				if err != nil {
 					return err
 				}
@@ -1327,7 +1327,7 @@ func (s *SavedAnimation) Encode(e *jx.Encoder) {
 func (s *SavedAnimation) encodeFields(e *jx.Encoder) {
 	{
 		e.FieldStart("id")
-		json.EncodeUUID(e, s.ID)
+		e.Str(s.ID)
 	}
 	{
 		e.FieldStart("device_id")
@@ -1376,8 +1376,8 @@ func (s *SavedAnimation) Decode(d *jx.Decoder) error {
 		case "id":
 			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
-				v, err := json.DecodeUUID(d)
-				s.ID = v
+				v, err := d.Str()
+				s.ID = string(v)
 				if err != nil {
 					return err
 				}

@@ -14,15 +14,32 @@
 
 import * as runtime from '../runtime';
 import type {
+	DeleteAnimationResponse,
+	GetAnimationResponse,
 	GetDevices200Response,
+	ListAnimationsResponse,
+	SaveAnimationRequest,
+	SaveAnimationResponse,
 	StartAnimationRequest,
 	StartAnimationResponse,
 	StopAnimationRequest,
-	StopAnimationResponse
+	StopAnimationResponse,
+	UpdateAnimationRequest,
+	UpdateAnimationResponse
 } from '../models/index';
 import {
+	DeleteAnimationResponseFromJSON,
+	DeleteAnimationResponseToJSON,
+	GetAnimationResponseFromJSON,
+	GetAnimationResponseToJSON,
 	GetDevices200ResponseFromJSON,
 	GetDevices200ResponseToJSON,
+	ListAnimationsResponseFromJSON,
+	ListAnimationsResponseToJSON,
+	SaveAnimationRequestFromJSON,
+	SaveAnimationRequestToJSON,
+	SaveAnimationResponseFromJSON,
+	SaveAnimationResponseToJSON,
 	StartAnimationRequestFromJSON,
 	StartAnimationRequestToJSON,
 	StartAnimationResponseFromJSON,
@@ -30,8 +47,28 @@ import {
 	StopAnimationRequestFromJSON,
 	StopAnimationRequestToJSON,
 	StopAnimationResponseFromJSON,
-	StopAnimationResponseToJSON
+	StopAnimationResponseToJSON,
+	UpdateAnimationRequestFromJSON,
+	UpdateAnimationRequestToJSON,
+	UpdateAnimationResponseFromJSON,
+	UpdateAnimationResponseToJSON
 } from '../models/index';
+
+export interface DeleteAnimationRequest {
+	id: string;
+}
+
+export interface GetAnimationRequest {
+	id: string;
+}
+
+export interface ListAnimationsRequest {
+	deviceId: string;
+}
+
+export interface SaveAnimationOperationRequest {
+	saveAnimationRequest: SaveAnimationRequest;
+}
 
 export interface StartAnimationOperationRequest {
 	startAnimationRequest: StartAnimationRequest;
@@ -41,10 +78,113 @@ export interface StopAnimationOperationRequest {
 	stopAnimationRequest: StopAnimationRequest;
 }
 
+export interface UpdateAnimationOperationRequest {
+	id: string;
+	updateAnimationRequest: UpdateAnimationRequest;
+}
+
 /**
  *
  */
 export class DefaultApi extends runtime.BaseAPI {
+	/**
+	 * Permanently removes a saved animation from the database
+	 * Delete a saved animation
+	 */
+	async deleteAnimationRaw(
+		requestParameters: DeleteAnimationRequest,
+		initOverrides?: RequestInit | runtime.InitOverrideFunction
+	): Promise<runtime.ApiResponse<DeleteAnimationResponse>> {
+		if (requestParameters['id'] == null) {
+			throw new runtime.RequiredError(
+				'id',
+				'Required parameter "id" was null or undefined when calling deleteAnimation().'
+			);
+		}
+
+		const queryParameters: any = {};
+
+		const headerParameters: runtime.HTTPHeaders = {};
+
+		let urlPath = `/animation/{id}`;
+		urlPath = urlPath.replace(`{${'id'}}`, encodeURIComponent(String(requestParameters['id'])));
+
+		const response = await this.request(
+			{
+				path: urlPath,
+				method: 'DELETE',
+				headers: headerParameters,
+				query: queryParameters
+			},
+			initOverrides
+		);
+
+		return new runtime.JSONApiResponse(response, (jsonValue) =>
+			DeleteAnimationResponseFromJSON(jsonValue)
+		);
+	}
+
+	/**
+	 * Permanently removes a saved animation from the database
+	 * Delete a saved animation
+	 */
+	async deleteAnimation(
+		requestParameters: DeleteAnimationRequest,
+		initOverrides?: RequestInit | runtime.InitOverrideFunction
+	): Promise<DeleteAnimationResponse> {
+		const response = await this.deleteAnimationRaw(requestParameters, initOverrides);
+		return await response.value();
+	}
+
+	/**
+	 * Retrieves a saved animation by its ID
+	 * Get a specific saved animation
+	 */
+	async getAnimationRaw(
+		requestParameters: GetAnimationRequest,
+		initOverrides?: RequestInit | runtime.InitOverrideFunction
+	): Promise<runtime.ApiResponse<GetAnimationResponse>> {
+		if (requestParameters['id'] == null) {
+			throw new runtime.RequiredError(
+				'id',
+				'Required parameter "id" was null or undefined when calling getAnimation().'
+			);
+		}
+
+		const queryParameters: any = {};
+
+		const headerParameters: runtime.HTTPHeaders = {};
+
+		let urlPath = `/animation/{id}`;
+		urlPath = urlPath.replace(`{${'id'}}`, encodeURIComponent(String(requestParameters['id'])));
+
+		const response = await this.request(
+			{
+				path: urlPath,
+				method: 'GET',
+				headers: headerParameters,
+				query: queryParameters
+			},
+			initOverrides
+		);
+
+		return new runtime.JSONApiResponse(response, (jsonValue) =>
+			GetAnimationResponseFromJSON(jsonValue)
+		);
+	}
+
+	/**
+	 * Retrieves a saved animation by its ID
+	 * Get a specific saved animation
+	 */
+	async getAnimation(
+		requestParameters: GetAnimationRequest,
+		initOverrides?: RequestInit | runtime.InitOverrideFunction
+	): Promise<GetAnimationResponse> {
+		const response = await this.getAnimationRaw(requestParameters, initOverrides);
+		return await response.value();
+	}
+
 	/**
 	 * Performs live SSDP discovery and returns currently available devices on the local network
 	 * Discover Yeelight CubeLite devices
@@ -81,6 +221,109 @@ export class DefaultApi extends runtime.BaseAPI {
 		initOverrides?: RequestInit | runtime.InitOverrideFunction
 	): Promise<GetDevices200Response> {
 		const response = await this.getDevicesRaw(initOverrides);
+		return await response.value();
+	}
+
+	/**
+	 * Returns all saved animations for the specified device, ordered by most recently updated
+	 * List saved animations for a device
+	 */
+	async listAnimationsRaw(
+		requestParameters: ListAnimationsRequest,
+		initOverrides?: RequestInit | runtime.InitOverrideFunction
+	): Promise<runtime.ApiResponse<ListAnimationsResponse>> {
+		if (requestParameters['deviceId'] == null) {
+			throw new runtime.RequiredError(
+				'deviceId',
+				'Required parameter "deviceId" was null or undefined when calling listAnimations().'
+			);
+		}
+
+		const queryParameters: any = {};
+
+		const headerParameters: runtime.HTTPHeaders = {};
+
+		let urlPath = `/animation/list/{device_id}`;
+		urlPath = urlPath.replace(
+			`{${'device_id'}}`,
+			encodeURIComponent(String(requestParameters['deviceId']))
+		);
+
+		const response = await this.request(
+			{
+				path: urlPath,
+				method: 'GET',
+				headers: headerParameters,
+				query: queryParameters
+			},
+			initOverrides
+		);
+
+		return new runtime.JSONApiResponse(response, (jsonValue) =>
+			ListAnimationsResponseFromJSON(jsonValue)
+		);
+	}
+
+	/**
+	 * Returns all saved animations for the specified device, ordered by most recently updated
+	 * List saved animations for a device
+	 */
+	async listAnimations(
+		requestParameters: ListAnimationsRequest,
+		initOverrides?: RequestInit | runtime.InitOverrideFunction
+	): Promise<ListAnimationsResponse> {
+		const response = await this.listAnimationsRaw(requestParameters, initOverrides);
+		return await response.value();
+	}
+
+	/**
+	 * Saves the current animation frames to the database with a name. Stored per device.
+	 * Save animation to database
+	 */
+	async saveAnimationRaw(
+		requestParameters: SaveAnimationOperationRequest,
+		initOverrides?: RequestInit | runtime.InitOverrideFunction
+	): Promise<runtime.ApiResponse<SaveAnimationResponse>> {
+		if (requestParameters['saveAnimationRequest'] == null) {
+			throw new runtime.RequiredError(
+				'saveAnimationRequest',
+				'Required parameter "saveAnimationRequest" was null or undefined when calling saveAnimation().'
+			);
+		}
+
+		const queryParameters: any = {};
+
+		const headerParameters: runtime.HTTPHeaders = {};
+
+		headerParameters['Content-Type'] = 'application/json';
+
+		let urlPath = `/animation/save`;
+
+		const response = await this.request(
+			{
+				path: urlPath,
+				method: 'POST',
+				headers: headerParameters,
+				query: queryParameters,
+				body: SaveAnimationRequestToJSON(requestParameters['saveAnimationRequest'])
+			},
+			initOverrides
+		);
+
+		return new runtime.JSONApiResponse(response, (jsonValue) =>
+			SaveAnimationResponseFromJSON(jsonValue)
+		);
+	}
+
+	/**
+	 * Saves the current animation frames to the database with a name. Stored per device.
+	 * Save animation to database
+	 */
+	async saveAnimation(
+		requestParameters: SaveAnimationOperationRequest,
+		initOverrides?: RequestInit | runtime.InitOverrideFunction
+	): Promise<SaveAnimationResponse> {
+		const response = await this.saveAnimationRaw(requestParameters, initOverrides);
 		return await response.value();
 	}
 
@@ -183,6 +426,65 @@ export class DefaultApi extends runtime.BaseAPI {
 		initOverrides?: RequestInit | runtime.InitOverrideFunction
 	): Promise<StopAnimationResponse> {
 		const response = await this.stopAnimationRaw(requestParameters, initOverrides);
+		return await response.value();
+	}
+
+	/**
+	 * Overwrites an existing animation\'s name and frames
+	 * Update an existing saved animation
+	 */
+	async updateAnimationRaw(
+		requestParameters: UpdateAnimationOperationRequest,
+		initOverrides?: RequestInit | runtime.InitOverrideFunction
+	): Promise<runtime.ApiResponse<UpdateAnimationResponse>> {
+		if (requestParameters['id'] == null) {
+			throw new runtime.RequiredError(
+				'id',
+				'Required parameter "id" was null or undefined when calling updateAnimation().'
+			);
+		}
+
+		if (requestParameters['updateAnimationRequest'] == null) {
+			throw new runtime.RequiredError(
+				'updateAnimationRequest',
+				'Required parameter "updateAnimationRequest" was null or undefined when calling updateAnimation().'
+			);
+		}
+
+		const queryParameters: any = {};
+
+		const headerParameters: runtime.HTTPHeaders = {};
+
+		headerParameters['Content-Type'] = 'application/json';
+
+		let urlPath = `/animation/{id}`;
+		urlPath = urlPath.replace(`{${'id'}}`, encodeURIComponent(String(requestParameters['id'])));
+
+		const response = await this.request(
+			{
+				path: urlPath,
+				method: 'PUT',
+				headers: headerParameters,
+				query: queryParameters,
+				body: UpdateAnimationRequestToJSON(requestParameters['updateAnimationRequest'])
+			},
+			initOverrides
+		);
+
+		return new runtime.JSONApiResponse(response, (jsonValue) =>
+			UpdateAnimationResponseFromJSON(jsonValue)
+		);
+	}
+
+	/**
+	 * Overwrites an existing animation\'s name and frames
+	 * Update an existing saved animation
+	 */
+	async updateAnimation(
+		requestParameters: UpdateAnimationOperationRequest,
+		initOverrides?: RequestInit | runtime.InitOverrideFunction
+	): Promise<UpdateAnimationResponse> {
+		const response = await this.updateAnimationRaw(requestParameters, initOverrides);
 		return await response.value();
 	}
 }

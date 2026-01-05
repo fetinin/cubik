@@ -1,13 +1,25 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { get } from 'svelte/store';
-	import { applyAnimation, getDevices, getMatrixSize, stopAnimation } from '$lib/api/mock';
+	import {
+		applyAnimation,
+		getDevices,
+		getMatrixSize,
+		stopAnimation,
+		saveAnimation,
+		updateAnimation,
+		loadAnimation,
+		deleteAnimation,
+		listAnimations
+	} from '$lib/api/mock';
 	import DeviceBar from '$lib/components/DeviceBar.svelte';
 	import AnimationPreview from '$lib/components/AnimationPreview.svelte';
 	import ColorPickerRGB from '$lib/components/ColorPickerRGB.svelte';
 	import ColorSelector from '$lib/components/ColorSelector.svelte';
 	import FramesPanel from '$lib/components/FramesPanel.svelte';
 	import MatrixGrid from '$lib/components/MatrixGrid.svelte';
+	import LoadAnimationModal from '$lib/components/LoadAnimationModal.svelte';
+	import SaveAnimationModal from '$lib/components/SaveAnimationModal.svelte';
 	import {
 		buildAnimationPayload,
 		createEditorState,
@@ -19,6 +31,7 @@
 		replaceSelectedFramePixels,
 		type PackedRGB
 	} from '$lib/state/editor';
+	import type { SavedAnimation } from '$lib/api/generated';
 
 	const editor = createEditorState();
 	const devices = editor.devices;
@@ -37,6 +50,13 @@
 	let stoppedNoticeTimeout: ReturnType<typeof setTimeout> | null = null;
 	let appliedNoticeTimeout: ReturnType<typeof setTimeout> | null = null;
 
+	// Saved animations state
+	let showLoadModal = $state(false);
+	let showSaveModal = $state(false);
+	let savedAnimations = $state<SavedAnimation[]>([]);
+	let currentAnimationId = $state<string | null>(null);
+	let currentAnimationName = $state<string | null>(null);
+
 	async function selectDevice(deviceId: string) {
 		editor.selectedDeviceId.set(deviceId);
 		const size = await getMatrixSize(deviceId);
@@ -44,6 +64,100 @@
 		editor.pixels.set(initPixelsForSize(size, 0x000000));
 		editor.frames.set([]);
 		editor.selectedFrameId.set(null);
+	}
+
+	async function refreshSavedAnimations(deviceId: string) {
+		try {
+			savedAnimations = await listAnimations(deviceId);
+		} catch (e) {
+			console.error('Failed to load saved animations:', e);
+			savedAnimations = [];
+		}
+	}
+
+	// Load saved animations when device changes
+	$effect(() => {
+		const device = get(selectedDevice);
+		if (device) {
+			refreshSavedAnimations(device.location);
+		}
+	});
+
+	async function handleSaveAnimation(detail: { name: string; overwrite: boolean }) {
+		const { name, overwrite } = detail;
+		const device = get(selectedDevice);
+		const framesList = get(frames);
+
+		if (!device) return;
+
+		try {
+			if (overwrite && currentAnimationId) {
+				// Update existing
+				const updated = await updateAnimation(
+					currentAnimationId,
+					name,
+					framesList.map((f) => f.pixels)
+				);
+				currentAnimationName = updated.name;
+			} else {
+				// Save as new
+				const saved = await saveAnimation(
+					device.location,
+					name,
+					framesList.map((f) => f.pixels)
+				);
+				currentAnimationId = saved.id;
+				currentAnimationName = saved.name;
+			}
+
+			await refreshSavedAnimations(device.location);
+		} catch (e) {
+			console.error('Failed to save animation:', e);
+		}
+	}
+
+	async function handleLoadAnimation(animationId: string) {
+		try {
+			const animation = await loadAnimation(animationId);
+
+			// Convert API frames to frontend Frame format
+			const loadedFrames = animation.frames.map((apiFrame, i) => ({
+				id: `frame-${Date.now()}-${i}`,
+				name: `Frame ${i + 1}`,
+				pixels: apiFrame.map((pixel) => (pixel.r << 16) | (pixel.g << 8) | pixel.b)
+			}));
+
+			editor.frames.set(loadedFrames);
+			currentAnimationId = animation.id;
+			currentAnimationName = animation.name;
+
+			// Load first frame into editor
+			if (loadedFrames[0]) {
+				editor.selectedFrameId.set(loadedFrames[0].id);
+				editor.pixels.set([...loadedFrames[0].pixels]);
+			}
+		} catch (e) {
+			console.error('Failed to load animation:', e);
+		}
+	}
+
+	async function handleDeleteAnimation(animationId: string) {
+		try {
+			await deleteAnimation(animationId);
+
+			// Clear current animation state if it was deleted
+			if (currentAnimationId === animationId) {
+				currentAnimationId = null;
+				currentAnimationName = null;
+			}
+
+			const device = get(selectedDevice);
+			if (device) {
+				await refreshSavedAnimations(device.location);
+			}
+		} catch (e) {
+			console.error('Failed to delete animation:', e);
+		}
 	}
 
 	onMount(async () => {
@@ -230,27 +344,49 @@
 				</section>
 
 				<section class="rounded border border-gray-200 p-4">
-					<div class="flex items-center justify-between gap-3">
-						<div class="text-sm font-medium">Apply</div>
-						<div class="flex items-center gap-2">
-							<button
-								type="button"
-								class="rounded bg-blue-600 px-3 py-1.5 text-xs font-medium text-white disabled:opacity-50"
-								onclick={applyCurrentAnimation}
-								disabled={$frames.length === 0}
-								data-testid="apply-animation"
-							>
-								Apply animation
-							</button>
+					<div class="flex flex-col gap-3">
+						<div class="flex items-center justify-between gap-3">
+							<div class="text-sm font-medium">Apply</div>
+							<div class="flex items-center gap-2">
+								<button
+									type="button"
+									class="rounded bg-blue-600 px-3 py-1.5 text-xs font-medium text-white disabled:opacity-50"
+									onclick={applyCurrentAnimation}
+									disabled={$frames.length === 0}
+									data-testid="apply-animation"
+								>
+									Apply animation
+								</button>
 
+								<button
+									type="button"
+									class="rounded border border-gray-300 px-3 py-1.5 text-xs font-medium disabled:opacity-50"
+									onclick={stopCurrentAnimation}
+									disabled={!$selectedDeviceId}
+									data-testid="stop-animation"
+								>
+									Stop animation
+								</button>
+							</div>
+						</div>
+
+						<div class="flex gap-2">
 							<button
 								type="button"
-								class="rounded border border-gray-300 px-3 py-1.5 text-xs font-medium disabled:opacity-50"
-								onclick={stopCurrentAnimation}
-								disabled={!$selectedDeviceId}
-								data-testid="stop-animation"
+								class="flex-1 rounded bg-blue-600 px-3 py-1.5 text-xs font-medium text-white disabled:opacity-50"
+								onclick={() => (showSaveModal = true)}
+								disabled={$frames.length === 0}
+								data-testid="save-animation"
 							>
-								Stop animation
+								Save Animation
+							</button>
+							<button
+								type="button"
+								class="flex-1 rounded border border-gray-300 px-3 py-1.5 text-xs font-medium"
+								onclick={() => (showLoadModal = true)}
+								data-testid="load-animation"
+							>
+								Load Animation
 							</button>
 						</div>
 					</div>
@@ -272,4 +408,18 @@
 			</aside>
 		</div>
 	{/if}
+
+	<!-- Modals -->
+	<LoadAnimationModal
+		bind:open={showLoadModal}
+		animations={savedAnimations}
+		onload={handleLoadAnimation}
+		ondelete={handleDeleteAnimation}
+	/>
+
+	<SaveAnimationModal
+		bind:open={showSaveModal}
+		{currentAnimationName}
+		onsave={handleSaveAnimation}
+	/>
 </main>

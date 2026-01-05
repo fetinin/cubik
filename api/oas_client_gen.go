@@ -178,7 +178,7 @@ func (c *Client) sendDeleteAnimation(ctx context.Context, params DeleteAnimation
 			Explode: false,
 		})
 		if err := func() error {
-			return e.EncodeValue(conv.UUIDToString(params.ID))
+			return e.EncodeValue(conv.StringToString(params.ID))
 		}(); err != nil {
 			return res, errors.Wrap(err, "encode path")
 		}
@@ -269,7 +269,7 @@ func (c *Client) sendGetAnimation(ctx context.Context, params GetAnimationParams
 			Explode: false,
 		})
 		if err := func() error {
-			return e.EncodeValue(conv.UUIDToString(params.ID))
+			return e.EncodeValue(conv.StringToString(params.ID))
 		}(); err != nil {
 			return res, errors.Wrap(err, "encode path")
 		}
@@ -753,7 +753,7 @@ func (c *Client) sendUpdateAnimation(ctx context.Context, request *UpdateAnimati
 			Explode: false,
 		})
 		if err := func() error {
-			return e.EncodeValue(conv.UUIDToString(params.ID))
+			return e.EncodeValue(conv.StringToString(params.ID))
 		}(); err != nil {
 			return res, errors.Wrap(err, "encode path")
 		}

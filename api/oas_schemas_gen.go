@@ -4,8 +4,6 @@ package api
 
 import (
 	"time"
-
-	"github.com/google/uuid"
 )
 
 type AnimationFrame []RGBPixel
@@ -245,14 +243,14 @@ func (s *SaveAnimationRequest) SetFrames(val []AnimationFrame) {
 // Ref: #/components/schemas/SaveAnimationResponse
 type SaveAnimationResponse struct {
 	// UUID of the newly saved animation.
-	ID uuid.UUID `json:"id"`
+	ID string `json:"id"`
 	// Success message.
 	Message   string         `json:"message"`
 	Animation SavedAnimation `json:"animation"`
 }
 
 // GetID returns the value of ID.
-func (s *SaveAnimationResponse) GetID() uuid.UUID {
+func (s *SaveAnimationResponse) GetID() string {
 	return s.ID
 }
 
@@ -267,7 +265,7 @@ func (s *SaveAnimationResponse) GetAnimation() SavedAnimation {
 }
 
 // SetID sets the value of ID.
-func (s *SaveAnimationResponse) SetID(val uuid.UUID) {
+func (s *SaveAnimationResponse) SetID(val string) {
 	s.ID = val
 }
 
@@ -286,7 +284,7 @@ func (*SaveAnimationResponse) saveAnimationRes() {}
 // Ref: #/components/schemas/SavedAnimation
 type SavedAnimation struct {
 	// Unique animation identifier.
-	ID uuid.UUID `json:"id"`
+	ID string `json:"id"`
 	// Device location this animation is saved for.
 	DeviceID string `json:"device_id"`
 	// User-provided name for the animation.
@@ -300,7 +298,7 @@ type SavedAnimation struct {
 }
 
 // GetID returns the value of ID.
-func (s *SavedAnimation) GetID() uuid.UUID {
+func (s *SavedAnimation) GetID() string {
 	return s.ID
 }
 
@@ -330,7 +328,7 @@ func (s *SavedAnimation) GetUpdatedAt() time.Time {
 }
 
 // SetID sets the value of ID.
-func (s *SavedAnimation) SetID(val uuid.UUID) {
+func (s *SavedAnimation) SetID(val string) {
 	s.ID = val
 }
 

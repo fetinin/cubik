@@ -66,3 +66,65 @@ export async function stopAnimation(deviceId: string): Promise<void> {
 		}
 	});
 }
+
+// Import SavedAnimation type for animation storage functions
+import type { SavedAnimation } from '$lib/api/generated';
+
+// Helper to convert API format to packed RGB
+const fromPixel = (pixel: RGBPixel): number => (pixel.r << 16) | (pixel.g << 8) | pixel.b;
+
+export async function saveAnimation(
+	deviceId: string,
+	name: string,
+	frames: number[][]
+): Promise<SavedAnimation> {
+	const toPixel = (packed: number): RGBPixel => ({
+		r: (packed >> 16) & 0xff,
+		g: (packed >> 8) & 0xff,
+		b: packed & 0xff
+	});
+
+	const response = await api.saveAnimation({
+		saveAnimationRequest: {
+			deviceId,
+			name,
+			frames: frames.map((frame) => frame.map(toPixel))
+		}
+	});
+	return response.animation;
+}
+
+export async function listAnimations(deviceId: string): Promise<SavedAnimation[]> {
+	const response = await api.listAnimations({ deviceId });
+	return response.animations;
+}
+
+export async function loadAnimation(id: string): Promise<SavedAnimation> {
+	const response = await api.getAnimation({ id });
+	return response.animation;
+}
+
+export async function updateAnimation(
+	id: string,
+	name: string,
+	frames: number[][]
+): Promise<SavedAnimation> {
+	const toPixel = (packed: number): RGBPixel => ({
+		r: (packed >> 16) & 0xff,
+		g: (packed >> 8) & 0xff,
+		b: packed & 0xff
+	});
+
+	const response = await api.updateAnimation({
+		id,
+		updateAnimationRequest: {
+			name,
+			frames: frames.map((frame) => frame.map(toPixel))
+		}
+	});
+	return response.animation;
+}
+
+export async function deleteAnimation(id: string): Promise<void> {
+	await api.deleteAnimation({ id });
+}
