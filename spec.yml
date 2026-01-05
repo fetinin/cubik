@@ -106,6 +106,212 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+
+  /animation/save:
+    post:
+      operationId: saveAnimation
+      summary: Save animation to database
+      description: Saves the current animation frames to the database with a name. Stored per device.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SaveAnimationRequest'
+      responses:
+        '200':
+          description: Animation saved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SaveAnimationResponse'
+        '400':
+          description: Bad request - invalid input data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                emptyFrames:
+                  summary: No frames provided
+                  value:
+                    error: "frames cannot be empty"
+                emptyName:
+                  summary: No name provided
+                  value:
+                    error: "name is required"
+                invalidDeviceId:
+                  summary: Invalid device ID format
+                  value:
+                    error: "invalid device_id format"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /animation/list/{device_id}:
+    get:
+      operationId: listAnimations
+      summary: List saved animations for a device
+      description: Returns all saved animations for the specified device, ordered by most recently updated
+      parameters:
+        - name: device_id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^yeelight://[0-9.]+:[0-9]+$'
+          description: Device location in format yeelight://IP:PORT
+          example: "yeelight://192.168.1.100:55443"
+      responses:
+        '200':
+          description: List of saved animations
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListAnimationsResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /animation/{id}:
+    get:
+      operationId: getAnimation
+      summary: Get a specific saved animation
+      description: Retrieves a saved animation by its ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Animation UUID
+          example: "550e8400-e29b-41d4-a716-446655440000"
+      responses:
+        '200':
+          description: Animation retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetAnimationResponse'
+        '404':
+          description: Animation not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                notFound:
+                  summary: Animation does not exist
+                  value:
+                    error: "animation not found"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    put:
+      operationId: updateAnimation
+      summary: Update an existing saved animation
+      description: Overwrites an existing animation's name and frames
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Animation UUID
+          example: "550e8400-e29b-41d4-a716-446655440000"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateAnimationRequest'
+      responses:
+        '200':
+          description: Animation updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateAnimationResponse'
+        '400':
+          description: Bad request - invalid input data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                emptyFrames:
+                  summary: No frames provided
+                  value:
+                    error: "frames cannot be empty"
+                emptyName:
+                  summary: No name provided
+                  value:
+                    error: "name is required"
+        '404':
+          description: Animation not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                notFound:
+                  summary: Animation does not exist
+                  value:
+                    error: "animation not found"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      operationId: deleteAnimation
+      summary: Delete a saved animation
+      description: Permanently removes a saved animation from the database
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Animation UUID
+          example: "550e8400-e29b-41d4-a716-446655440000"
+      responses:
+        '200':
+          description: Animation deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteAnimationResponse'
+        '404':
+          description: Animation not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                notFound:
+                  summary: Animation does not exist
+                  value:
+                    error: "animation not found"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 components:
   schemas:
     Device:
@@ -221,3 +427,146 @@ components:
           type: string
           description: Success message
           example: "Animation stopped successfully"
+    SavedAnimation:
+      type: object
+      required:
+        - id
+        - device_id
+        - name
+        - frames
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique animation identifier
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        device_id:
+          type: string
+          pattern: '^yeelight://[0-9.]+:[0-9]+$'
+          description: Device location this animation is saved for
+          example: "yeelight://192.168.1.100:55443"
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: User-provided name for the animation
+          example: "Rainbow Wave"
+        frames:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/AnimationFrame'
+          description: Array of animation frames
+        created_at:
+          type: string
+          format: date-time
+          description: Timestamp when animation was created
+          example: "2026-01-05T14:30:00Z"
+        updated_at:
+          type: string
+          format: date-time
+          description: Timestamp when animation was last updated
+          example: "2026-01-05T15:45:00Z"
+      additionalProperties: false
+    SaveAnimationRequest:
+      type: object
+      required:
+        - device_id
+        - name
+        - frames
+      properties:
+        device_id:
+          type: string
+          pattern: '^yeelight://[0-9.]+:[0-9]+$'
+          description: Device location to save animation for
+          example: "yeelight://192.168.1.100:55443"
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Name for the animation
+          example: "Rainbow Wave"
+        frames:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/AnimationFrame'
+          description: Array of animation frames to save
+      additionalProperties: false
+    SaveAnimationResponse:
+      type: object
+      required:
+        - id
+        - message
+        - animation
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: UUID of the newly saved animation
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        message:
+          type: string
+          description: Success message
+          example: "Animation saved successfully"
+        animation:
+          $ref: '#/components/schemas/SavedAnimation'
+    ListAnimationsResponse:
+      type: object
+      required:
+        - animations
+      properties:
+        animations:
+          type: array
+          items:
+            $ref: '#/components/schemas/SavedAnimation'
+          description: List of saved animations for the device, ordered by updated_at descending
+    GetAnimationResponse:
+      type: object
+      required:
+        - animation
+      properties:
+        animation:
+          $ref: '#/components/schemas/SavedAnimation'
+    UpdateAnimationRequest:
+      type: object
+      required:
+        - name
+        - frames
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Updated name for the animation
+          example: "Rainbow Wave Updated"
+        frames:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/AnimationFrame'
+          description: Updated animation frames
+      additionalProperties: false
+    UpdateAnimationResponse:
+      type: object
+      required:
+        - message
+        - animation
+      properties:
+        message:
+          type: string
+          description: Success message
+          example: "Animation updated successfully"
+        animation:
+          $ref: '#/components/schemas/SavedAnimation'
+    DeleteAnimationResponse:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          description: Success message
+          example: "Animation deleted successfully"

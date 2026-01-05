@@ -13,12 +13,48 @@ type UnimplementedHandler struct{}
 
 var _ Handler = UnimplementedHandler{}
 
+// DeleteAnimation implements deleteAnimation operation.
+//
+// Permanently removes a saved animation from the database.
+//
+// DELETE /animation/{id}
+func (UnimplementedHandler) DeleteAnimation(ctx context.Context, params DeleteAnimationParams) (r DeleteAnimationRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetAnimation implements getAnimation operation.
+//
+// Retrieves a saved animation by its ID.
+//
+// GET /animation/{id}
+func (UnimplementedHandler) GetAnimation(ctx context.Context, params GetAnimationParams) (r GetAnimationRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetDevices implements getDevices operation.
 //
 // Performs live SSDP discovery and returns currently available devices on the local network.
 //
 // GET /api/devices
 func (UnimplementedHandler) GetDevices(ctx context.Context) (r GetDevicesRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ListAnimations implements listAnimations operation.
+//
+// Returns all saved animations for the specified device, ordered by most recently updated.
+//
+// GET /animation/list/{device_id}
+func (UnimplementedHandler) ListAnimations(ctx context.Context, params ListAnimationsParams) (r ListAnimationsRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// SaveAnimation implements saveAnimation operation.
+//
+// Saves the current animation frames to the database with a name. Stored per device.
+//
+// POST /animation/save
+func (UnimplementedHandler) SaveAnimation(ctx context.Context, req *SaveAnimationRequest) (r SaveAnimationRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -38,5 +74,14 @@ func (UnimplementedHandler) StartAnimation(ctx context.Context, req *StartAnimat
 //
 // POST /animation/stop
 func (UnimplementedHandler) StopAnimation(ctx context.Context, req *StopAnimationRequest) (r StopAnimationRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// UpdateAnimation implements updateAnimation operation.
+//
+// Overwrites an existing animation's name and frames.
+//
+// PUT /animation/{id}
+func (UnimplementedHandler) UpdateAnimation(ctx context.Context, req *UpdateAnimationRequest, params UpdateAnimationParams) (r UpdateAnimationRes, _ error) {
 	return r, ht.ErrNotImplemented
 }

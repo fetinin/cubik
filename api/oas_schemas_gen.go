@@ -2,7 +2,39 @@
 
 package api
 
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
+
 type AnimationFrame []RGBPixel
+
+type DeleteAnimationInternalServerError Error
+
+func (*DeleteAnimationInternalServerError) deleteAnimationRes() {}
+
+type DeleteAnimationNotFound Error
+
+func (*DeleteAnimationNotFound) deleteAnimationRes() {}
+
+// Ref: #/components/schemas/DeleteAnimationResponse
+type DeleteAnimationResponse struct {
+	// Success message.
+	Message string `json:"message"`
+}
+
+// GetMessage returns the value of Message.
+func (s *DeleteAnimationResponse) GetMessage() string {
+	return s.Message
+}
+
+// SetMessage sets the value of Message.
+func (s *DeleteAnimationResponse) SetMessage(val string) {
+	s.Message = val
+}
+
+func (*DeleteAnimationResponse) deleteAnimationRes() {}
 
 // Ref: #/components/schemas/Device
 type Device struct {
@@ -60,7 +92,33 @@ func (s *Error) SetError(val string) {
 	s.Error = val
 }
 
-func (*Error) getDevicesRes() {}
+func (*Error) getDevicesRes()     {}
+func (*Error) listAnimationsRes() {}
+
+type GetAnimationInternalServerError Error
+
+func (*GetAnimationInternalServerError) getAnimationRes() {}
+
+type GetAnimationNotFound Error
+
+func (*GetAnimationNotFound) getAnimationRes() {}
+
+// Ref: #/components/schemas/GetAnimationResponse
+type GetAnimationResponse struct {
+	Animation SavedAnimation `json:"animation"`
+}
+
+// GetAnimation returns the value of Animation.
+func (s *GetAnimationResponse) GetAnimation() SavedAnimation {
+	return s.Animation
+}
+
+// SetAnimation sets the value of Animation.
+func (s *GetAnimationResponse) SetAnimation(val SavedAnimation) {
+	s.Animation = val
+}
+
+func (*GetAnimationResponse) getAnimationRes() {}
 
 type GetDevicesOK struct {
 	Devices []Device `json:"devices"`
@@ -77,6 +135,24 @@ func (s *GetDevicesOK) SetDevices(val []Device) {
 }
 
 func (*GetDevicesOK) getDevicesRes() {}
+
+// Ref: #/components/schemas/ListAnimationsResponse
+type ListAnimationsResponse struct {
+	// List of saved animations for the device, ordered by updated_at descending.
+	Animations []SavedAnimation `json:"animations"`
+}
+
+// GetAnimations returns the value of Animations.
+func (s *ListAnimationsResponse) GetAnimations() []SavedAnimation {
+	return s.Animations
+}
+
+// SetAnimations sets the value of Animations.
+func (s *ListAnimationsResponse) SetAnimations(val []SavedAnimation) {
+	s.Animations = val
+}
+
+func (*ListAnimationsResponse) listAnimationsRes() {}
 
 // Ref: #/components/schemas/RGBPixel
 type RGBPixel struct {
@@ -116,6 +192,171 @@ func (s *RGBPixel) SetG(val int32) {
 // SetB sets the value of B.
 func (s *RGBPixel) SetB(val int32) {
 	s.B = val
+}
+
+type SaveAnimationBadRequest Error
+
+func (*SaveAnimationBadRequest) saveAnimationRes() {}
+
+type SaveAnimationInternalServerError Error
+
+func (*SaveAnimationInternalServerError) saveAnimationRes() {}
+
+// Ref: #/components/schemas/SaveAnimationRequest
+type SaveAnimationRequest struct {
+	// Device location to save animation for.
+	DeviceID string `json:"device_id"`
+	// Name for the animation.
+	Name string `json:"name"`
+	// Array of animation frames to save.
+	Frames []AnimationFrame `json:"frames"`
+}
+
+// GetDeviceID returns the value of DeviceID.
+func (s *SaveAnimationRequest) GetDeviceID() string {
+	return s.DeviceID
+}
+
+// GetName returns the value of Name.
+func (s *SaveAnimationRequest) GetName() string {
+	return s.Name
+}
+
+// GetFrames returns the value of Frames.
+func (s *SaveAnimationRequest) GetFrames() []AnimationFrame {
+	return s.Frames
+}
+
+// SetDeviceID sets the value of DeviceID.
+func (s *SaveAnimationRequest) SetDeviceID(val string) {
+	s.DeviceID = val
+}
+
+// SetName sets the value of Name.
+func (s *SaveAnimationRequest) SetName(val string) {
+	s.Name = val
+}
+
+// SetFrames sets the value of Frames.
+func (s *SaveAnimationRequest) SetFrames(val []AnimationFrame) {
+	s.Frames = val
+}
+
+// Ref: #/components/schemas/SaveAnimationResponse
+type SaveAnimationResponse struct {
+	// UUID of the newly saved animation.
+	ID uuid.UUID `json:"id"`
+	// Success message.
+	Message   string         `json:"message"`
+	Animation SavedAnimation `json:"animation"`
+}
+
+// GetID returns the value of ID.
+func (s *SaveAnimationResponse) GetID() uuid.UUID {
+	return s.ID
+}
+
+// GetMessage returns the value of Message.
+func (s *SaveAnimationResponse) GetMessage() string {
+	return s.Message
+}
+
+// GetAnimation returns the value of Animation.
+func (s *SaveAnimationResponse) GetAnimation() SavedAnimation {
+	return s.Animation
+}
+
+// SetID sets the value of ID.
+func (s *SaveAnimationResponse) SetID(val uuid.UUID) {
+	s.ID = val
+}
+
+// SetMessage sets the value of Message.
+func (s *SaveAnimationResponse) SetMessage(val string) {
+	s.Message = val
+}
+
+// SetAnimation sets the value of Animation.
+func (s *SaveAnimationResponse) SetAnimation(val SavedAnimation) {
+	s.Animation = val
+}
+
+func (*SaveAnimationResponse) saveAnimationRes() {}
+
+// Ref: #/components/schemas/SavedAnimation
+type SavedAnimation struct {
+	// Unique animation identifier.
+	ID uuid.UUID `json:"id"`
+	// Device location this animation is saved for.
+	DeviceID string `json:"device_id"`
+	// User-provided name for the animation.
+	Name string `json:"name"`
+	// Array of animation frames.
+	Frames []AnimationFrame `json:"frames"`
+	// Timestamp when animation was created.
+	CreatedAt time.Time `json:"created_at"`
+	// Timestamp when animation was last updated.
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
+// GetID returns the value of ID.
+func (s *SavedAnimation) GetID() uuid.UUID {
+	return s.ID
+}
+
+// GetDeviceID returns the value of DeviceID.
+func (s *SavedAnimation) GetDeviceID() string {
+	return s.DeviceID
+}
+
+// GetName returns the value of Name.
+func (s *SavedAnimation) GetName() string {
+	return s.Name
+}
+
+// GetFrames returns the value of Frames.
+func (s *SavedAnimation) GetFrames() []AnimationFrame {
+	return s.Frames
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *SavedAnimation) GetCreatedAt() time.Time {
+	return s.CreatedAt
+}
+
+// GetUpdatedAt returns the value of UpdatedAt.
+func (s *SavedAnimation) GetUpdatedAt() time.Time {
+	return s.UpdatedAt
+}
+
+// SetID sets the value of ID.
+func (s *SavedAnimation) SetID(val uuid.UUID) {
+	s.ID = val
+}
+
+// SetDeviceID sets the value of DeviceID.
+func (s *SavedAnimation) SetDeviceID(val string) {
+	s.DeviceID = val
+}
+
+// SetName sets the value of Name.
+func (s *SavedAnimation) SetName(val string) {
+	s.Name = val
+}
+
+// SetFrames sets the value of Frames.
+func (s *SavedAnimation) SetFrames(val []AnimationFrame) {
+	s.Frames = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *SavedAnimation) SetCreatedAt(val time.Time) {
+	s.CreatedAt = val
+}
+
+// SetUpdatedAt sets the value of UpdatedAt.
+func (s *SavedAnimation) SetUpdatedAt(val time.Time) {
+	s.UpdatedAt = val
 }
 
 type StartAnimationBadRequest Error
@@ -225,3 +466,72 @@ func (s *StopAnimationResponse) SetMessage(val string) {
 }
 
 func (*StopAnimationResponse) stopAnimationRes() {}
+
+type UpdateAnimationBadRequest Error
+
+func (*UpdateAnimationBadRequest) updateAnimationRes() {}
+
+type UpdateAnimationInternalServerError Error
+
+func (*UpdateAnimationInternalServerError) updateAnimationRes() {}
+
+type UpdateAnimationNotFound Error
+
+func (*UpdateAnimationNotFound) updateAnimationRes() {}
+
+// Ref: #/components/schemas/UpdateAnimationRequest
+type UpdateAnimationRequest struct {
+	// Updated name for the animation.
+	Name string `json:"name"`
+	// Updated animation frames.
+	Frames []AnimationFrame `json:"frames"`
+}
+
+// GetName returns the value of Name.
+func (s *UpdateAnimationRequest) GetName() string {
+	return s.Name
+}
+
+// GetFrames returns the value of Frames.
+func (s *UpdateAnimationRequest) GetFrames() []AnimationFrame {
+	return s.Frames
+}
+
+// SetName sets the value of Name.
+func (s *UpdateAnimationRequest) SetName(val string) {
+	s.Name = val
+}
+
+// SetFrames sets the value of Frames.
+func (s *UpdateAnimationRequest) SetFrames(val []AnimationFrame) {
+	s.Frames = val
+}
+
+// Ref: #/components/schemas/UpdateAnimationResponse
+type UpdateAnimationResponse struct {
+	// Success message.
+	Message   string         `json:"message"`
+	Animation SavedAnimation `json:"animation"`
+}
+
+// GetMessage returns the value of Message.
+func (s *UpdateAnimationResponse) GetMessage() string {
+	return s.Message
+}
+
+// GetAnimation returns the value of Animation.
+func (s *UpdateAnimationResponse) GetAnimation() SavedAnimation {
+	return s.Animation
+}
+
+// SetMessage sets the value of Message.
+func (s *UpdateAnimationResponse) SetMessage(val string) {
+	s.Message = val
+}
+
+// SetAnimation sets the value of Animation.
+func (s *UpdateAnimationResponse) SetAnimation(val SavedAnimation) {
+	s.Animation = val
+}
+
+func (*UpdateAnimationResponse) updateAnimationRes() {}

@@ -6,7 +6,12 @@ package api
 type OperationName = string
 
 const (
-	GetDevicesOperation     OperationName = "GetDevices"
-	StartAnimationOperation OperationName = "StartAnimation"
-	StopAnimationOperation  OperationName = "StopAnimation"
+	DeleteAnimationOperation OperationName = "DeleteAnimation"
+	GetAnimationOperation    OperationName = "GetAnimation"
+	GetDevicesOperation      OperationName = "GetDevices"
+	ListAnimationsOperation  OperationName = "ListAnimations"
+	SaveAnimationOperation   OperationName = "SaveAnimation"
+	StartAnimationOperation  OperationName = "StartAnimation"
+	StopAnimationOperation   OperationName = "StopAnimation"
+	UpdateAnimationOperation OperationName = "UpdateAnimation"
 )

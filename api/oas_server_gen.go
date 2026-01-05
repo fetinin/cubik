@@ -8,12 +8,36 @@ import (
 
 // Handler handles operations described by OpenAPI v3 specification.
 type Handler interface {
+	// DeleteAnimation implements deleteAnimation operation.
+	//
+	// Permanently removes a saved animation from the database.
+	//
+	// DELETE /animation/{id}
+	DeleteAnimation(ctx context.Context, params DeleteAnimationParams) (DeleteAnimationRes, error)
+	// GetAnimation implements getAnimation operation.
+	//
+	// Retrieves a saved animation by its ID.
+	//
+	// GET /animation/{id}
+	GetAnimation(ctx context.Context, params GetAnimationParams) (GetAnimationRes, error)
 	// GetDevices implements getDevices operation.
 	//
 	// Performs live SSDP discovery and returns currently available devices on the local network.
 	//
 	// GET /api/devices
 	GetDevices(ctx context.Context) (GetDevicesRes, error)
+	// ListAnimations implements listAnimations operation.
+	//
+	// Returns all saved animations for the specified device, ordered by most recently updated.
+	//
+	// GET /animation/list/{device_id}
+	ListAnimations(ctx context.Context, params ListAnimationsParams) (ListAnimationsRes, error)
+	// SaveAnimation implements saveAnimation operation.
+	//
+	// Saves the current animation frames to the database with a name. Stored per device.
+	//
+	// POST /animation/save
+	SaveAnimation(ctx context.Context, req *SaveAnimationRequest) (SaveAnimationRes, error)
 	// StartAnimation implements startAnimation operation.
 	//
 	// Starts playing an animation loop on the specified device. Only one animation can run per device at
@@ -27,6 +51,12 @@ type Handler interface {
 	//
 	// POST /animation/stop
 	StopAnimation(ctx context.Context, req *StopAnimationRequest) (StopAnimationRes, error)
+	// UpdateAnimation implements updateAnimation operation.
+	//
+	// Overwrites an existing animation's name and frames.
+	//
+	// PUT /animation/{id}
+	UpdateAnimation(ctx context.Context, req *UpdateAnimationRequest, params UpdateAnimationParams) (UpdateAnimationRes, error)
 }
 
 // Server implements http server based on OpenAPI v3 specification and

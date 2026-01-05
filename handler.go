@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
-	"strings"
 
 	"cubik/api"
 )
@@ -73,11 +72,6 @@ func (h *APIHandler) StartAnimation(ctx context.Context, req *api.StartAnimation
 // StopAnimation implements POST /animation/stop
 // Stops the animation on the specified device
 func (h *APIHandler) StopAnimation(ctx context.Context, req *api.StopAnimationRequest) (api.StopAnimationRes, error) {
-	// Validate device location format
-	if !strings.HasPrefix(req.DeviceLocation, "yeelight://") {
-		return &api.StopAnimationBadRequest{Error: "invalid device_location format"}, nil
-	}
-
 	// Stop animation (no-op if not running)
 	StopDeviceAnimation(req.DeviceLocation)
 

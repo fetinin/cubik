@@ -10,6 +10,20 @@ import (
 	ht "github.com/ogen-go/ogen/http"
 )
 
+func encodeSaveAnimationRequest(
+	req *SaveAnimationRequest,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
 func encodeStartAnimationRequest(
 	req *StartAnimationRequest,
 	r *http.Request,
@@ -26,6 +40,20 @@ func encodeStartAnimationRequest(
 
 func encodeStopAnimationRequest(
 	req *StopAnimationRequest,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeUpdateAnimationRequest(
+	req *UpdateAnimationRequest,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"

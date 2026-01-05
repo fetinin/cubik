@@ -255,8 +255,6 @@
 						</div>
 					</div>
 
-					<div class="mt-2 text-xs text-gray-500">Preview is 1 FPS (device limitation).</div>
-
 					{#if $applyStatus.state === 'applying'}
 						<div class="mt-3 text-sm text-gray-600">Applying…</div>
 					{:else if $applyStatus.state === 'success'}

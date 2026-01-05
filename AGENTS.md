@@ -45,6 +45,19 @@ go generate ./...
 - Handler interface (`api.Handler`)
 - JSON serialization/deserialization
 - HTTP routing and middleware
+- **Automatic validation** - ogen validates all inputs based on OpenAPI spec constraints before calling handlers
+
+### Validation Behavior
+
+**IMPORTANT**: ogen automatically validates all request data based on the OpenAPI spec. Do NOT implement manual validation in handlers for:
+- Pattern matching (e.g., `pattern: '^yeelight://[0-9.]+:[0-9]+$'`)
+- Min/max length constraints (e.g., `minLength: 1`, `maxLength: 100`)
+- Required fields (e.g., `required: [device_id, name, frames]`)
+- Array constraints (e.g., `minItems: 1`)
+- Number ranges (e.g., `minimum: 0`, `maximum: 255`)
+- Type validation (e.g., string, integer, UUID format)
+
+If validation fails, ogen returns a 400 Bad Request with error details **before** the handler is called. Handlers only receive valid data that meets all spec constraints.
 
 ### API Implementation Files
 

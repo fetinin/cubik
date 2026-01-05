@@ -40,6 +40,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		s.notFound(w, r)
 		return
 	}
+	args := [1]string{}
 
 	// Static code generated router with unwrapped path search.
 	switch {
@@ -60,9 +61,9 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				break
 			}
 			switch elem[0] {
-			case 'n': // Prefix: "nimation/st"
+			case 'n': // Prefix: "nimation/"
 
-				if l := len("nimation/st"); len(elem) >= l && elem[0:l] == "nimation/st" {
+				if l := len("nimation/"); len(elem) >= l && elem[0:l] == "nimation/" {
 					elem = elem[l:]
 				} else {
 					break
@@ -72,46 +73,157 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					break
 				}
 				switch elem[0] {
-				case 'a': // Prefix: "art"
+				case 'l': // Prefix: "list/"
+					origElem := elem
+					if l := len("list/"); len(elem) >= l && elem[0:l] == "list/" {
+						elem = elem[l:]
+					} else {
+						break
+					}
 
-					if l := len("art"); len(elem) >= l && elem[0:l] == "art" {
+					// Param: "device_id"
+					// Leaf parameter, slashes are prohibited
+					idx := strings.IndexByte(elem, '/')
+					if idx >= 0 {
+						break
+					}
+					args[0] = elem
+					elem = ""
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch r.Method {
+						case "GET":
+							s.handleListAnimationsRequest([1]string{
+								args[0],
+							}, elemIsEscaped, w, r)
+						default:
+							s.notAllowed(w, r, "GET")
+						}
+
+						return
+					}
+
+					elem = origElem
+				case 's': // Prefix: "s"
+					origElem := elem
+					if l := len("s"); len(elem) >= l && elem[0:l] == "s" {
 						elem = elem[l:]
 					} else {
 						break
 					}
 
 					if len(elem) == 0 {
-						// Leaf node.
-						switch r.Method {
-						case "POST":
-							s.handleStartAnimationRequest([0]string{}, elemIsEscaped, w, r)
-						default:
-							s.notAllowed(w, r, "POST")
-						}
-
-						return
-					}
-
-				case 'o': // Prefix: "op"
-
-					if l := len("op"); len(elem) >= l && elem[0:l] == "op" {
-						elem = elem[l:]
-					} else {
 						break
 					}
+					switch elem[0] {
+					case 'a': // Prefix: "ave"
 
-					if len(elem) == 0 {
-						// Leaf node.
-						switch r.Method {
-						case "POST":
-							s.handleStopAnimationRequest([0]string{}, elemIsEscaped, w, r)
-						default:
-							s.notAllowed(w, r, "POST")
+						if l := len("ave"); len(elem) >= l && elem[0:l] == "ave" {
+							elem = elem[l:]
+						} else {
+							break
 						}
 
-						return
+						if len(elem) == 0 {
+							// Leaf node.
+							switch r.Method {
+							case "POST":
+								s.handleSaveAnimationRequest([0]string{}, elemIsEscaped, w, r)
+							default:
+								s.notAllowed(w, r, "POST")
+							}
+
+							return
+						}
+
+					case 't': // Prefix: "t"
+
+						if l := len("t"); len(elem) >= l && elem[0:l] == "t" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							break
+						}
+						switch elem[0] {
+						case 'a': // Prefix: "art"
+
+							if l := len("art"); len(elem) >= l && elem[0:l] == "art" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch r.Method {
+								case "POST":
+									s.handleStartAnimationRequest([0]string{}, elemIsEscaped, w, r)
+								default:
+									s.notAllowed(w, r, "POST")
+								}
+
+								return
+							}
+
+						case 'o': // Prefix: "op"
+
+							if l := len("op"); len(elem) >= l && elem[0:l] == "op" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch r.Method {
+								case "POST":
+									s.handleStopAnimationRequest([0]string{}, elemIsEscaped, w, r)
+								default:
+									s.notAllowed(w, r, "POST")
+								}
+
+								return
+							}
+
+						}
+
 					}
 
+					elem = origElem
+				}
+				// Param: "id"
+				// Leaf parameter, slashes are prohibited
+				idx := strings.IndexByte(elem, '/')
+				if idx >= 0 {
+					break
+				}
+				args[0] = elem
+				elem = ""
+
+				if len(elem) == 0 {
+					// Leaf node.
+					switch r.Method {
+					case "DELETE":
+						s.handleDeleteAnimationRequest([1]string{
+							args[0],
+						}, elemIsEscaped, w, r)
+					case "GET":
+						s.handleGetAnimationRequest([1]string{
+							args[0],
+						}, elemIsEscaped, w, r)
+					case "PUT":
+						s.handleUpdateAnimationRequest([1]string{
+							args[0],
+						}, elemIsEscaped, w, r)
+					default:
+						s.notAllowed(w, r, "DELETE,GET,PUT")
+					}
+
+					return
 				}
 
 			case 'p': // Prefix: "pi/devices"
@@ -149,7 +261,7 @@ type Route struct {
 	operationGroup string
 	pathPattern    string
 	count          int
-	args           [0]string
+	args           [1]string
 }
 
 // Name returns ogen operation name.
@@ -234,9 +346,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 				break
 			}
 			switch elem[0] {
-			case 'n': // Prefix: "nimation/st"
+			case 'n': // Prefix: "nimation/"
 
-				if l := len("nimation/st"); len(elem) >= l && elem[0:l] == "nimation/st" {
+				if l := len("nimation/"); len(elem) >= l && elem[0:l] == "nimation/" {
 					elem = elem[l:]
 				} else {
 					break
@@ -246,56 +358,188 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 					break
 				}
 				switch elem[0] {
-				case 'a': // Prefix: "art"
-
-					if l := len("art"); len(elem) >= l && elem[0:l] == "art" {
+				case 'l': // Prefix: "list/"
+					origElem := elem
+					if l := len("list/"); len(elem) >= l && elem[0:l] == "list/" {
 						elem = elem[l:]
 					} else {
 						break
 					}
 
+					// Param: "device_id"
+					// Leaf parameter, slashes are prohibited
+					idx := strings.IndexByte(elem, '/')
+					if idx >= 0 {
+						break
+					}
+					args[0] = elem
+					elem = ""
+
 					if len(elem) == 0 {
 						// Leaf node.
 						switch method {
-						case "POST":
-							r.name = StartAnimationOperation
-							r.summary = "Start animation playback on device"
-							r.operationID = "startAnimation"
+						case "GET":
+							r.name = ListAnimationsOperation
+							r.summary = "List saved animations for a device"
+							r.operationID = "listAnimations"
 							r.operationGroup = ""
-							r.pathPattern = "/animation/start"
+							r.pathPattern = "/animation/list/{device_id}"
 							r.args = args
-							r.count = 0
+							r.count = 1
 							return r, true
 						default:
 							return
 						}
 					}
 
-				case 'o': // Prefix: "op"
-
-					if l := len("op"); len(elem) >= l && elem[0:l] == "op" {
+					elem = origElem
+				case 's': // Prefix: "s"
+					origElem := elem
+					if l := len("s"); len(elem) >= l && elem[0:l] == "s" {
 						elem = elem[l:]
 					} else {
 						break
 					}
 
 					if len(elem) == 0 {
-						// Leaf node.
-						switch method {
-						case "POST":
-							r.name = StopAnimationOperation
-							r.summary = "Stop animation playback on device"
-							r.operationID = "stopAnimation"
-							r.operationGroup = ""
-							r.pathPattern = "/animation/stop"
-							r.args = args
-							r.count = 0
-							return r, true
-						default:
-							return
+						break
+					}
+					switch elem[0] {
+					case 'a': // Prefix: "ave"
+
+						if l := len("ave"); len(elem) >= l && elem[0:l] == "ave" {
+							elem = elem[l:]
+						} else {
+							break
 						}
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch method {
+							case "POST":
+								r.name = SaveAnimationOperation
+								r.summary = "Save animation to database"
+								r.operationID = "saveAnimation"
+								r.operationGroup = ""
+								r.pathPattern = "/animation/save"
+								r.args = args
+								r.count = 0
+								return r, true
+							default:
+								return
+							}
+						}
+
+					case 't': // Prefix: "t"
+
+						if l := len("t"); len(elem) >= l && elem[0:l] == "t" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							break
+						}
+						switch elem[0] {
+						case 'a': // Prefix: "art"
+
+							if l := len("art"); len(elem) >= l && elem[0:l] == "art" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch method {
+								case "POST":
+									r.name = StartAnimationOperation
+									r.summary = "Start animation playback on device"
+									r.operationID = "startAnimation"
+									r.operationGroup = ""
+									r.pathPattern = "/animation/start"
+									r.args = args
+									r.count = 0
+									return r, true
+								default:
+									return
+								}
+							}
+
+						case 'o': // Prefix: "op"
+
+							if l := len("op"); len(elem) >= l && elem[0:l] == "op" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch method {
+								case "POST":
+									r.name = StopAnimationOperation
+									r.summary = "Stop animation playback on device"
+									r.operationID = "stopAnimation"
+									r.operationGroup = ""
+									r.pathPattern = "/animation/stop"
+									r.args = args
+									r.count = 0
+									return r, true
+								default:
+									return
+								}
+							}
+
+						}
+
 					}
 
+					elem = origElem
+				}
+				// Param: "id"
+				// Leaf parameter, slashes are prohibited
+				idx := strings.IndexByte(elem, '/')
+				if idx >= 0 {
+					break
+				}
+				args[0] = elem
+				elem = ""
+
+				if len(elem) == 0 {
+					// Leaf node.
+					switch method {
+					case "DELETE":
+						r.name = DeleteAnimationOperation
+						r.summary = "Delete a saved animation"
+						r.operationID = "deleteAnimation"
+						r.operationGroup = ""
+						r.pathPattern = "/animation/{id}"
+						r.args = args
+						r.count = 1
+						return r, true
+					case "GET":
+						r.name = GetAnimationOperation
+						r.summary = "Get a specific saved animation"
+						r.operationID = "getAnimation"
+						r.operationGroup = ""
+						r.pathPattern = "/animation/{id}"
+						r.args = args
+						r.count = 1
+						return r, true
+					case "PUT":
+						r.name = UpdateAnimationOperation
+						r.summary = "Update an existing saved animation"
+						r.operationID = "updateAnimation"
+						r.operationGroup = ""
+						r.pathPattern = "/animation/{id}"
+						r.args = args
+						r.count = 1
+						return r, true
+					default:
+						return
+					}
 				}
 
 			case 'p': // Prefix: "pi/devices"
