@@ -125,4 +125,3 @@ export function buildAnimationPayload(size: MatrixSize, frames: Frame[]): Animat
 		frames: frames.map((f) => f.pixels.slice())
 	};
 }
-

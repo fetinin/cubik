@@ -159,22 +159,42 @@
 				<section class="rounded border border-gray-200 p-4">
 					<div class="flex items-center justify-between gap-4">
 						<div class="text-sm text-gray-600">Matrix: {size.width}×{size.height}</div>
-						<button
-							type="button"
-							class="rounded border border-gray-300 px-3 py-1.5 text-xs font-medium"
-							onclick={() => pixels.set(initPixelsForSize(size, 0x000000))}
-						>
-							Clear
-						</button>
+						<div class="flex items-center gap-2">
+							<button
+								type="button"
+								class="rounded bg-gray-900 px-3 py-1.5 text-xs font-medium text-white"
+								onclick={saveNewFrame}
+								data-testid="save-frame"
+							>
+								Save frame
+							</button>
+							<button
+								type="button"
+								class="rounded border border-gray-300 px-3 py-1.5 text-xs font-medium disabled:opacity-50"
+								onclick={() => replaceSelectedFramePixels(editor)}
+								disabled={$selectedFrameId === null}
+							>
+								Replace selected
+							</button>
+							<button
+								type="button"
+								class="rounded border border-gray-300 px-3 py-1.5 text-xs font-medium"
+								onclick={() => pixels.set(initPixelsForSize(size, 0x000000))}
+							>
+								Clear
+							</button>
+						</div>
 					</div>
 
-					<MatrixGrid
-						width={size.width}
-						height={size.height}
-						pixels={$pixels}
-						{paintColor}
-						{onPaint}
-					/>
+					<div class="mt-4">
+						<MatrixGrid
+							width={size.width}
+							height={size.height}
+							pixels={$pixels}
+							{paintColor}
+							{onPaint}
+						/>
+					</div>
 				</section>
 
 				<section class="rounded border border-gray-200 p-4">
@@ -204,8 +224,6 @@
 						frames={$frames}
 						selectedFrameId={$selectedFrameId}
 						onSelectFrame={selectFrame}
-						onSaveNewFrame={saveNewFrame}
-						onReplaceSelected={() => replaceSelectedFramePixels(editor)}
 						onDeleteFrame={deleteFrame}
 						onMoveFrame={moveFrame}
 					/>

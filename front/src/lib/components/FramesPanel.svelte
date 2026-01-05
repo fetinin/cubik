@@ -5,47 +5,15 @@
 		frames: Frame[];
 		selectedFrameId: string | null;
 		onSelectFrame: (frameId: string) => void;
-		onSaveNewFrame: () => void;
-		onReplaceSelected: () => void;
 		onDeleteFrame: (frameId: string) => void;
 		onMoveFrame: (frameId: string, dir: -1 | 1) => void;
 	};
 
-	let {
-		frames,
-		selectedFrameId,
-		onSelectFrame,
-		onSaveNewFrame,
-		onReplaceSelected,
-		onDeleteFrame,
-		onMoveFrame
-	}: Props = $props();
-
-	const canReplace = () => selectedFrameId !== null;
+	let { frames, selectedFrameId, onSelectFrame, onDeleteFrame, onMoveFrame }: Props = $props();
 </script>
 
 <div class="flex flex-col gap-3">
-	<div class="flex items-center justify-between gap-3">
-		<div class="text-sm font-medium">Frames</div>
-		<div class="flex items-center gap-2">
-			<button
-				type="button"
-				class="rounded bg-gray-900 px-3 py-1.5 text-xs font-medium text-white"
-				onclick={onSaveNewFrame}
-				data-testid="save-frame"
-			>
-				Save frame
-			</button>
-			<button
-				type="button"
-				class="rounded border border-gray-300 px-3 py-1.5 text-xs font-medium disabled:opacity-50"
-				onclick={onReplaceSelected}
-				disabled={!canReplace()}
-			>
-				Replace selected
-			</button>
-		</div>
-	</div>
+	<div class="text-sm font-medium">Frames</div>
 
 	{#if frames.length === 0}
 		<div class="text-sm text-gray-500">No frames yet. Draw something and click “Save frame”.</div>

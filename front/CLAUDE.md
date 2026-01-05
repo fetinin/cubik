@@ -83,11 +83,13 @@ Tests require assertions (`expect.requireAssertions: true`).
 The project uses automatic TypeScript client generation from the OpenAPI specification:
 
 **Generate the client:**
+
 ```bash
 bun run generate-api
 ```
 
 This runs `openapitools/openapi-generator-cli` via Docker to generate:
+
 - TypeScript types and models in `src/api/generated/models/`
 - API client in `src/api/generated/apis/DefaultApi.ts`
 - Runtime utilities in `src/api/generated/runtime.ts`
@@ -95,13 +97,16 @@ This runs `openapitools/openapi-generator-cli` via Docker to generate:
 **IMPORTANT:** Run this command whenever the backend's `spec.yml` changes to keep types in sync.
 
 **Using the generated client:**
+
 ```typescript
 import { DefaultApi, Configuration } from '$lib/api/generated';
 
 // Create API client
-const api = new DefaultApi(new Configuration({
-  basePath: 'http://localhost:8080'
-}));
+const api = new DefaultApi(
+	new Configuration({
+		basePath: 'http://localhost:8080'
+	})
+);
 
 // Get devices
 const response = await api.getDevices();
@@ -109,12 +114,15 @@ console.log(response.devices); // Device[]
 
 // Start animation
 await api.startAnimation({
-  startAnimationRequest: {
-    device_location: 'yeelight://192.168.1.100:55443',
-    frames: [
-      [{ r: 255, g: 0, b: 0 }, { r: 0, g: 255, b: 0 }]
-    ]
-  }
+	startAnimationRequest: {
+		device_location: 'yeelight://192.168.1.100:55443',
+		frames: [
+			[
+				{ r: 255, g: 0, b: 0 },
+				{ r: 0, g: 255, b: 0 }
+			]
+		]
+	}
 });
 ```
 
