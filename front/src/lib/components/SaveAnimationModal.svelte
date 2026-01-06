@@ -10,6 +10,20 @@
 	let name = $state('');
 	const showOverwriteOption = $derived(currentAnimationName !== null);
 
+	// Pre-fill name when editing existing animation
+	$effect(() => {
+		if (open && currentAnimationName && !name) {
+			name = currentAnimationName;
+		}
+	});
+
+	// Reset name when modal closes
+	$effect(() => {
+		if (!open) {
+			name = '';
+		}
+	});
+
 	function handleSave(overwrite: boolean) {
 		if (!name.trim()) return;
 		onsave({ name: name.trim(), overwrite });

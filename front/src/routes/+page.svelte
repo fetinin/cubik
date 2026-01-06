@@ -86,6 +86,13 @@
 	async function handleSaveAnimation(detail: { name: string; overwrite: boolean }) {
 		const { name, overwrite } = detail;
 		const device = get(selectedDevice);
+
+		// Save current pixel buffer to selected frame before saving animation
+		// This ensures any unsaved edits are included in the update
+		if (get(selectedFrameId)) {
+			replaceSelectedFramePixels(editor);
+		}
+
 		const framesList = get(frames);
 
 		if (!device) return;
