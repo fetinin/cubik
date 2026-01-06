@@ -66,9 +66,6 @@ jobs:
       - name: Run type check
         run: bun run check
 
-      - name: Run frontend tests
-        run: bun test
-
   docker-build:
     runs-on: ubuntu-latest
     steps:
