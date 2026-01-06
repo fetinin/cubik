@@ -43,27 +43,28 @@ export async function getMatrixSize(_deviceId: string): Promise<MatrixSize> {
 	return { width: 20, height: 5 };
 }
 
-export async function applyAnimation(deviceId: string, payload: AnimationPayload): Promise<void> {
+export async function applyAnimation(
+	deviceLocation: string,
+	payload: AnimationPayload
+): Promise<void> {
 	const toPixel = (packed: number): RGBPixel => ({
 		r: (packed >> 16) & 0xff,
 		g: (packed >> 8) & 0xff,
 		b: packed & 0xff
 	});
 
-	// NOTE: The backend expects device_location (yeelight://IP:PORT). We pass deviceId as the location here.
 	await api.startAnimation({
 		startAnimationRequest: {
-			deviceLocation: deviceId,
+			deviceLocation,
 			frames: payload.frames.map((frame) => frame.map(toPixel))
 		}
 	});
 }
 
-export async function stopAnimation(deviceId: string): Promise<void> {
-	// NOTE: The backend expects device_location (yeelight://IP:PORT). We pass deviceId as the location here.
+export async function stopAnimation(deviceLocation: string): Promise<void> {
 	await api.stopAnimation({
 		stopAnimationRequest: {
-			deviceLocation: deviceId
+			deviceLocation
 		}
 	});
 }
