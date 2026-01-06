@@ -117,6 +117,7 @@ func StartDeviceAnimation(deviceLocation string, frames [][]Color) error {
 		defer func() {
 			animationsMu.Lock()
 			delete(runningAnimations, deviceLocation)
+			cancelFunc()
 			animationsMu.Unlock()
 		}()
 
@@ -136,12 +137,8 @@ func StopDeviceAnimation(deviceLocation string) {
 	animationsMu.Lock()
 	state, exists := runningAnimations[deviceLocation]
 	if exists {
+		state.CancelFunc()
 		delete(runningAnimations, deviceLocation)
 	}
 	animationsMu.Unlock()
-
-	// Cancel context if animation was running
-	if exists {
-		state.CancelFunc()
-	}
 }
