@@ -12,6 +12,9 @@ RUN bun install --frozen-lockfile
 # Copy frontend source code
 COPY front/ ./
 
+# Generate SvelteKit files
+RUN bun run prepare
+
 # Build the frontend SPA
 RUN bun run build
 
