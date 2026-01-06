@@ -40,7 +40,7 @@ import { DefaultApi, Configuration } from '$lib/api/generated';
 
 // Create API client instance
 const api = new DefaultApi(new Configuration({
-  basePath: 'http://localhost:8080'
+  basePath: 'http://localhost:9080'
 }));
 
 // Get all devices
@@ -133,7 +133,7 @@ const devices = await getDevices();
 import { DefaultApi, Configuration } from '$lib/api/generated';
 
 const api = new DefaultApi(new Configuration({
-  basePath: 'http://localhost:8080'
+  basePath: 'http://localhost:9080'
 }));
 
 const response = await api.getDevices();

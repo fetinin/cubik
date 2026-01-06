@@ -1,0 +1,32 @@
+# Exclude everything by default
+*
+
+# Backend - Go source and config
+!go.mod
+!go.sum
+!*.go
+!spec.yml
+!generate.go
+!api/
+
+# Backend - Migrations
+!migrations/
+!migrations/*.sql
+
+# Frontend - Package files
+!front/
+!front/package.json
+!front/bun.lock
+
+# Frontend - Config files
+!front/svelte.config.js
+!front/vite.config.ts
+!front/tsconfig.json
+!front/eslint.config.js
+!front/.prettierrc
+!front/.prettierignore
+!front/.npmrc
+
+# Frontend - Source code
+!front/src/**
+!front/static/**

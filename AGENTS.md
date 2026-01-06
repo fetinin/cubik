@@ -23,7 +23,7 @@ The project uses an **API spec-first development approach** with OpenAPI 3.1 and
 
 The API is defined in `spec.yml` (OpenAPI 3.1 format):
 - **Endpoint**: `GET /api/devices`
-- **Server**: `http://localhost:8080`
+- **Server**: `http://localhost:9080`
 - **Response**: JSON array of devices with `id` and `name` fields
 - **Error handling**: 500 responses with error messages
 
@@ -65,7 +65,7 @@ If validation fails, ogen returns a 400 Bad Request with error details **before*
 - `spec.yml` - OpenAPI 3.1 specification (source of truth)
 - `generate.go` - go:generate directive for code generation
 - `handler.go` - Implements `api.Handler` interface, calls `DiscoverDevices()`
-- `server.go` - HTTP server setup with CORS middleware on port 8080
+- `server.go` - HTTP server setup with CORS middleware on port 9080
 
 **Auto-generated (gitignored):**
 - `api/*.go` - Generated server code (~17 files)
@@ -83,10 +83,10 @@ The application supports two modes via command-line flag:
 
 **Server Mode:**
 ```bash
-./cubik --server
+./cubik
 ```
-- Starts HTTP API server on port 8080
-- Endpoint: `GET http://localhost:8080/api/devices`
+- Starts HTTP API server on port 9080
+- Endpoint: `GET http://localhost:9080/api/devices`
 - CORS enabled for frontend integration
 - Live device discovery on each API request (3-second timeout)
 
@@ -114,8 +114,8 @@ vim handler.go
 
 # Build and test
 go build
-./cubik --server
-curl http://localhost:8080/api/devices
+./cubik
+curl http://localhost:9080/api/devices
 ```
 
 ### Frontend API Client Generation
@@ -135,7 +135,7 @@ This generates TypeScript types and API client code in `front/src/api/generated/
 import { DefaultApi, Configuration } from '$lib/api/generated';
 
 const api = new DefaultApi(new Configuration({
-  basePath: 'http://localhost:8080'
+  basePath: 'http://localhost:9080'
 }));
 
 // Get devices
@@ -183,7 +183,7 @@ The generated code is gitignored and should be regenerated after any changes to 
    - `DrawDigit`, `DrawNumber`, `DrawString`: Rendering functions for the matrix.
 
 5. **HTTP API Server (server.go, handler.go)**
-   - `StartServer()`: Initializes HTTP server on port 8080 with CORS middleware
+   - `StartServer()`: Initializes HTTP server on port 9080 with CORS middleware
    - `APIHandler`: Implements ogen-generated `api.Handler` interface
    - `GetDevices()`: REST endpoint that calls `DiscoverDevices()` and transforms results to JSON
    - CORS middleware allows frontend access from any origin (development mode)

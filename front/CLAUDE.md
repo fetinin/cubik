@@ -104,7 +104,7 @@ import { DefaultApi, Configuration } from '$lib/api/generated';
 // Create API client
 const api = new DefaultApi(
 	new Configuration({
-		basePath: 'http://localhost:8080'
+		basePath: 'http://localhost:9080'
 	})
 );
 
