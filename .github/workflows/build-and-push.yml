@@ -13,6 +13,19 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1'
+
+      - name: Install frontend dependencies
+        working-directory: front
+        run: bun install --frozen-lockfile
+
+      - name: Build frontend
+        working-directory: front
+        run: bun run build
+
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
