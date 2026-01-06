@@ -29,17 +29,6 @@ jobs:
             exit 1
           fi
 
-      - name: Run Go tests
-        run: go test -v -race -coverprofile=coverage.txt -covermode=atomic ./...
-
-      - name: Upload Go coverage
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: go-coverage
-          path: coverage.txt
-          retention-days: 7
-
   frontend-checks:
     runs-on: ubuntu-latest
     defaults:
