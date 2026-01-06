@@ -11,20 +11,55 @@ A web application for discovering and controlling Yeelight CubeLite (Matrix) LED
 
 ## Quick Start with Docker
 
-The fastest way to get started is using Docker:
+### Using Pre-built GitHub Image
+
+The fastest way to get started is using the pre-built image from GitHub Container Registry:
+
+```bash
+# Run the container (ephemeral - data lost on restart)
+docker run --network host ghcr.io/fetinin/cubik:latest
+
+# Access the application
+open http://localhost:9080
+```
+
+**Running with Persistent Database Storage:**
+
+To preserve your animations and settings across container restarts:
+
+```bash
+# Create a directory for persistent data
+mkdir -p data
+
+# Run with persistent storage
+docker run --network host \
+  -v $(pwd)/data:/data \
+  -e SERVER_DB_PATH=/data/cubik.db \
+  ghcr.io/fetinin/cubik:latest
+```
+
+**What this does:**
+- `--network host` enables device discovery by using the host's network stack (required for SSDP multicast)
+- `-v $(pwd)/data:/data` mounts your local `data/` directory into the container
+- `-e SERVER_DB_PATH=/data/cubik.db` tells the app to store the database in the mounted volume
+- Your animations and settings will persist in `data/cubik.db` even when the container is stopped or removed
+
+### Building Locally
+
+If you prefer to build the image yourself:
 
 ```bash
 # Build the image
 docker build -t cubik:latest .
 
 # Run the container (ephemeral - data lost on restart)
-docker run -p 9080:9080 cubik:latest
+docker run --network host cubik:latest
 
 # Access the application
 open http://localhost:9080
 ```
 
-### Running with Persistent Database Storage
+### Running with Persistent Database Storage (Local Build)
 
 To preserve your animations and settings across container restarts, mount a volume for the database:
 
@@ -33,13 +68,14 @@ To preserve your animations and settings across container restarts, mount a volu
 mkdir -p data
 
 # Run with persistent storage
-docker run -p 9080:9080 \
+docker run --network host \
   -v $(pwd)/data:/data \
   -e SERVER_DB_PATH=/data/cubik.db \
   cubik:latest
 ```
 
 **What this does:**
+- `--network host` enables device discovery by using the host's network stack (required for SSDP multicast)
 - `-v $(pwd)/data:/data` mounts your local `data/` directory into the container
 - `-e SERVER_DB_PATH=/data/cubik.db` tells the app to store the database in the mounted volume
 - Your animations and settings will persist in `data/cubik.db` even when the container is stopped or removed
@@ -163,10 +199,10 @@ SERVER_PORT=3000 SERVER_DB_PATH=/data/cubik.db ./cubik
 
 ```bash
 # Run with environment variables
-docker run -p 3000:3000 -e SERVER_PORT=3000 cubik:latest
+docker run --network host -e SERVER_PORT=3000 cubik:latest
 
 # Run with volume-mounted database
-docker run -p 9080:9080 -v $(pwd)/data:/data -e SERVER_DB_PATH=/data/cubik.db cubik:latest
+docker run --network host -v $(pwd)/data:/data -e SERVER_DB_PATH=/data/cubik.db cubik:latest
 ```
 
 ## Yeelight Protocol Details
@@ -190,10 +226,14 @@ For detailed protocol documentation, see [protocol guide](docs/yeelight-protocol
 
 ### Docker Networking Issues
 
-When running in Docker, device discovery requires host network access:
+When running in Docker, device discovery requires host network access. All Docker commands must use `--network host` instead of port mapping (`-p`) for SSDP multicast to work:
 
 ```bash
+# Correct - uses host network
 docker run --network host cubik:latest
+
+# Incorrect - port mapping won't discover devices
+docker run -p 9080:9080 cubik:latest
 ```
 
 ## Development Notes
