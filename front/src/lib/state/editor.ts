@@ -1,5 +1,5 @@
 import { derived, get, writable, type Readable, type Writable } from 'svelte/store';
-import type { AnimationPayload, Device, MatrixSize } from '$lib/api/mock';
+import type { AnimationPayload, Device, MatrixSize } from '$lib/api/client';
 
 export type PackedRGB = number; // 0xRRGGBB
 

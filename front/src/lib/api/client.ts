@@ -18,10 +18,11 @@ export type AnimationPayload = {
 
 import { DefaultApi, Configuration } from '$lib/api/generated';
 import type { RGBPixel } from '$lib/api/generated';
+import { env } from '$env/dynamic/public';
 
 const api = new DefaultApi(
 	new Configuration({
-		basePath: 'http://localhost:9080'
+		basePath: env.PUBLIC_API_BASE_PATH || ''
 	})
 );
 
