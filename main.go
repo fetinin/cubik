@@ -12,8 +12,13 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 
+	cfg, err := LoadConfig()
+	if err != nil {
+		log.Fatalf("Failed to load configuration: %v", err)
+	}
+
 	// Initialize database
-	db, err := InitDB(ctx)
+	db, err := InitDB(ctx, cfg.ServerDBPath)
 	if err != nil {
 		log.Fatalf("Failed to initialize database: %v", err)
 	}
@@ -29,10 +34,9 @@ func main() {
 	}
 	log.Println("Database migrations completed successfully")
 
-	// Start server with DB dependency
 	wg := sync.WaitGroup{}
 	wg.Go(func() {
-		if err := StartServer(ctx, db); err != nil {
+		if err := StartServer(ctx, db, cfg.ServerPort); err != nil {
 			log.Fatalf("Server error: %v", err)
 		}
 	})

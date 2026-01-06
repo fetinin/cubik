@@ -11,11 +11,12 @@ import (
 
 // InitDB initializes SQLite database connection with proper configuration
 // Returns *sql.DB instance and error
-func InitDB(ctx context.Context) (*sql.DB, error) {
+func InitDB(ctx context.Context, dbPath string) (*sql.DB, error) {
 	// Open database with URI and query parameters
 	// cache=shared: allows multiple connections to share cache
 	// mode=rwc: read-write-create mode
-	db, err := sql.Open("sqlite", "file:cubik.db?cache=shared&mode=rwc")
+	dbURI := fmt.Sprintf("file:%s?cache=shared&mode=rwc", dbPath)
+	db, err := sql.Open("sqlite", dbURI)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open database: %w", err)
 	}

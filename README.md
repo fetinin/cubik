@@ -18,10 +18,10 @@ The fastest way to get started is using Docker:
 docker build -t cubik:latest .
 
 # Run the container
-docker run -p 8080:8080 cubik:latest
+docker run -p 9080:9080 cubik:latest
 
 # Access the application
-open http://localhost:8080
+open http://localhost:9080
 ```
 ## Prerequisites
 
@@ -54,7 +54,7 @@ go build
 ./cubik 
 ```
 
-The server will start on `http://localhost:8080`
+The server will start on `http://localhost:9080`
 
 ### Frontend
 
@@ -118,9 +118,35 @@ The API code is automatically generated and should never be edited manually.
 
 ### Environment Variables
 
-Currently, the application uses hardcoded defaults. Future versions may support:
-- `PORT`: HTTP server port (default: 8080)
-- `DB_PATH`: SQLite database location
+The application supports the following environment variables for configuration:
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `SERVER_PORT` | HTTP server port | `9080` |
+| `SERVER_DB_PATH` | SQLite database file path | `cubik.db` |
+
+**Example usage:**
+
+```bash
+# Run with custom port
+SERVER_PORT=3000 ./cubik
+
+# Run with custom database path
+SERVER_DB_PATH=/data/cubik.db ./cubik
+
+# Run with both
+SERVER_PORT=3000 SERVER_DB_PATH=/data/cubik.db ./cubik
+```
+
+**Docker usage:**
+
+```bash
+# Run with environment variables
+docker run -p 3000:3000 -e SERVER_PORT=3000 cubik:latest
+
+# Run with volume-mounted database
+docker run -p 9080:9080 -v $(pwd)/data:/data -e SERVER_DB_PATH=/data/cubik.db cubik:latest
+```
 
 ## Yeelight Protocol Details
 

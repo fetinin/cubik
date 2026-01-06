@@ -35,8 +35,8 @@ func corsMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-// StartServer initializes and runs the HTTP API server on port 9080
-func StartServer(ctx context.Context, db *sql.DB) error {
+// StartServer initializes and runs the HTTP API server
+func StartServer(ctx context.Context, db *sql.DB, port string) error {
 	// Create handler implementation with DB dependency
 	handler := &APIHandler{
 		db: db,
@@ -91,11 +91,11 @@ func StartServer(ctx context.Context, db *sql.DB) error {
 
 	// Configure HTTP server
 	httpServer := &http.Server{
-		Addr:    ":9080",
+		Addr:    ":" + port,
 		Handler: mux,
 	}
 
-	log.Printf("Starting Cubik server on http://localhost:9080")
+	log.Printf("Starting Cubik server on http://localhost:%s", port)
 	log.Printf("Serving frontend SPA and API endpoints")
 	log.Printf("Note: For device discovery to work, ensure 'LAN Control' is enabled in the Yeelight app")
 
