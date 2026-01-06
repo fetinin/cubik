@@ -7,7 +7,6 @@ require (
 	github.com/go-faster/jx v1.2.0
 	github.com/golang-migrate/migrate/v4 v4.19.1
 	github.com/google/uuid v1.6.0
-	github.com/mattn/go-sqlite3 v1.14.33
 	github.com/ogen-go/ogen v1.18.0
 	go.opentelemetry.io/otel v1.39.0
 	go.opentelemetry.io/otel/metric v1.39.0
