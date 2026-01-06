@@ -2,6 +2,8 @@
 
 A web application for discovering and controlling Yeelight CubeLite (Matrix) LED devices over your local network. Create custom animations, draw patterns, and control your CubeLite's 20×5 LED matrix display through an intuitive web interface.
 
+![Demo](Demo.gif)
+
 ## Features
 
 - **Device Discovery**: Automatic SSDP discovery of Yeelight CubeLite devices on your local network
