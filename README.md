@@ -17,12 +17,33 @@ The fastest way to get started is using Docker:
 # Build the image
 docker build -t cubik:latest .
 
-# Run the container
+# Run the container (ephemeral - data lost on restart)
 docker run -p 9080:9080 cubik:latest
 
 # Access the application
 open http://localhost:9080
 ```
+
+### Running with Persistent Database Storage
+
+To preserve your animations and settings across container restarts, mount a volume for the database:
+
+```bash
+# Create a directory for persistent data
+mkdir -p data
+
+# Run with persistent storage
+docker run -p 9080:9080 \
+  -v $(pwd)/data:/data \
+  -e SERVER_DB_PATH=/data/cubik.db \
+  cubik:latest
+```
+
+**What this does:**
+- `-v $(pwd)/data:/data` mounts your local `data/` directory into the container
+- `-e SERVER_DB_PATH=/data/cubik.db` tells the app to store the database in the mounted volume
+- Your animations and settings will persist in `data/cubik.db` even when the container is stopped or removed
+
 ## Prerequisites
 
 ### For Local Development
