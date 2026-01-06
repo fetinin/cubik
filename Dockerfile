@@ -1,6 +1,8 @@
 # Stage 1: Build Frontend
 FROM oven/bun:1 AS frontend-builder
 
+ENV PUBLIC_API_BASE_PATH=""
+
 WORKDIR /app/front
 
 # Copy frontend package files

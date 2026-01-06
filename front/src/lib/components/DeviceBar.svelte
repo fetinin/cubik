@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Device } from '$lib/api/mock';
+	import type { Device } from '$lib/api/client';
 
 	type Props = {
 		devices: Device[];

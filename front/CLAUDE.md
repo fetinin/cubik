@@ -126,7 +126,7 @@ await api.startAnimation({
 });
 ```
 
-The generated code lives in `src/api/generated/` and is gitignored. The mock API in `src/lib/api/mock.ts` can be replaced with calls to the generated client.
+The generated code lives in `src/api/generated/` and is gitignored. The mock API in `src/lib/api/client.ts` can be replaced with calls to the generated client.
 
 ## Code Architecture
 
@@ -150,7 +150,7 @@ The application follows a single-page app pattern with centralized state managem
    - `PackedRGB`: Colors stored as `0xRRGGBB` integers for efficiency
    - Frame management with unique IDs generated via timestamp + random
 
-2. **API Layer (`src/lib/api/mock.ts`)**
+2. **API Layer (`src/lib/api/client.ts`)**
    - Currently mocked - will be replaced with real HTTP calls to Go backend
    - `getDevices()`: Fetch available Yeelight devices
    - `getMatrixSize()`: Get matrix dimensions (currently hardcoded to 20×5)
@@ -184,7 +184,7 @@ The application follows a single-page app pattern with centralized state managem
 - **Pixel Layout**: Row-major order (index = y × width + x)
 - **Frame Rate**: Fixed at 1 FPS due to Yeelight device limitation (60 RPS max)
 - **State Immutability**: All pixel/frame updates create new arrays to trigger Svelte reactivity
-- **Backend Integration**: API layer is currently mocked; replace `src/lib/api/mock.ts` functions with real HTTP calls to Go backend
+- **Backend Integration**: API layer is currently mocked; replace `src/lib/api/client.ts` functions with real HTTP calls to Go backend
 
 ## Related Projects
 

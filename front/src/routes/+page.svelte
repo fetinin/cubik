@@ -11,7 +11,7 @@
 		loadAnimation,
 		deleteAnimation,
 		listAnimations
-	} from '$lib/api/mock';
+	} from '$lib/api/client';
 	import DeviceBar from '$lib/components/DeviceBar.svelte';
 	import AnimationPreview from '$lib/components/AnimationPreview.svelte';
 	import ColorPickerRGB from '$lib/components/ColorPickerRGB.svelte';
