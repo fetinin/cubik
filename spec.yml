@@ -6,6 +6,7 @@ info:
 servers:
   - url: http://localhost:8080
     description: Local development server
+
 paths:
   /api/devices:
     get:
@@ -32,7 +33,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-  /animation/start:
+  /api/animation/start:
     post:
       operationId: startAnimation
       summary: Start animation playback on device
@@ -71,7 +72,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-  /animation/stop:
+  /api/animation/stop:
     post:
       operationId: stopAnimation
       summary: Stop animation playback on device
@@ -107,7 +108,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
-  /animation/save:
+  /api/animation/save:
     post:
       operationId: saveAnimation
       summary: Save animation to database
@@ -151,7 +152,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
-  /animation/list/{device_id}:
+  /api/animation/list/{device_id}:
     get:
       operationId: listAnimations
       summary: List saved animations for a device
@@ -178,7 +179,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
-  /animation/{id}:
+  /api/animation/{id}:
     get:
       operationId: getAnimation
       summary: Get a specific saved animation

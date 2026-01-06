@@ -31,13 +31,13 @@ type Invoker interface {
 	//
 	// Permanently removes a saved animation from the database.
 	//
-	// DELETE /animation/{id}
+	// DELETE /api/animation/{id}
 	DeleteAnimation(ctx context.Context, params DeleteAnimationParams) (DeleteAnimationRes, error)
 	// GetAnimation invokes getAnimation operation.
 	//
 	// Retrieves a saved animation by its ID.
 	//
-	// GET /animation/{id}
+	// GET /api/animation/{id}
 	GetAnimation(ctx context.Context, params GetAnimationParams) (GetAnimationRes, error)
 	// GetDevices invokes getDevices operation.
 	//
@@ -49,32 +49,32 @@ type Invoker interface {
 	//
 	// Returns all saved animations for the specified device, ordered by most recently updated.
 	//
-	// GET /animation/list/{device_id}
+	// GET /api/animation/list/{device_id}
 	ListAnimations(ctx context.Context, params ListAnimationsParams) (ListAnimationsRes, error)
 	// SaveAnimation invokes saveAnimation operation.
 	//
 	// Saves the current animation frames to the database with a name. Stored per device.
 	//
-	// POST /animation/save
+	// POST /api/animation/save
 	SaveAnimation(ctx context.Context, request *SaveAnimationRequest) (SaveAnimationRes, error)
 	// StartAnimation invokes startAnimation operation.
 	//
 	// Starts playing an animation loop on the specified device. Only one animation can run per device at
 	// a time.
 	//
-	// POST /animation/start
+	// POST /api/animation/start
 	StartAnimation(ctx context.Context, request *StartAnimationRequest) (StartAnimationRes, error)
 	// StopAnimation invokes stopAnimation operation.
 	//
 	// Stops the currently running animation on the specified device. No-op if no animation is running.
 	//
-	// POST /animation/stop
+	// POST /api/animation/stop
 	StopAnimation(ctx context.Context, request *StopAnimationRequest) (StopAnimationRes, error)
 	// UpdateAnimation invokes updateAnimation operation.
 	//
 	// Overwrites an existing animation's name and frames.
 	//
-	// PUT /animation/{id}
+	// PUT /api/animation/{id}
 	UpdateAnimation(ctx context.Context, request *UpdateAnimationRequest, params UpdateAnimationParams) (UpdateAnimationRes, error)
 }
 
@@ -125,7 +125,7 @@ func (c *Client) requestURL(ctx context.Context) *url.URL {
 //
 // Permanently removes a saved animation from the database.
 //
-// DELETE /animation/{id}
+// DELETE /api/animation/{id}
 func (c *Client) DeleteAnimation(ctx context.Context, params DeleteAnimationParams) (DeleteAnimationRes, error) {
 	res, err := c.sendDeleteAnimation(ctx, params)
 	return res, err
@@ -135,7 +135,7 @@ func (c *Client) sendDeleteAnimation(ctx context.Context, params DeleteAnimation
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("deleteAnimation"),
 		semconv.HTTPRequestMethodKey.String("DELETE"),
-		semconv.URLTemplateKey.String("/animation/{id}"),
+		semconv.URLTemplateKey.String("/api/animation/{id}"),
 	}
 	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
@@ -169,7 +169,7 @@ func (c *Client) sendDeleteAnimation(ctx context.Context, params DeleteAnimation
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [2]string
-	pathParts[0] = "/animation/"
+	pathParts[0] = "/api/animation/"
 	{
 		// Encode "id" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
@@ -216,7 +216,7 @@ func (c *Client) sendDeleteAnimation(ctx context.Context, params DeleteAnimation
 //
 // Retrieves a saved animation by its ID.
 //
-// GET /animation/{id}
+// GET /api/animation/{id}
 func (c *Client) GetAnimation(ctx context.Context, params GetAnimationParams) (GetAnimationRes, error) {
 	res, err := c.sendGetAnimation(ctx, params)
 	return res, err
@@ -226,7 +226,7 @@ func (c *Client) sendGetAnimation(ctx context.Context, params GetAnimationParams
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getAnimation"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.URLTemplateKey.String("/animation/{id}"),
+		semconv.URLTemplateKey.String("/api/animation/{id}"),
 	}
 	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
@@ -260,7 +260,7 @@ func (c *Client) sendGetAnimation(ctx context.Context, params GetAnimationParams
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [2]string
-	pathParts[0] = "/animation/"
+	pathParts[0] = "/api/animation/"
 	{
 		// Encode "id" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
@@ -380,7 +380,7 @@ func (c *Client) sendGetDevices(ctx context.Context) (res GetDevicesRes, err err
 //
 // Returns all saved animations for the specified device, ordered by most recently updated.
 //
-// GET /animation/list/{device_id}
+// GET /api/animation/list/{device_id}
 func (c *Client) ListAnimations(ctx context.Context, params ListAnimationsParams) (ListAnimationsRes, error) {
 	res, err := c.sendListAnimations(ctx, params)
 	return res, err
@@ -390,7 +390,7 @@ func (c *Client) sendListAnimations(ctx context.Context, params ListAnimationsPa
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("listAnimations"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.URLTemplateKey.String("/animation/list/{device_id}"),
+		semconv.URLTemplateKey.String("/api/animation/list/{device_id}"),
 	}
 	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
@@ -424,7 +424,7 @@ func (c *Client) sendListAnimations(ctx context.Context, params ListAnimationsPa
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [2]string
-	pathParts[0] = "/animation/list/"
+	pathParts[0] = "/api/animation/list/"
 	{
 		// Encode "device_id" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
@@ -471,7 +471,7 @@ func (c *Client) sendListAnimations(ctx context.Context, params ListAnimationsPa
 //
 // Saves the current animation frames to the database with a name. Stored per device.
 //
-// POST /animation/save
+// POST /api/animation/save
 func (c *Client) SaveAnimation(ctx context.Context, request *SaveAnimationRequest) (SaveAnimationRes, error) {
 	res, err := c.sendSaveAnimation(ctx, request)
 	return res, err
@@ -481,7 +481,7 @@ func (c *Client) sendSaveAnimation(ctx context.Context, request *SaveAnimationRe
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("saveAnimation"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.URLTemplateKey.String("/animation/save"),
+		semconv.URLTemplateKey.String("/api/animation/save"),
 	}
 	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
@@ -515,7 +515,7 @@ func (c *Client) sendSaveAnimation(ctx context.Context, request *SaveAnimationRe
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
-	pathParts[0] = "/animation/save"
+	pathParts[0] = "/api/animation/save"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeRequest"
@@ -548,7 +548,7 @@ func (c *Client) sendSaveAnimation(ctx context.Context, request *SaveAnimationRe
 // Starts playing an animation loop on the specified device. Only one animation can run per device at
 // a time.
 //
-// POST /animation/start
+// POST /api/animation/start
 func (c *Client) StartAnimation(ctx context.Context, request *StartAnimationRequest) (StartAnimationRes, error) {
 	res, err := c.sendStartAnimation(ctx, request)
 	return res, err
@@ -558,7 +558,7 @@ func (c *Client) sendStartAnimation(ctx context.Context, request *StartAnimation
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("startAnimation"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.URLTemplateKey.String("/animation/start"),
+		semconv.URLTemplateKey.String("/api/animation/start"),
 	}
 	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
@@ -592,7 +592,7 @@ func (c *Client) sendStartAnimation(ctx context.Context, request *StartAnimation
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
-	pathParts[0] = "/animation/start"
+	pathParts[0] = "/api/animation/start"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeRequest"
@@ -624,7 +624,7 @@ func (c *Client) sendStartAnimation(ctx context.Context, request *StartAnimation
 //
 // Stops the currently running animation on the specified device. No-op if no animation is running.
 //
-// POST /animation/stop
+// POST /api/animation/stop
 func (c *Client) StopAnimation(ctx context.Context, request *StopAnimationRequest) (StopAnimationRes, error) {
 	res, err := c.sendStopAnimation(ctx, request)
 	return res, err
@@ -634,7 +634,7 @@ func (c *Client) sendStopAnimation(ctx context.Context, request *StopAnimationRe
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("stopAnimation"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.URLTemplateKey.String("/animation/stop"),
+		semconv.URLTemplateKey.String("/api/animation/stop"),
 	}
 	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
@@ -668,7 +668,7 @@ func (c *Client) sendStopAnimation(ctx context.Context, request *StopAnimationRe
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
-	pathParts[0] = "/animation/stop"
+	pathParts[0] = "/api/animation/stop"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeRequest"
@@ -700,7 +700,7 @@ func (c *Client) sendStopAnimation(ctx context.Context, request *StopAnimationRe
 //
 // Overwrites an existing animation's name and frames.
 //
-// PUT /animation/{id}
+// PUT /api/animation/{id}
 func (c *Client) UpdateAnimation(ctx context.Context, request *UpdateAnimationRequest, params UpdateAnimationParams) (UpdateAnimationRes, error) {
 	res, err := c.sendUpdateAnimation(ctx, request, params)
 	return res, err
@@ -710,7 +710,7 @@ func (c *Client) sendUpdateAnimation(ctx context.Context, request *UpdateAnimati
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("updateAnimation"),
 		semconv.HTTPRequestMethodKey.String("PUT"),
-		semconv.URLTemplateKey.String("/animation/{id}"),
+		semconv.URLTemplateKey.String("/api/animation/{id}"),
 	}
 	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
@@ -744,7 +744,7 @@ func (c *Client) sendUpdateAnimation(ctx context.Context, request *UpdateAnimati
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [2]string
-	pathParts[0] = "/animation/"
+	pathParts[0] = "/api/animation/"
 	{
 		// Encode "id" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{

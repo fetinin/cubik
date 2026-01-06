@@ -37,14 +37,14 @@ func (c *codeRecorder) Unwrap() http.ResponseWriter {
 //
 // Permanently removes a saved animation from the database.
 //
-// DELETE /animation/{id}
+// DELETE /api/animation/{id}
 func (s *Server) handleDeleteAnimationRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("deleteAnimation"),
 		semconv.HTTPRequestMethodKey.String("DELETE"),
-		semconv.HTTPRouteKey.String("/animation/{id}"),
+		semconv.HTTPRouteKey.String("/api/animation/{id}"),
 	}
 
 	// Start a span for this request.
@@ -178,14 +178,14 @@ func (s *Server) handleDeleteAnimationRequest(args [1]string, argsEscaped bool, 
 //
 // Retrieves a saved animation by its ID.
 //
-// GET /animation/{id}
+// GET /api/animation/{id}
 func (s *Server) handleGetAnimationRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getAnimation"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/animation/{id}"),
+		semconv.HTTPRouteKey.String("/api/animation/{id}"),
 	}
 
 	// Start a span for this request.
@@ -441,14 +441,14 @@ func (s *Server) handleGetDevicesRequest(args [0]string, argsEscaped bool, w htt
 //
 // Returns all saved animations for the specified device, ordered by most recently updated.
 //
-// GET /animation/list/{device_id}
+// GET /api/animation/list/{device_id}
 func (s *Server) handleListAnimationsRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("listAnimations"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/animation/list/{device_id}"),
+		semconv.HTTPRouteKey.String("/api/animation/list/{device_id}"),
 	}
 
 	// Start a span for this request.
@@ -582,14 +582,14 @@ func (s *Server) handleListAnimationsRequest(args [1]string, argsEscaped bool, w
 //
 // Saves the current animation frames to the database with a name. Stored per device.
 //
-// POST /animation/save
+// POST /api/animation/save
 func (s *Server) handleSaveAnimationRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("saveAnimation"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/animation/save"),
+		semconv.HTTPRouteKey.String("/api/animation/save"),
 	}
 
 	// Start a span for this request.
@@ -724,14 +724,14 @@ func (s *Server) handleSaveAnimationRequest(args [0]string, argsEscaped bool, w 
 // Starts playing an animation loop on the specified device. Only one animation can run per device at
 // a time.
 //
-// POST /animation/start
+// POST /api/animation/start
 func (s *Server) handleStartAnimationRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("startAnimation"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/animation/start"),
+		semconv.HTTPRouteKey.String("/api/animation/start"),
 	}
 
 	// Start a span for this request.
@@ -865,14 +865,14 @@ func (s *Server) handleStartAnimationRequest(args [0]string, argsEscaped bool, w
 //
 // Stops the currently running animation on the specified device. No-op if no animation is running.
 //
-// POST /animation/stop
+// POST /api/animation/stop
 func (s *Server) handleStopAnimationRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("stopAnimation"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/animation/stop"),
+		semconv.HTTPRouteKey.String("/api/animation/stop"),
 	}
 
 	// Start a span for this request.
@@ -1006,14 +1006,14 @@ func (s *Server) handleStopAnimationRequest(args [0]string, argsEscaped bool, w 
 //
 // Overwrites an existing animation's name and frames.
 //
-// PUT /animation/{id}
+// PUT /api/animation/{id}
 func (s *Server) handleUpdateAnimationRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("updateAnimation"),
 		semconv.HTTPRequestMethodKey.String("PUT"),
-		semconv.HTTPRouteKey.String("/animation/{id}"),
+		semconv.HTTPRouteKey.String("/api/animation/{id}"),
 	}
 
 	// Start a span for this request.

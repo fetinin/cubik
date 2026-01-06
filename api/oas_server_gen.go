@@ -12,13 +12,13 @@ type Handler interface {
 	//
 	// Permanently removes a saved animation from the database.
 	//
-	// DELETE /animation/{id}
+	// DELETE /api/animation/{id}
 	DeleteAnimation(ctx context.Context, params DeleteAnimationParams) (DeleteAnimationRes, error)
 	// GetAnimation implements getAnimation operation.
 	//
 	// Retrieves a saved animation by its ID.
 	//
-	// GET /animation/{id}
+	// GET /api/animation/{id}
 	GetAnimation(ctx context.Context, params GetAnimationParams) (GetAnimationRes, error)
 	// GetDevices implements getDevices operation.
 	//
@@ -30,32 +30,32 @@ type Handler interface {
 	//
 	// Returns all saved animations for the specified device, ordered by most recently updated.
 	//
-	// GET /animation/list/{device_id}
+	// GET /api/animation/list/{device_id}
 	ListAnimations(ctx context.Context, params ListAnimationsParams) (ListAnimationsRes, error)
 	// SaveAnimation implements saveAnimation operation.
 	//
 	// Saves the current animation frames to the database with a name. Stored per device.
 	//
-	// POST /animation/save
+	// POST /api/animation/save
 	SaveAnimation(ctx context.Context, req *SaveAnimationRequest) (SaveAnimationRes, error)
 	// StartAnimation implements startAnimation operation.
 	//
 	// Starts playing an animation loop on the specified device. Only one animation can run per device at
 	// a time.
 	//
-	// POST /animation/start
+	// POST /api/animation/start
 	StartAnimation(ctx context.Context, req *StartAnimationRequest) (StartAnimationRes, error)
 	// StopAnimation implements stopAnimation operation.
 	//
 	// Stops the currently running animation on the specified device. No-op if no animation is running.
 	//
-	// POST /animation/stop
+	// POST /api/animation/stop
 	StopAnimation(ctx context.Context, req *StopAnimationRequest) (StopAnimationRes, error)
 	// UpdateAnimation implements updateAnimation operation.
 	//
 	// Overwrites an existing animation's name and frames.
 	//
-	// PUT /animation/{id}
+	// PUT /api/animation/{id}
 	UpdateAnimation(ctx context.Context, req *UpdateAnimationRequest, params UpdateAnimationParams) (UpdateAnimationRes, error)
 }
 

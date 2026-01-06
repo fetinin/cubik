@@ -21,7 +21,7 @@ import type { RGBPixel } from '$lib/api/generated';
 
 const api = new DefaultApi(
 	new Configuration({
-		basePath: 'http://localhost:8080'
+		basePath: '' // Empty string for same-origin requests (served from Go backend)
 	})
 );
 

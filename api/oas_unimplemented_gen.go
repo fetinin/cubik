@@ -17,7 +17,7 @@ var _ Handler = UnimplementedHandler{}
 //
 // Permanently removes a saved animation from the database.
 //
-// DELETE /animation/{id}
+// DELETE /api/animation/{id}
 func (UnimplementedHandler) DeleteAnimation(ctx context.Context, params DeleteAnimationParams) (r DeleteAnimationRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
@@ -26,7 +26,7 @@ func (UnimplementedHandler) DeleteAnimation(ctx context.Context, params DeleteAn
 //
 // Retrieves a saved animation by its ID.
 //
-// GET /animation/{id}
+// GET /api/animation/{id}
 func (UnimplementedHandler) GetAnimation(ctx context.Context, params GetAnimationParams) (r GetAnimationRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
@@ -44,7 +44,7 @@ func (UnimplementedHandler) GetDevices(ctx context.Context) (r GetDevicesRes, _ 
 //
 // Returns all saved animations for the specified device, ordered by most recently updated.
 //
-// GET /animation/list/{device_id}
+// GET /api/animation/list/{device_id}
 func (UnimplementedHandler) ListAnimations(ctx context.Context, params ListAnimationsParams) (r ListAnimationsRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
@@ -53,7 +53,7 @@ func (UnimplementedHandler) ListAnimations(ctx context.Context, params ListAnima
 //
 // Saves the current animation frames to the database with a name. Stored per device.
 //
-// POST /animation/save
+// POST /api/animation/save
 func (UnimplementedHandler) SaveAnimation(ctx context.Context, req *SaveAnimationRequest) (r SaveAnimationRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
@@ -63,7 +63,7 @@ func (UnimplementedHandler) SaveAnimation(ctx context.Context, req *SaveAnimatio
 // Starts playing an animation loop on the specified device. Only one animation can run per device at
 // a time.
 //
-// POST /animation/start
+// POST /api/animation/start
 func (UnimplementedHandler) StartAnimation(ctx context.Context, req *StartAnimationRequest) (r StartAnimationRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
@@ -72,7 +72,7 @@ func (UnimplementedHandler) StartAnimation(ctx context.Context, req *StartAnimat
 //
 // Stops the currently running animation on the specified device. No-op if no animation is running.
 //
-// POST /animation/stop
+// POST /api/animation/stop
 func (UnimplementedHandler) StopAnimation(ctx context.Context, req *StopAnimationRequest) (r StopAnimationRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
@@ -81,7 +81,7 @@ func (UnimplementedHandler) StopAnimation(ctx context.Context, req *StopAnimatio
 //
 // Overwrites an existing animation's name and frames.
 //
-// PUT /animation/{id}
+// PUT /api/animation/{id}
 func (UnimplementedHandler) UpdateAnimation(ctx context.Context, req *UpdateAnimationRequest, params UpdateAnimationParams) (r UpdateAnimationRes, _ error) {
 	return r, ht.ErrNotImplemented
 }

@@ -49,9 +49,9 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 		switch elem[0] {
-		case '/': // Prefix: "/a"
+		case '/': // Prefix: "/api/"
 
-			if l := len("/a"); len(elem) >= l && elem[0:l] == "/a" {
+			if l := len("/api/"); len(elem) >= l && elem[0:l] == "/api/" {
 				elem = elem[l:]
 			} else {
 				break
@@ -61,9 +61,9 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				break
 			}
 			switch elem[0] {
-			case 'n': // Prefix: "nimation/"
+			case 'a': // Prefix: "animation/"
 
-				if l := len("nimation/"); len(elem) >= l && elem[0:l] == "nimation/" {
+				if l := len("animation/"); len(elem) >= l && elem[0:l] == "animation/" {
 					elem = elem[l:]
 				} else {
 					break
@@ -226,9 +226,9 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					return
 				}
 
-			case 'p': // Prefix: "pi/devices"
+			case 'd': // Prefix: "devices"
 
-				if l := len("pi/devices"); len(elem) >= l && elem[0:l] == "pi/devices" {
+				if l := len("devices"); len(elem) >= l && elem[0:l] == "devices" {
 					elem = elem[l:]
 				} else {
 					break
@@ -334,9 +334,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 			break
 		}
 		switch elem[0] {
-		case '/': // Prefix: "/a"
+		case '/': // Prefix: "/api/"
 
-			if l := len("/a"); len(elem) >= l && elem[0:l] == "/a" {
+			if l := len("/api/"); len(elem) >= l && elem[0:l] == "/api/" {
 				elem = elem[l:]
 			} else {
 				break
@@ -346,9 +346,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 				break
 			}
 			switch elem[0] {
-			case 'n': // Prefix: "nimation/"
+			case 'a': // Prefix: "animation/"
 
-				if l := len("nimation/"); len(elem) >= l && elem[0:l] == "nimation/" {
+				if l := len("animation/"); len(elem) >= l && elem[0:l] == "animation/" {
 					elem = elem[l:]
 				} else {
 					break
@@ -383,7 +383,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							r.summary = "List saved animations for a device"
 							r.operationID = "listAnimations"
 							r.operationGroup = ""
-							r.pathPattern = "/animation/list/{device_id}"
+							r.pathPattern = "/api/animation/list/{device_id}"
 							r.args = args
 							r.count = 1
 							return r, true
@@ -421,7 +421,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								r.summary = "Save animation to database"
 								r.operationID = "saveAnimation"
 								r.operationGroup = ""
-								r.pathPattern = "/animation/save"
+								r.pathPattern = "/api/animation/save"
 								r.args = args
 								r.count = 0
 								return r, true
@@ -458,7 +458,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 									r.summary = "Start animation playback on device"
 									r.operationID = "startAnimation"
 									r.operationGroup = ""
-									r.pathPattern = "/animation/start"
+									r.pathPattern = "/api/animation/start"
 									r.args = args
 									r.count = 0
 									return r, true
@@ -483,7 +483,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 									r.summary = "Stop animation playback on device"
 									r.operationID = "stopAnimation"
 									r.operationGroup = ""
-									r.pathPattern = "/animation/stop"
+									r.pathPattern = "/api/animation/stop"
 									r.args = args
 									r.count = 0
 									return r, true
@@ -515,7 +515,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						r.summary = "Delete a saved animation"
 						r.operationID = "deleteAnimation"
 						r.operationGroup = ""
-						r.pathPattern = "/animation/{id}"
+						r.pathPattern = "/api/animation/{id}"
 						r.args = args
 						r.count = 1
 						return r, true
@@ -524,7 +524,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						r.summary = "Get a specific saved animation"
 						r.operationID = "getAnimation"
 						r.operationGroup = ""
-						r.pathPattern = "/animation/{id}"
+						r.pathPattern = "/api/animation/{id}"
 						r.args = args
 						r.count = 1
 						return r, true
@@ -533,7 +533,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						r.summary = "Update an existing saved animation"
 						r.operationID = "updateAnimation"
 						r.operationGroup = ""
-						r.pathPattern = "/animation/{id}"
+						r.pathPattern = "/api/animation/{id}"
 						r.args = args
 						r.count = 1
 						return r, true
@@ -542,9 +542,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 					}
 				}
 
-			case 'p': // Prefix: "pi/devices"
+			case 'd': // Prefix: "devices"
 
-				if l := len("pi/devices"); len(elem) >= l && elem[0:l] == "pi/devices" {
+				if l := len("devices"); len(elem) >= l && elem[0:l] == "devices" {
 					elem = elem[l:]
 				} else {
 					break

@@ -1,15 +1,17 @@
+
 # SavedAnimation
+
 
 ## Properties
 
-| Name        | Type                               |
-| ----------- | ---------------------------------- |
-| `id`        | string                             |
-| `deviceId`  | string                             |
-| `name`      | string                             |
-| `frames`    | Array&lt;Array&lt;RGBPixel&gt;&gt; |
-| `createdAt` | Date                               |
-| `updatedAt` | Date                               |
+Name | Type
+------------ | -------------
+`id` | string
+`deviceId` | string
+`name` | string
+`frames` | Array&lt;Array&lt;RGBPixel&gt;&gt;
+`createdAt` | Date
+`updatedAt` | Date
 
 ## Example
 
@@ -38,3 +40,5 @@ console.log(exampleParsed)
 ```
 
 [[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)
+
+
