@@ -13,19 +13,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: '1'
-
-      - name: Install frontend dependencies
-        working-directory: front
-        run: bun install --frozen-lockfile
-
-      - name: Build frontend
-        working-directory: front
-        run: bun run build
-
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
@@ -38,8 +25,14 @@ jobs:
       - name: Generate API code
         run: go generate ./...
 
-      - name: Verify generated code
-        run: test -d api && test -f api/oas_server_gen.go
+      - name: Check for uncommitted changes
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "Error: Generated code differs from committed code"
+            echo "Please run 'go generate ./...' locally and commit the changes"
+            git diff
+            exit 1
+          fi
 
   build:
     needs: validate-go

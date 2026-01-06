@@ -11,38 +11,23 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: '1'
-
-      - name: Install frontend dependencies
-        working-directory: front
-        run: bun install --frozen-lockfile
-
-      - name: Build frontend
-        working-directory: front
-        run: bun run build
-
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
           go-version: '1.25'
           cache: true
 
-      - name: Verify spec.yml exists
-        run: test -f spec.yml
-
       - name: Generate API code from OpenAPI spec
         run: go generate ./...
 
-      - name: Verify API code was generated
+      - name: Check for uncommitted changes
         run: |
-          test -d api || (echo "api/ directory not created" && exit 1)
-          test -f api/oas_server_gen.go || (echo "ogen did not generate server code" && exit 1)
-
-      - name: Build Go application
-        run: go build -v ./...
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "Error: Generated code differs from committed code"
+            echo "Please run 'go generate ./...' locally and commit the changes"
+            git diff
+            exit 1
+          fi
 
       - name: Run go vet
         run: go vet ./...
@@ -70,7 +55,7 @@ jobs:
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:
-          bun-version: '1'
+          bun-version: '1.3.5'
 
       - name: Install frontend dependencies
         run: bun install --frozen-lockfile
