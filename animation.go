@@ -15,7 +15,6 @@ type AnimationState struct {
 	DeviceLocation string
 	Frames         [][]Color // Pre-converted frames (each frame is 100 Color values)
 	CancelFunc     context.CancelFunc
-	StartTime      time.Time
 }
 
 // Global registry of running animations, keyed by device location
@@ -103,7 +102,6 @@ func StartDeviceAnimation(deviceLocation string, frames [][]Color) error {
 		DeviceLocation: deviceLocation,
 		Frames:         frames,
 		CancelFunc:     cancelFunc,
-		StartTime:      time.Now(),
 	}
 
 	// Store in global registry
