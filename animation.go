@@ -115,8 +115,8 @@ func StartDeviceAnimation(deviceLocation string, frames [][]Color) error {
 		defer func() {
 			animationsMu.Lock()
 			delete(runningAnimations, deviceLocation)
-			cancelFunc()
 			animationsMu.Unlock()
+			cancelFunc()
 		}()
 
 		// Run animation loop
@@ -131,12 +131,10 @@ func StartDeviceAnimation(deviceLocation string, frames [][]Color) error {
 // StopDeviceAnimation stops the animation for the specified device
 // No-op if no animation is currently running for this device
 func StopDeviceAnimation(deviceLocation string) {
-	// Lock and check if animation exists
 	animationsMu.Lock()
 	state, exists := runningAnimations[deviceLocation]
+	animationsMu.Unlock()
 	if exists {
 		state.CancelFunc()
-		delete(runningAnimations, deviceLocation)
 	}
-	animationsMu.Unlock()
 }
