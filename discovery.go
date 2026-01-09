@@ -8,7 +8,6 @@ import (
 	"time"
 )
 
-// DeviceInfo holds parsed information about a Yeelight device
 type DeviceInfo struct {
 	Location  string
 	ID        string
@@ -34,10 +33,7 @@ const (
 		"\r\n"
 )
 
-// DiscoverDevices searches for Yeelight CubeLite devices on the local network
-// and returns a list of discovered devices. It waits for 3 seconds to collect responses.
 func DiscoverDevices() ([]*DeviceInfo, error) {
-	// Create UDP connection
 	addr, err := net.ResolveUDPAddr("udp4", multicastAddr)
 	if err != nil {
 		return nil, fmt.Errorf("error resolving address: %w", err)
@@ -49,20 +45,13 @@ func DiscoverDevices() ([]*DeviceInfo, error) {
 	}
 	defer conn.Close()
 
-	// Send search request
-	_, err = conn.WriteToUDP([]byte(searchMessage), addr)
-	if err != nil {
+	if _, err = conn.WriteToUDP([]byte(searchMessage), addr); err != nil {
 		return nil, fmt.Errorf("error sending search request: %w", err)
 	}
 
-	// Set read timeout
 	conn.SetReadDeadline(time.Now().Add(3 * time.Second))
 
-	// Listen for responses
 	buffer := make([]byte, 2048)
-	// Track unique devices by location. Deduplication is required because devices
-	// send multiple responses to ensure reliability in UDP-based SSDP protocol,
-	// where packets may be lost on busy networks.
 	discoveredDevices := make(map[string]*DeviceInfo)
 
 	for {
@@ -74,39 +63,30 @@ func DiscoverDevices() ([]*DeviceInfo, error) {
 			continue
 		}
 
-		response := string(buffer[:n])
-		deviceInfo := parseDeviceInfo(response)
-
-		// Only process devices with model "CubeLite"
+		deviceInfo := parseDeviceInfo(string(buffer[:n]))
 		if discoveredDevices[deviceInfo.Location] == nil {
 			discoveredDevices[deviceInfo.Location] = deviceInfo
 		}
 
-		// Reset timeout for next read
 		conn.SetReadDeadline(time.Now().Add(3 * time.Second))
 	}
 
-	// Convert map to slice
 	devices := make([]*DeviceInfo, 0, len(discoveredDevices))
 	for _, device := range discoveredDevices {
-		if device.Model != "CubeLite" {
-			continue
+		if device.Model == "CubeLite" {
+			devices = append(devices, device)
 		}
-		devices = append(devices, device)
 	}
 
 	return devices, nil
 }
 
-// parseDeviceInfo extracts all device information from the SSDP response
 func parseDeviceInfo(response string) *DeviceInfo {
 	device := &DeviceInfo{}
 	scanner := bufio.NewScanner(strings.NewReader(response))
 
 	for scanner.Scan() {
-		line := scanner.Text()
-		// Split on first colon to separate header name from value
-		parts := strings.SplitN(line, ":", 2)
+		parts := strings.SplitN(scanner.Text(), ":", 2)
 		if len(parts) != 2 {
 			continue
 		}

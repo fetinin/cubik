@@ -17,24 +17,17 @@ func main() {
 		log.Fatalf("Failed to load configuration: %v", err)
 	}
 
-	// Initialize database
 	db, err := InitDB(ctx, cfg.ServerDBPath)
 	if err != nil {
 		log.Fatalf("Failed to initialize database: %v", err)
 	}
-	defer func() {
-		if err := CloseDB(db); err != nil {
-			log.Printf("Error closing database: %v", err)
-		}
-	}()
+	defer CloseDB(db)
 
-	// Run migrations
 	if err := RunMigrations(db); err != nil {
 		log.Fatalf("Failed to run migrations: %v", err)
 	}
-	log.Println("Database migrations completed successfully")
 
-	wg := sync.WaitGroup{}
+	var wg sync.WaitGroup
 	wg.Go(func() {
 		if err := StartServer(ctx, db, cfg.ServerPort); err != nil {
 			log.Fatalf("Server error: %v", err)
