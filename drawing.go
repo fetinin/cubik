@@ -1,7 +1,9 @@
 package main
 
 import (
+	"errors"
 	"fmt"
+	"strconv"
 	"strings"
 )
 
@@ -60,7 +62,7 @@ func (fb *Framebuffer) Encode() string {
 	var builder strings.Builder
 	builder.Grow(len(fb.Pixels) * 4)
 
-	for y := 0; y < fb.Height; y++ {
+	for y := range fb.Height {
 		for x := fb.Width - 1; x >= 0; x-- {
 			pixel := fb.Pixels[y*fb.Width+x]
 			builder.WriteString(encodeRGBColor(pixel.R, pixel.G, pixel.B))
@@ -153,13 +155,15 @@ func DrawDigit(fb *Framebuffer, digit rune, x, y int, color, background Color) e
 		return fmt.Errorf("digit at position (%d, %d) exceeds bounds", x, y)
 	}
 
-	for row := 0; row < 5; row++ {
-		for col := 0; col < 5; col++ {
+	for row := range 5 {
+		for col := range 5 {
 			pixelColor := background
 			if bitmap[row][col] {
 				pixelColor = color
 			}
-			fb.SetPixel(x+col, y+row, pixelColor)
+			if err := fb.SetPixel(x+col, y+row, pixelColor); err != nil {
+				return fmt.Errorf("failed to set pixel: %w", err)
+			}
 		}
 	}
 
@@ -167,12 +171,12 @@ func DrawDigit(fb *Framebuffer, digit rune, x, y int, color, background Color) e
 }
 
 func DrawNumber(fb *Framebuffer, number int, y, spacing int, alignment Alignment, color, background Color) error {
-	return DrawString(fb, fmt.Sprintf("%d", number), y, spacing, alignment, color, background)
+	return DrawString(fb, strconv.Itoa(number), y, spacing, alignment, color, background)
 }
 
 func DrawString(fb *Framebuffer, str string, y, spacing int, alignment Alignment, color, background Color) error {
 	if len(str) == 0 {
-		return fmt.Errorf("cannot draw empty string")
+		return errors.New("cannot draw empty string")
 	}
 
 	totalWidth := len(str)*5 + (len(str)-1)*spacing

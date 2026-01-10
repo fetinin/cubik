@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -11,14 +12,14 @@ import (
 )
 
 type CommandRequest struct {
-	ID     int           `json:"id"`
-	Method string        `json:"method"`
-	Params []interface{} `json:"params"`
+	ID     int    `json:"id"`
+	Method string `json:"method"`
+	Params []any  `json:"params"`
 }
 
 type CommandResponse struct {
-	ID     int           `json:"id"`
-	Result []interface{} `json:"result,omitempty"`
+	ID     int   `json:"id"`
+	Result []any `json:"result,omitempty"`
 	Error  *struct {
 		Code    int    `json:"code"`
 		Message string `json:"message"`
@@ -33,19 +34,22 @@ func parseLocation(location string) (string, error) {
 	return addr, nil
 }
 
-func SendCommand(device *DeviceInfo, method string, params []interface{}) (*CommandResponse, error) {
+func SendCommand(device *DeviceInfo, method string, params []any) (*CommandResponse, error) {
 	addr, err := parseLocation(device.Location)
 	if err != nil {
 		return nil, err
 	}
 
-	conn, err := net.DialTimeout("tcp", addr, 3*time.Second)
-	if err != nil {
-		return nil, fmt.Errorf("failed to connect to %s: %w", addr, err)
+	dialer := &net.Dialer{Timeout: 3 * time.Second}
+	conn, dialErr := dialer.DialContext(context.Background(), "tcp", addr)
+	if dialErr != nil {
+		return nil, fmt.Errorf("failed to connect to %s: %w", addr, dialErr)
 	}
 	defer conn.Close()
 
-	conn.SetDeadline(time.Now().Add(3 * time.Second))
+	if deadlineErr := conn.SetDeadline(time.Now().Add(3 * time.Second)); deadlineErr != nil {
+		return nil, fmt.Errorf("failed to set deadline: %w", deadlineErr)
+	}
 
 	cmd := CommandRequest{ID: 1, Method: method, Params: params}
 	cmdJSON, err := json.Marshal(cmd)
@@ -76,7 +80,7 @@ func SendCommand(device *DeviceInfo, method string, params []interface{}) (*Comm
 }
 
 func GetProp(device *DeviceInfo, properties ...string) (map[string]string, error) {
-	params := make([]interface{}, len(properties))
+	params := make([]any, len(properties))
 	for i, prop := range properties {
 		params[i] = prop
 	}
@@ -103,7 +107,7 @@ func GetProp(device *DeviceInfo, properties ...string) (map[string]string, error
 }
 
 func TogglePower(device *DeviceInfo) error {
-	response, err := SendCommand(device, "toggle", []interface{}{})
+	response, err := SendCommand(device, "toggle", []any{})
 	if err != nil {
 		return fmt.Errorf("failed to toggle power: %w", err)
 	}
@@ -123,7 +127,7 @@ func encodeRGBColor(r, g, b uint8) string {
 
 // ActivateFxMode activates direct mode for manual LED control on Matrix devices.
 func ActivateFxMode(device *DeviceInfo) error {
-	params := []interface{}{map[string]string{"mode": "direct"}}
+	params := []any{map[string]string{"mode": "direct"}}
 	response, err := SendCommand(device, "activate_fx_mode", params)
 	if err != nil {
 		return fmt.Errorf("failed to activate fx mode: %w", err)
@@ -143,7 +147,7 @@ func SetBrightness(device *DeviceInfo, brightness int) error {
 		return fmt.Errorf("brightness must be between 1 and 100, got %d", brightness)
 	}
 
-	response, err := SendCommand(device, "set_bright", []interface{}{brightness, "sudden", 0})
+	response, err := SendCommand(device, "set_bright", []any{brightness, "sudden", 0})
 	if err != nil {
 		return fmt.Errorf("failed to set brightness: %w", err)
 	}
@@ -157,19 +161,22 @@ func SetBrightness(device *DeviceInfo, brightness int) error {
 	return fmt.Errorf("unexpected response from device: %+v", response.Result)
 }
 
-func SendCommandNoResponse(device *DeviceInfo, method string, params []interface{}) error {
+func SendCommandNoResponse(device *DeviceInfo, method string, params []any) error {
 	addr, err := parseLocation(device.Location)
 	if err != nil {
 		return err
 	}
 
-	conn, err := net.DialTimeout("tcp", addr, 3*time.Second)
-	if err != nil {
-		return fmt.Errorf("failed to connect to %s: %w", addr, err)
+	dialer := &net.Dialer{Timeout: 3 * time.Second}
+	conn, dialErr := dialer.DialContext(context.Background(), "tcp", addr)
+	if dialErr != nil {
+		return fmt.Errorf("failed to connect to %s: %w", addr, dialErr)
 	}
 	defer conn.Close()
 
-	conn.SetWriteDeadline(time.Now().Add(3 * time.Second))
+	if writeDeadlineErr := conn.SetWriteDeadline(time.Now().Add(3 * time.Second)); writeDeadlineErr != nil {
+		return fmt.Errorf("failed to set write deadline: %w", writeDeadlineErr)
+	}
 
 	cmd := CommandRequest{ID: 1, Method: method, Params: params}
 	cmdJSON, err := json.Marshal(cmd)
@@ -187,7 +194,7 @@ func SendCommandNoResponse(device *DeviceInfo, method string, params []interface
 // UpdateLeds sends base64-encoded RGB data to update all LEDs on the Matrix device.
 // ActivateFxMode must be called before using this function.
 func UpdateLeds(device *DeviceInfo, rgbData string) error {
-	if err := SendCommandNoResponse(device, "update_leds", []interface{}{rgbData}); err != nil {
+	if err := SendCommandNoResponse(device, "update_leds", []any{rgbData}); err != nil {
 		return fmt.Errorf("failed to update LEDs: %w", err)
 	}
 	return nil

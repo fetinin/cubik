@@ -2,12 +2,11 @@ package main
 
 import (
 	"context"
+	"cubik/api"
 	"fmt"
-	"log"
+	"log/slog"
 	"sync"
 	"time"
-
-	"cubik/api"
 )
 
 type AnimationState struct {
@@ -56,7 +55,7 @@ func PlayAnimation(ctx context.Context, state *AnimationState) error {
 
 			copy(fb.Pixels, state.Frames[frameIndex])
 			if err := UpdateLeds(deviceInfo, fb.Encode()); err != nil {
-				log.Printf("Error updating LEDs for %s: %v", state.DeviceLocation, err)
+				slog.Error("Error updating LEDs", "device", state.DeviceLocation, "error", err)
 			}
 
 			frameIndex++
@@ -64,7 +63,7 @@ func PlayAnimation(ctx context.Context, state *AnimationState) error {
 	}
 }
 
-func StartDeviceAnimation(deviceLocation string, frames [][]Color) error {
+func StartDeviceAnimation(deviceLocation string, frames [][]Color) {
 	StopDeviceAnimation(deviceLocation)
 
 	ctx, cancelFunc := context.WithCancel(context.Background())
@@ -87,11 +86,9 @@ func StartDeviceAnimation(deviceLocation string, frames [][]Color) error {
 		}()
 
 		if err := PlayAnimation(ctx, state); err != nil {
-			log.Printf("Animation error for %s: %v", deviceLocation, err)
+			slog.Error("Animation error", "device", deviceLocation, "error", err)
 		}
 	}()
-
-	return nil
 }
 
 func StopDeviceAnimation(deviceLocation string) {

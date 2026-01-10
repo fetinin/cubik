@@ -2,11 +2,11 @@ package main
 
 import (
 	"context"
-	"database/sql"
-	"fmt"
-	"log"
-
 	"cubik/api"
+	"database/sql"
+	"errors"
+	"fmt"
+	"log/slog"
 )
 
 type APIHandler struct {
@@ -15,10 +15,10 @@ type APIHandler struct {
 
 var _ api.Handler = (*APIHandler)(nil)
 
-func (h *APIHandler) GetDevices(ctx context.Context) (api.GetDevicesRes, error) {
+func (h *APIHandler) GetDevices(_ context.Context) (api.GetDevicesRes, error) {
 	devices, err := DiscoverDevices()
 	if err != nil {
-		log.Printf("Discovery error: %v", err)
+		slog.Error("Discovery error", "error", err)
 		return &api.Error{Error: err.Error()}, nil
 	}
 
@@ -34,15 +34,16 @@ func (h *APIHandler) GetDevices(ctx context.Context) (api.GetDevicesRes, error) 
 	return &api.GetDevicesOK{Devices: apiDevices}, nil
 }
 
-func (h *APIHandler) StartAnimation(ctx context.Context, req *api.StartAnimationRequest) (api.StartAnimationRes, error) {
+func (h *APIHandler) StartAnimation(
+	_ context.Context,
+	req *api.StartAnimationRequest,
+) (api.StartAnimationRes, error) {
 	internalFrames := make([][]Color, len(req.Frames))
 	for i, apiFrame := range req.Frames {
 		internalFrames[i] = ConvertAPIFrameToColors(apiFrame)
 	}
 
-	if err := StartDeviceAnimation(req.DeviceLocation, internalFrames); err != nil {
-		return &api.StartAnimationInternalServerError{Error: fmt.Sprintf("failed to start animation: %v", err)}, nil
-	}
+	StartDeviceAnimation(req.DeviceLocation, internalFrames)
 
 	return &api.StartAnimationResponse{
 		Message:    "Animation started successfully",
@@ -50,7 +51,7 @@ func (h *APIHandler) StartAnimation(ctx context.Context, req *api.StartAnimation
 	}, nil
 }
 
-func (h *APIHandler) StopAnimation(ctx context.Context, req *api.StopAnimationRequest) (api.StopAnimationRes, error) {
+func (h *APIHandler) StopAnimation(_ context.Context, req *api.StopAnimationRequest) (api.StopAnimationRes, error) {
 	StopDeviceAnimation(req.DeviceLocation)
 	return &api.StopAnimationResponse{Message: "Animation stopped successfully"}, nil
 }
@@ -61,7 +62,7 @@ func (h *APIHandler) SaveAnimation(ctx context.Context, req *api.SaveAnimationRe
 		frames[i] = ConvertAPIFrameToColors(apiFrame)
 	}
 
-	animation, err := SaveAnimation(h.db, req.DeviceID, req.Name, frames)
+	animation, err := SaveAnimation(ctx, h.db, req.DeviceID, req.Name, frames)
 	if err != nil {
 		return &api.SaveAnimationInternalServerError{
 			Error: fmt.Sprintf("failed to save animation: %v", err),
@@ -75,8 +76,11 @@ func (h *APIHandler) SaveAnimation(ctx context.Context, req *api.SaveAnimationRe
 	}, nil
 }
 
-func (h *APIHandler) ListAnimations(ctx context.Context, params api.ListAnimationsParams) (api.ListAnimationsRes, error) {
-	animations, err := ListAnimationsByDevice(h.db, params.DeviceID)
+func (h *APIHandler) ListAnimations(
+	ctx context.Context,
+	params api.ListAnimationsParams,
+) (api.ListAnimationsRes, error) {
+	animations, err := ListAnimationsByDevice(ctx, h.db, params.DeviceID)
 	if err != nil {
 		return &api.Error{Error: fmt.Sprintf("failed to list animations: %v", err)}, nil
 	}
@@ -90,8 +94,8 @@ func (h *APIHandler) ListAnimations(ctx context.Context, params api.ListAnimatio
 }
 
 func (h *APIHandler) GetAnimation(ctx context.Context, params api.GetAnimationParams) (api.GetAnimationRes, error) {
-	animation, err := GetAnimation(h.db, params.ID)
-	if err == ErrNotFound {
+	animation, err := GetAnimation(ctx, h.db, params.ID)
+	if errors.Is(err, ErrNotFound) {
 		return &api.GetAnimationNotFound{Error: "animation not found"}, nil
 	}
 	if err != nil {
@@ -103,14 +107,18 @@ func (h *APIHandler) GetAnimation(ctx context.Context, params api.GetAnimationPa
 	return &api.GetAnimationResponse{Animation: convertToAPIAnimation(animation)}, nil
 }
 
-func (h *APIHandler) UpdateAnimation(ctx context.Context, req *api.UpdateAnimationRequest, params api.UpdateAnimationParams) (api.UpdateAnimationRes, error) {
+func (h *APIHandler) UpdateAnimation(
+	ctx context.Context,
+	req *api.UpdateAnimationRequest,
+	params api.UpdateAnimationParams,
+) (api.UpdateAnimationRes, error) {
 	frames := make([][]Color, len(req.Frames))
 	for i, apiFrame := range req.Frames {
 		frames[i] = ConvertAPIFrameToColors(apiFrame)
 	}
 
-	animation, err := UpdateAnimation(h.db, params.ID, req.Name, frames)
-	if err == ErrNotFound {
+	animation, err := UpdateAnimation(ctx, h.db, params.ID, req.Name, frames)
+	if errors.Is(err, ErrNotFound) {
 		return &api.UpdateAnimationNotFound{Error: "animation not found"}, nil
 	}
 	if err != nil {
@@ -125,9 +133,12 @@ func (h *APIHandler) UpdateAnimation(ctx context.Context, req *api.UpdateAnimati
 	}, nil
 }
 
-func (h *APIHandler) DeleteAnimation(ctx context.Context, params api.DeleteAnimationParams) (api.DeleteAnimationRes, error) {
-	err := DeleteAnimation(h.db, params.ID)
-	if err == ErrNotFound {
+func (h *APIHandler) DeleteAnimation(
+	ctx context.Context,
+	params api.DeleteAnimationParams,
+) (api.DeleteAnimationRes, error) {
+	err := DeleteAnimation(ctx, h.db, params.ID)
+	if errors.Is(err, ErrNotFound) {
 		return &api.DeleteAnimationNotFound{Error: "animation not found"}, nil
 	}
 	if err != nil {

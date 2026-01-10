@@ -20,9 +20,9 @@ func InitDB(ctx context.Context, dbPath string) (*sql.DB, error) {
 	db.SetMaxIdleConns(5)
 	db.SetConnMaxLifetime(5 * time.Minute)
 
-	if err := db.PingContext(ctx); err != nil {
+	if pingErr := db.PingContext(ctx); pingErr != nil {
 		db.Close()
-		return nil, fmt.Errorf("failed to ping database: %w", err)
+		return nil, fmt.Errorf("failed to ping database: %w", pingErr)
 	}
 
 	pragmas := []string{
@@ -31,9 +31,9 @@ func InitDB(ctx context.Context, dbPath string) (*sql.DB, error) {
 		"PRAGMA busy_timeout = 5000",
 	}
 	for _, pragma := range pragmas {
-		if _, err := db.ExecContext(ctx, pragma); err != nil {
+		if _, execErr := db.ExecContext(ctx, pragma); execErr != nil {
 			db.Close()
-			return nil, fmt.Errorf("failed to execute %s: %w", pragma, err)
+			return nil, fmt.Errorf("failed to execute %s: %w", pragma, execErr)
 		}
 	}
 

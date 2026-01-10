@@ -8,12 +8,25 @@ This is a Go application for discovering and controlling Yeelight CubeLite (Matr
 
 ## Build and Run Commands
 
+This project uses [mise](https://mise.jdx.dev/getting-started.html) for task management. Mise is like make - it manages tasks used to build and test projects.
+
+### Available mise Tasks
+
 ```bash
 # Build the application
-go build
+mise run build
 
+# Run the linter
+mise run lint
+
+# Run the linter with auto-fix
+mise run fmt
+
+# Run the application directly
 go run .
 ```
+
+**IMPORTANT**: After making any changes to Go code, you MUST run `mise run lint` to check for linting issues. Use `mise run fmt` to automatically fix formatting issues.
 
 ## API Specification and Code Generation
 
@@ -35,8 +48,8 @@ The project uses [ogen-go/ogen](https://github.com/ogen-go/ogen) for automatic G
 # Generate API code from spec.yml
 go generate ./...
 
-# This creates the api/ directory with ~17 auto-generated files
-# The api/ directory is gitignored as it's reproducible from spec.yml
+# This creates/updates the api/ directory with ~17 auto-generated files
+# The api/ directory is committed to git for CI/CD and dependency management
 ```
 
 **Generated code includes:**
@@ -61,14 +74,15 @@ If validation fails, ogen returns a 400 Bad Request with error details **before*
 
 ### API Implementation Files
 
-**Manual implementation (checked into git):**
+**Manual implementation:**
 - `spec.yml` - OpenAPI 3.1 specification (source of truth)
 - `generate.go` - go:generate directive for code generation
 - `handler.go` - Implements `api.Handler` interface, calls `DiscoverDevices()`
 - `server.go` - HTTP server setup with CORS middleware on port 9080
 
-**Auto-generated (gitignored):**
+**Auto-generated (committed to git):**
 - `api/*.go` - Generated server code (~17 files)
+- Should be regenerated after changes to `spec.yml` and committed
 
 ### Running Modes
 
@@ -96,7 +110,8 @@ The application supports two modes via command-line flag:
 2. Run `go generate ./...` to regenerate backend code
 3. Run `cd front && bun run generate-api` to regenerate frontend client
 4. Implement new handler methods in `handler.go`
-5. Run `go build` to compile
+5. Run `mise run lint` to check for linting issues
+6. Run `mise run build` to compile
 
 **Example workflow:**
 ```bash
@@ -112,8 +127,9 @@ cd front && bun run generate-api
 # Implement handler method
 vim handler.go
 
-# Build and test
-go build
+# Lint and build
+mise run lint
+mise run build
 ./cubik
 curl http://localhost:9080/api/devices
 ```
@@ -153,7 +169,7 @@ await api.startAnimation({
 });
 ```
 
-The generated code is gitignored and should be regenerated after any changes to `spec.yml`.
+**Note:** The frontend generated code in `front/src/api/generated/` may be gitignored. Check the frontend `.gitignore` to confirm.
 
 ## Code Architecture
 

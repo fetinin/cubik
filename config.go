@@ -7,7 +7,7 @@ import (
 )
 
 type Config struct {
-	ServerPort   string `env:"SERVER_PORT" envDefault:"9080"`
+	ServerPort   string `env:"SERVER_PORT"    envDefault:"9080"`
 	ServerDBPath string `env:"SERVER_DB_PATH" envDefault:"cubik.db"`
 }
 

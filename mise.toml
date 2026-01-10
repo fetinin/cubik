@@ -1,0 +1,14 @@
+[tools]
+golangci-lint = "v2.8.0"
+
+[tasks.build]
+description = "Build the CLI"
+run = "go build"
+
+[tasks.lint]
+description = "Run golangci-lint"
+run = "golangci-lint run"
+
+[tasks.fmt]
+description = "Run golangci-lint"
+run = "golangci-lint run --fix"

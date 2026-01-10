@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"net"
 	"strings"
@@ -39,25 +40,28 @@ func DiscoverDevices() ([]*DeviceInfo, error) {
 		return nil, fmt.Errorf("error resolving address: %w", err)
 	}
 
-	conn, err := net.ListenUDP("udp4", &net.UDPAddr{IP: net.IPv4zero, Port: 0})
-	if err != nil {
-		return nil, fmt.Errorf("error creating UDP connection: %w", err)
+	conn, listenErr := net.ListenUDP("udp4", &net.UDPAddr{IP: net.IPv4zero, Port: 0})
+	if listenErr != nil {
+		return nil, fmt.Errorf("error creating UDP connection: %w", listenErr)
 	}
 	defer conn.Close()
 
-	if _, err = conn.WriteToUDP([]byte(searchMessage), addr); err != nil {
-		return nil, fmt.Errorf("error sending search request: %w", err)
+	if _, writeErr := conn.WriteToUDP([]byte(searchMessage), addr); writeErr != nil {
+		return nil, fmt.Errorf("error sending search request: %w", writeErr)
 	}
 
-	conn.SetReadDeadline(time.Now().Add(3 * time.Second))
+	if deadlineErr := conn.SetReadDeadline(time.Now().Add(3 * time.Second)); deadlineErr != nil {
+		return nil, fmt.Errorf("failed to set read deadline: %w", deadlineErr)
+	}
 
 	buffer := make([]byte, 2048)
 	discoveredDevices := make(map[string]*DeviceInfo)
 
 	for {
-		n, _, err := conn.ReadFromUDP(buffer)
-		if err != nil {
-			if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
+		n, _, readErr := conn.ReadFromUDP(buffer)
+		if readErr != nil {
+			var netErr net.Error
+			if errors.As(readErr, &netErr) {
 				break
 			}
 			continue
@@ -68,7 +72,9 @@ func DiscoverDevices() ([]*DeviceInfo, error) {
 			discoveredDevices[deviceInfo.Location] = deviceInfo
 		}
 
-		conn.SetReadDeadline(time.Now().Add(3 * time.Second))
+		if resetDeadlineErr := conn.SetReadDeadline(time.Now().Add(3 * time.Second)); resetDeadlineErr != nil {
+			return nil, fmt.Errorf("failed to set read deadline: %w", resetDeadlineErr)
+		}
 	}
 
 	devices := make([]*DeviceInfo, 0, len(discoveredDevices))
