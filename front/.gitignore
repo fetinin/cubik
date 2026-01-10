@@ -6,7 +6,8 @@ node_modules
 .netlify
 .wrangler
 /.svelte-kit
-/build
+/build/**
+!/build/.gitkeep # keep folder. Needed for the backend to build
 
 # OS
 .DS_Store

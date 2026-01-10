@@ -1,9 +1,11 @@
+//nolint:unused // demo code for future use
 package main
 
 import (
 	"fmt"
 	"math"
-	"math/rand"
+	"math/rand/v2"
+	"strings"
 	"time"
 )
 
@@ -16,15 +18,15 @@ func demoTestPatterns(device *DeviceInfo) {
 			{"Checkerboard", createCheckerboard(100)},
 			{"Solid Red", createSolidColor(255, 0, 0, 100)},
 			{"Checkerboard", createCheckerboard(100)},
-			//{"Solid Green", createSolidColor(0, 255, 0, 100)},
+			// {"Solid Green", createSolidColor(0, 255, 0, 100)},
 			{"Solid Blue", createSolidColor(0, 0, 255, 100)},
-			//{"Rainbow Gradient", createGradient(100)},
+			// {"Rainbow Gradient", createGradient(100)},
 		}
 
 		for _, pattern := range patterns {
 			fmt.Printf("\n  Displaying: %s\n", pattern.name)
-			//fmt.Print("  Press Enter to continue...")
-			//bufio.NewReader(os.Stdin).ReadString('\n')
+			// fmt.Print("  Press Enter to continue...")
+			// bufio.NewReader(os.Stdin).ReadString('\n')
 			time.Sleep(1*time.Second + 100*time.Millisecond)
 
 			err := UpdateLeds(device, pattern.data)
@@ -44,10 +46,16 @@ func demoDigitDisplay(device *DeviceInfo) {
 	// Demo 1: Single digits 0-9 in green
 	green := Color{R: 0, G: 255, B: 0}
 	fmt.Println("\n  Demo: Single digits 0-9")
-	for i := 0; i <= 9; i++ {
+	for i := range 10 {
 		fb.Clear(black)
-		DrawNumber(fb, i, 0, 0, AlignCenter, green, black)
-		UpdateLeds(device, fb.Encode())
+		if err := DrawNumber(fb, i, 0, 0, AlignCenter, green, black); err != nil {
+			fmt.Printf("  Error drawing number: %v\n", err)
+			continue
+		}
+		if err := UpdateLeds(device, fb.Encode()); err != nil {
+			fmt.Printf("  Error updating LEDs: %v\n", err)
+			continue
+		}
 		time.Sleep(500 * time.Millisecond)
 	}
 
@@ -57,8 +65,14 @@ func demoDigitDisplay(device *DeviceInfo) {
 	fmt.Println("\n  Demo: Multi-digit numbers")
 	for _, num := range numbers {
 		fb.Clear(black)
-		DrawNumber(fb, num, 0, 1, AlignCenter, blue, black)
-		UpdateLeds(device, fb.Encode())
+		if err := DrawNumber(fb, num, 0, 1, AlignCenter, blue, black); err != nil {
+			fmt.Printf("  Error drawing number: %v\n", err)
+			continue
+		}
+		if err := UpdateLeds(device, fb.Encode()); err != nil {
+			fmt.Printf("  Error updating LEDs: %v\n", err)
+			continue
+		}
 		time.Sleep(1 * time.Second)
 	}
 
@@ -67,8 +81,14 @@ func demoDigitDisplay(device *DeviceInfo) {
 	fmt.Println("\n  Demo: Countdown 10 to 0")
 	for i := 10; i >= 0; i-- {
 		fb.Clear(black)
-		DrawNumber(fb, i, 0, 1, AlignCenter, red, black)
-		UpdateLeds(device, fb.Encode())
+		if err := DrawNumber(fb, i, 0, 1, AlignCenter, red, black); err != nil {
+			fmt.Printf("  Error drawing number: %v\n", err)
+			continue
+		}
+		if err := UpdateLeds(device, fb.Encode()); err != nil {
+			fmt.Printf("  Error updating LEDs: %v\n", err)
+			continue
+		}
 		time.Sleep(500 * time.Millisecond)
 	}
 
@@ -78,8 +98,14 @@ func demoDigitDisplay(device *DeviceInfo) {
 	alignments := []Alignment{AlignLeft, AlignCenter, AlignRight}
 	for _, align := range alignments {
 		fb.Clear(black)
-		DrawNumber(fb, 42, 0, 1, align, white, black)
-		UpdateLeds(device, fb.Encode())
+		if err := DrawNumber(fb, 42, 0, 1, align, white, black); err != nil {
+			fmt.Printf("  Error drawing number: %v\n", err)
+			continue
+		}
+		if err := UpdateLeds(device, fb.Encode()); err != nil {
+			fmt.Printf("  Error updating LEDs: %v\n", err)
+			continue
+		}
 		time.Sleep(1 * time.Second)
 	}
 
@@ -196,7 +222,7 @@ func NewChristmasTreeAnimator(mode AnimationMode) ChristmasTreeAnimator {
 			On:             true,
 			Color:          colors[i%len(colors)],
 			BaseColor:      colors[i%len(colors)],
-			NextToggleTick: uint(rand.Intn(10)), // initial twinkle offset in ticks
+			NextToggleTick: uint(rand.IntN(10)), // initial twinkle offset in ticks
 		}
 	}
 
@@ -238,7 +264,7 @@ func (a *ChristmasTreeAnimator) updateTwinkle() {
 		if a.Tick >= a.Lights[i].NextToggleTick {
 			a.Lights[i].On = !a.Lights[i].On
 			// Random interval 2-10 ticks (was ~100-500ms at ~20 FPS)
-			delayTicks := uint(2 + rand.Intn(9))
+			delayTicks := uint(2 + rand.IntN(9))
 			a.Lights[i].NextToggleTick = a.Tick + delayTicks
 		}
 	}
@@ -285,7 +311,7 @@ func (a *ChristmasTreeAnimator) updateSparkle() {
 
 	// Randomly trigger new sparkles (5% chance per frame)
 	if rand.Float64() < 0.05 {
-		sparkleIdx := rand.Intn(len(a.Lights))
+		sparkleIdx := rand.IntN(len(a.Lights))
 		a.Lights[sparkleIdx].Color = LightWhite
 		a.Lights[sparkleIdx].SparkleEndTick = a.Tick + uint(6)
 	}
@@ -300,21 +326,122 @@ func drawChristmasTree(fb *Framebuffer, animator *ChristmasTreeAnimator) {
 	// 2. Draw tree foliage (green background)
 	for y, xCoords := range treePixels {
 		for _, x := range xCoords {
-			fb.SetPixel(x, y, TreeGreen)
+			if err := fb.SetPixel(x, y, TreeGreen); err != nil {
+				return
+			}
 		}
 	}
 
 	// 3. Draw trunk (row 4, pixels 9-11)
 	for x := 9; x <= 11; x++ {
-		fb.SetPixel(x, 4, TrunkBrown)
+		if err := fb.SetPixel(x, 4, TrunkBrown); err != nil {
+			return
+		}
 	}
 
 	// 4. Draw lights (overlay on tree)
 	for _, light := range animator.Lights {
 		if light.On {
-			fb.SetPixel(light.X, light.Y, light.Color)
+			if err := fb.SetPixel(light.X, light.Y, light.Color); err != nil {
+				return
+			}
 		} else {
-			fb.SetPixel(light.X, light.Y, LightOff)
+			if err := fb.SetPixel(light.X, light.Y, LightOff); err != nil {
+				return
+			}
 		}
 	}
+}
+
+// Matrix LED Control Functions - Patterns and Animations
+
+// createSolidColor generates base64-encoded RGB data for a solid color pattern.
+// All LEDs will be set to the same color specified by (r, g, b).
+// numLEDs specifies the total number of LEDs (100 for a 20x5 matrix).
+// Returns a string of length numLEDs * 4 characters.
+func createSolidColor(r, g, b uint8, numLEDs int) string {
+	// Encode single pixel
+	encoded := encodeRGBColor(r, g, b)
+
+	// Use strings.Builder for efficient concatenation
+	var builder strings.Builder
+	builder.Grow(numLEDs * 4) // Pre-allocate capacity
+
+	// Repeat for all LEDs
+	for range numLEDs {
+		builder.WriteString(encoded)
+	}
+
+	return builder.String()
+}
+
+// createCheckerboard creates a checkerboard pattern alternating red and blue.
+// The pattern alternates based on LED position in a row-major order.
+// For a 20x5 matrix (100 LEDs), this creates an alternating pattern across all LEDs.
+// Returns base64-encoded RGB data for numLEDs.
+func createCheckerboard(numLEDs int) string {
+	// Pre-encode colors
+	red := encodeRGBColor(255, 0, 0)
+	blue := encodeRGBColor(0, 0, 255)
+
+	var builder strings.Builder
+	builder.Grow(numLEDs * 4)
+
+	for i := range numLEDs {
+		if i%2 == 0 {
+			builder.WriteString(red)
+		} else {
+			builder.WriteString(blue)
+		}
+	}
+
+	return builder.String()
+}
+
+// createGradient creates a rainbow gradient across all LEDs.
+// The gradient transitions through red → yellow → green → cyan → blue → magenta → red.
+// Each LED gets a color based on its position, creating a smooth rainbow effect.
+// For a 20x5 matrix, the gradient flows across all 100 LEDs in row-major order.
+func createGradient(numLEDs int) string {
+	var builder strings.Builder
+	builder.Grow(numLEDs * 4)
+
+	for i := range numLEDs {
+		// Calculate position in gradient (0.0 to 1.0)
+		pos := float64(i) / float64(numLEDs)
+
+		var r, g, b uint8
+
+		// Rainbow gradient using piecewise linear interpolation
+		switch {
+		case pos < 0.167: // Red to Yellow
+			r = 255
+			g = uint8(pos / 0.167 * 255)
+			b = 0
+		case pos < 0.333: // Yellow to Green
+			r = uint8((0.333 - pos) / 0.166 * 255)
+			g = 255
+			b = 0
+		case pos < 0.5: // Green to Cyan
+			r = 0
+			g = 255
+			b = uint8((pos - 0.333) / 0.167 * 255)
+		case pos < 0.667: // Cyan to Blue
+			r = 0
+			g = uint8((0.667 - pos) / 0.167 * 255)
+			b = 255
+		case pos < 0.833: // Blue to Magenta
+			r = uint8((pos - 0.667) / 0.166 * 255)
+			g = 0
+			b = 255
+		default: // Magenta to Red
+			r = 255
+			g = 0
+			b = uint8((1.0 - pos) / 0.167 * 255)
+		}
+
+		builder.WriteString(encodeRGBColor(r, g, b))
+	}
+
+	return builder.String()
 }

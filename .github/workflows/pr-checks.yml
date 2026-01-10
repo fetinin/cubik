@@ -29,6 +29,27 @@ jobs:
             exit 1
           fi
 
+  go-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.25'
+          cache: true
+
+      - name: Set up mise
+        uses: jdx/mise-action@v2
+        with:
+          install: true
+          cache: true
+
+      - name: Run golangci-lint
+        run: mise run lint
+
   frontend-checks:
     runs-on: ubuntu-latest
     defaults:

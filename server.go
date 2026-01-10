@@ -2,31 +2,27 @@ package main
 
 import (
 	"context"
+	"cubik/api"
 	"database/sql"
 	"embed"
 	"fmt"
 	"io"
 	"io/fs"
-	"log"
+	"log/slog"
 	"net/http"
 	"strings"
-
-	"cubik/api"
 )
 
 //go:embed front/build/**
 var frontendFS embed.FS
 
-// corsMiddleware adds CORS headers for frontend access
 func corsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Allow all origins for development
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 
-		// Handle preflight requests
-		if r.Method == "OPTIONS" {
+		if r.Method == http.MethodOptions {
 			w.WriteHeader(http.StatusOK)
 			return
 		}
@@ -35,79 +31,66 @@ func corsMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-// StartServer initializes and runs the HTTP API server
 func StartServer(ctx context.Context, db *sql.DB, port string) error {
-	// Create handler implementation with DB dependency
-	handler := &APIHandler{
-		db: db,
+	handler := &APIHandler{db: db}
+	srv, srvErr := api.NewServer(handler)
+	if srvErr != nil {
+		return fmt.Errorf("failed to create server: %w", srvErr)
 	}
 
-	// Create ogen server with handler
-	srv, err := api.NewServer(handler)
-	if err != nil {
-		return fmt.Errorf("failed to create server: %w", err)
-	}
-
-	// Create a mux to handle both API and static files
 	mux := http.NewServeMux()
-
-	// API routes under /api/* with CORS middleware
 	mux.Handle("/api/", corsMiddleware(srv))
 
-	// Serve static frontend files
-	frontendSubFS, err := fs.Sub(frontendFS, "front/build")
-	if err != nil {
-		return fmt.Errorf("failed to create frontend sub-filesystem: %w", err)
+	frontendSubFS, subErr := fs.Sub(frontendFS, "front/build")
+	if subErr != nil {
+		return fmt.Errorf("failed to create frontend sub-filesystem: %w", subErr)
 	}
 
-	// Create a custom file server with SPA fallback
 	spaHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Prepare the path for file system lookup
 		path := strings.TrimPrefix(r.URL.Path, "/")
 		if path == "" {
 			path = "index.html"
 		}
 
-		// Try to open the file
-		file, err := frontendSubFS.Open(path)
-		if err != nil {
+		file, openErr := frontendSubFS.Open(path)
+		if openErr != nil {
 			http.NotFound(w, r)
 			return
 		}
 		defer file.Close()
 
-		// File exists, serve it with proper content type
-		stat, err := file.Stat()
-		if err != nil {
+		stat, statErr := file.Stat()
+		if statErr != nil {
 			http.Error(w, "Error reading file", http.StatusInternalServerError)
 			return
 		}
 
-		// Let http.ServeContent handle content type detection
-		http.ServeContent(w, r, path, stat.ModTime(), file.(io.ReadSeeker))
+		rs, ok := file.(io.ReadSeeker)
+		if !ok {
+			http.Error(w, "Error reading file", http.StatusInternalServerError)
+			return
+		}
+		http.ServeContent(w, r, path, stat.ModTime(), rs)
 	})
-	
 	mux.Handle("/", spaHandler)
 
-	// Configure HTTP server
 	httpServer := &http.Server{
 		Addr:    ":" + port,
 		Handler: mux,
 	}
 
-	log.Printf("Starting Cubik server on http://localhost:%s", port)
-	log.Printf("Serving frontend SPA and API endpoints")
-	log.Printf("Note: For device discovery to work, ensure 'LAN Control' is enabled in the Yeelight app")
+	slog.Info("Starting Cubik server", "address", "http://localhost:"+port)
 
 	go func() {
 		<-ctx.Done()
-		log.Println("Shutting down server...")
-		httpServer.Shutdown(context.Background())
+		slog.Info("Shutting down server...")
+		if shutdownErr := httpServer.Shutdown(context.Background()); shutdownErr != nil {
+			slog.Error("Server shutdown error", "error", shutdownErr)
+		}
 	}()
-	// Start server (blocks until error or shutdown)
-	if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-		return fmt.Errorf("server error: %w", err)
-	}
 
+	if listenErr := httpServer.ListenAndServe(); listenErr != nil && listenErr != http.ErrServerClosed {
+		return fmt.Errorf("server error: %w", listenErr)
+	}
 	return nil
 }

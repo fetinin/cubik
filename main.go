@@ -2,46 +2,53 @@ package main
 
 import (
 	"context"
-	"log"
+	"fmt"
+	"log/slog"
+	"os"
 	"os/signal"
 	"sync"
 	"syscall"
 )
 
 func main() {
-	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
-	defer stop()
+	ctx, _ := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	if err := run(ctx); err != nil {
+		slog.Error("Application error", "error", err)
+		os.Exit(1)
+	}
+}
 
+func run(ctx context.Context) error {
 	cfg, err := LoadConfig()
 	if err != nil {
-		log.Fatalf("Failed to load configuration: %v", err)
+		return fmt.Errorf("failed to load configuration: %w", err)
 	}
 
-	// Initialize database
 	db, err := InitDB(ctx, cfg.ServerDBPath)
 	if err != nil {
-		log.Fatalf("Failed to initialize database: %v", err)
+		return fmt.Errorf("failed to initialize database: %w", err)
 	}
 	defer func() {
-		if err := CloseDB(db); err != nil {
-			log.Printf("Error closing database: %v", err)
+		if closeErr := CloseDB(db); closeErr != nil {
+			slog.Error("Failed to close database", "error", closeErr)
 		}
 	}()
 
-	// Run migrations
-	if err := RunMigrations(db); err != nil {
-		log.Fatalf("Failed to run migrations: %v", err)
+	if migrationErr := RunMigrations(db); migrationErr != nil {
+		return fmt.Errorf("failed to run migrations: %w", migrationErr)
 	}
-	log.Println("Database migrations completed successfully")
 
-	wg := sync.WaitGroup{}
+	var wg sync.WaitGroup
 	wg.Go(func() {
-		if err := StartServer(ctx, db, cfg.ServerPort); err != nil {
-			log.Fatalf("Server error: %v", err)
+		if serverErr := StartServer(ctx, db, cfg.ServerPort); serverErr != nil {
+			slog.Error("Server error", "error", serverErr)
+			os.Exit(1)
 		}
 	})
 
 	<-ctx.Done()
-	log.Println("Shutting down...")
+	slog.Info("Shutting down...")
 	wg.Wait()
+
+	return nil
 }

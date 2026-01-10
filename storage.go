@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
 	"errors"
@@ -10,11 +11,8 @@ import (
 	"github.com/google/uuid"
 )
 
-var (
-	ErrNotFound = errors.New("animation not found")
-)
+var ErrNotFound = errors.New("animation not found")
 
-// SavedAnimation represents a saved animation in the database
 type SavedAnimation struct {
 	ID        string
 	DeviceID  string
@@ -24,25 +22,18 @@ type SavedAnimation struct {
 	UpdatedAt time.Time
 }
 
-// FrameJSON is used for JSON serialization of Color data
 type FrameJSON struct {
 	R uint8 `json:"r"`
 	G uint8 `json:"g"`
 	B uint8 `json:"b"`
 }
 
-// serializeFrames converts [][]Color to JSON string
 func serializeFrames(frames [][]Color) (string, error) {
-	// Convert [][]Color to [][]FrameJSON
 	jsonFrames := make([][][]FrameJSON, len(frames))
 	for i, frame := range frames {
 		jsonFrame := make([]FrameJSON, len(frame))
 		for j, color := range frame {
-			jsonFrame[j] = FrameJSON{
-				R: color.R,
-				G: color.G,
-				B: color.B,
-			}
+			jsonFrame[j] = FrameJSON(color)
 		}
 		jsonFrames[i] = [][]FrameJSON{jsonFrame}
 	}
@@ -51,62 +42,47 @@ func serializeFrames(frames [][]Color) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("failed to marshal frames: %w", err)
 	}
-
 	return string(data), nil
 }
 
-// deserializeFrames converts JSON string back to [][]Color
 func deserializeFrames(jsonStr string) ([][]Color, error) {
 	var jsonFrames [][][]FrameJSON
-
 	if err := json.Unmarshal([]byte(jsonStr), &jsonFrames); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal frames: %w", err)
 	}
 
-	// Convert back to [][]Color
 	frames := make([][]Color, len(jsonFrames))
 	for i, jsonFrameWrapper := range jsonFrames {
 		if len(jsonFrameWrapper) > 0 {
 			jsonFrame := jsonFrameWrapper[0]
 			frame := make([]Color, len(jsonFrame))
 			for j, pixel := range jsonFrame {
-				frame[j] = Color{
-					R: pixel.R,
-					G: pixel.G,
-					B: pixel.B,
-				}
+				frame[j] = Color(pixel)
 			}
 			frames[i] = frame
 		}
 	}
-
 	return frames, nil
 }
 
-// SaveAnimation saves a new animation to the database
-func SaveAnimation(db *sql.DB, deviceID, name string, frames [][]Color) (*SavedAnimation, error) {
-	// Generate UUID
+func SaveAnimation(ctx context.Context, db *sql.DB, deviceID, name string, frames [][]Color) (*SavedAnimation, error) {
 	id := uuid.New().String()
-
-	// Serialize frames to JSON
 	framesJSON, err := serializeFrames(frames)
 	if err != nil {
 		return nil, err
 	}
 
-	// Create timestamps
 	now := time.Now().UTC()
-	createdAt := now.Format(time.RFC3339)
-	updatedAt := createdAt
+	timestamp := now.Format(time.RFC3339)
 
-	// Insert into database
-	_, err = db.Exec(
+	_, execErr := db.ExecContext(
+		ctx,
 		`INSERT INTO saved_animations (id, device_id, name, frames_json, created_at, updated_at)
 		 VALUES (?, ?, ?, ?, ?, ?)`,
-		id, deviceID, name, framesJSON, createdAt, updatedAt,
+		id, deviceID, name, framesJSON, timestamp, timestamp,
 	)
-	if err != nil {
-		return nil, fmt.Errorf("failed to insert animation: %w", err)
+	if execErr != nil {
+		return nil, fmt.Errorf("failed to insert animation: %w", execErr)
 	}
 
 	return &SavedAnimation{
@@ -119,37 +95,28 @@ func SaveAnimation(db *sql.DB, deviceID, name string, frames [][]Color) (*SavedA
 	}, nil
 }
 
-// GetAnimation retrieves a saved animation by ID
-func GetAnimation(db *sql.DB, id string) (*SavedAnimation, error) {
-	var (
-		deviceID   string
-		name       string
-		framesJSON string
-		createdAt  string
-		updatedAt  string
-	)
+func GetAnimation(ctx context.Context, db *sql.DB, id string) (*SavedAnimation, error) {
+	var deviceID, name, framesJSON, createdAt, updatedAt string
 
-	err := db.QueryRow(
+	queryErr := db.QueryRowContext(
+		ctx,
 		`SELECT device_id, name, frames_json, created_at, updated_at
-		 FROM saved_animations
-		 WHERE id = ?`,
+		 FROM saved_animations WHERE id = ?`,
 		id,
 	).Scan(&deviceID, &name, &framesJSON, &createdAt, &updatedAt)
 
-	if err == sql.ErrNoRows {
+	if errors.Is(queryErr, sql.ErrNoRows) {
 		return nil, ErrNotFound
 	}
-	if err != nil {
-		return nil, fmt.Errorf("failed to query animation: %w", err)
+	if queryErr != nil {
+		return nil, fmt.Errorf("failed to query animation: %w", queryErr)
 	}
 
-	// Deserialize frames
-	frames, err := deserializeFrames(framesJSON)
-	if err != nil {
-		return nil, err
+	frames, deserializeErr := deserializeFrames(framesJSON)
+	if deserializeErr != nil {
+		return nil, deserializeErr
 	}
 
-	// Parse timestamps
 	createdTime, _ := time.Parse(time.RFC3339, createdAt)
 	updatedTime, _ := time.Parse(time.RFC3339, updatedAt)
 
@@ -163,42 +130,30 @@ func GetAnimation(db *sql.DB, id string) (*SavedAnimation, error) {
 	}, nil
 }
 
-// ListAnimationsByDevice returns all saved animations for a device
-func ListAnimationsByDevice(db *sql.DB, deviceID string) ([]*SavedAnimation, error) {
-	rows, err := db.Query(
+func ListAnimationsByDevice(ctx context.Context, db *sql.DB, deviceID string) ([]*SavedAnimation, error) {
+	rows, queryErr := db.QueryContext(
+		ctx,
 		`SELECT id, name, frames_json, created_at, updated_at
-		 FROM saved_animations
-		 WHERE device_id = ?
-		 ORDER BY updated_at DESC`,
+		 FROM saved_animations WHERE device_id = ? ORDER BY updated_at DESC`,
 		deviceID,
 	)
-	if err != nil {
-		return nil, fmt.Errorf("failed to query animations: %w", err)
+	if queryErr != nil {
+		return nil, fmt.Errorf("failed to query animations: %w", queryErr)
 	}
 	defer rows.Close()
 
 	var animations []*SavedAnimation
-
 	for rows.Next() {
-		var (
-			id         string
-			name       string
-			framesJSON string
-			createdAt  string
-			updatedAt  string
-		)
-
-		if err := rows.Scan(&id, &name, &framesJSON, &createdAt, &updatedAt); err != nil {
-			return nil, fmt.Errorf("failed to scan row: %w", err)
+		var id, name, framesJSON, createdAt, updatedAt string
+		if scanErr := rows.Scan(&id, &name, &framesJSON, &createdAt, &updatedAt); scanErr != nil {
+			return nil, fmt.Errorf("failed to scan row: %w", scanErr)
 		}
 
-		// Deserialize frames
-		frames, err := deserializeFrames(framesJSON)
-		if err != nil {
-			return nil, err
+		frames, deserializeErr := deserializeFrames(framesJSON)
+		if deserializeErr != nil {
+			return nil, deserializeErr
 		}
 
-		// Parse timestamps
 		createdTime, _ := time.Parse(time.RFC3339, createdAt)
 		updatedTime, _ := time.Parse(time.RFC3339, updatedAt)
 
@@ -212,67 +167,51 @@ func ListAnimationsByDevice(db *sql.DB, deviceID string) ([]*SavedAnimation, err
 		})
 	}
 
-	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("error iterating rows: %w", err)
+	if iterErr := rows.Err(); iterErr != nil {
+		return nil, fmt.Errorf("error iterating rows: %w", iterErr)
 	}
-
 	return animations, nil
 }
 
-// UpdateAnimation updates an existing animation's name and frames
-func UpdateAnimation(db *sql.DB, id, name string, frames [][]Color) (*SavedAnimation, error) {
-	// Serialize frames to JSON
+func UpdateAnimation(ctx context.Context, db *sql.DB, id, name string, frames [][]Color) (*SavedAnimation, error) {
 	framesJSON, err := serializeFrames(frames)
 	if err != nil {
 		return nil, err
 	}
 
-	// Update timestamp
-	now := time.Now().UTC()
-	updatedAt := now.Format(time.RFC3339)
-
-	// Update in database
-	result, err := db.Exec(
-		`UPDATE saved_animations
-		 SET name = ?, frames_json = ?, updated_at = ?
-		 WHERE id = ?`,
+	updatedAt := time.Now().UTC().Format(time.RFC3339)
+	result, execErr := db.ExecContext(
+		ctx,
+		`UPDATE saved_animations SET name = ?, frames_json = ?, updated_at = ? WHERE id = ?`,
 		name, framesJSON, updatedAt, id,
 	)
-	if err != nil {
-		return nil, fmt.Errorf("failed to update animation: %w", err)
+	if execErr != nil {
+		return nil, fmt.Errorf("failed to update animation: %w", execErr)
 	}
 
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return nil, fmt.Errorf("failed to get rows affected: %w", err)
+	rowsAffected, rowsErr := result.RowsAffected()
+	if rowsErr != nil {
+		return nil, fmt.Errorf("failed to get rows affected: %w", rowsErr)
 	}
-
 	if rowsAffected == 0 {
 		return nil, ErrNotFound
 	}
 
-	// Retrieve the updated animation to get all fields
-	return GetAnimation(db, id)
+	return GetAnimation(ctx, db, id)
 }
 
-// DeleteAnimation removes a saved animation from the database
-func DeleteAnimation(db *sql.DB, id string) error {
-	result, err := db.Exec(
-		`DELETE FROM saved_animations WHERE id = ?`,
-		id,
-	)
-	if err != nil {
-		return fmt.Errorf("failed to delete animation: %w", err)
+func DeleteAnimation(ctx context.Context, db *sql.DB, id string) error {
+	result, execErr := db.ExecContext(ctx, `DELETE FROM saved_animations WHERE id = ?`, id)
+	if execErr != nil {
+		return fmt.Errorf("failed to delete animation: %w", execErr)
 	}
 
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return fmt.Errorf("failed to get rows affected: %w", err)
+	rowsAffected, rowsErr := result.RowsAffected()
+	if rowsErr != nil {
+		return fmt.Errorf("failed to get rows affected: %w", rowsErr)
 	}
-
 	if rowsAffected == 0 {
 		return ErrNotFound
 	}
-
 	return nil
 }
