@@ -13,6 +13,7 @@ type AnimationState struct {
 	DeviceLocation string
 	Frames         [][]Color
 	CancelFunc     context.CancelFunc
+	done           chan struct{}
 }
 
 var (
@@ -71,6 +72,7 @@ func StartDeviceAnimation(deviceLocation string, frames [][]Color) {
 		DeviceLocation: deviceLocation,
 		Frames:         frames,
 		CancelFunc:     cancelFunc,
+		done:           make(chan struct{}),
 	}
 
 	animationsMu.Lock()
@@ -82,7 +84,7 @@ func StartDeviceAnimation(deviceLocation string, frames [][]Color) {
 			animationsMu.Lock()
 			delete(runningAnimations, deviceLocation)
 			animationsMu.Unlock()
-			cancelFunc()
+			close(state.done)
 		}()
 
 		if err := PlayAnimation(ctx, state); err != nil {
@@ -97,5 +99,6 @@ func StopDeviceAnimation(deviceLocation string) {
 	animationsMu.Unlock()
 	if exists {
 		state.CancelFunc()
+		<-state.done
 	}
 }
