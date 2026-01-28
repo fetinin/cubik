@@ -27,12 +27,18 @@
 	const rows = $derived([...Array(height).keys()]);
 	const cols = $derived([...Array(width).keys()]);
 
-	function paint(index: number) {
+	function paint(index: number): void {
 		onPaint(index, paintColor);
 	}
 
-	function getCoords(index: number): { x: number; y: number } {
+	function indexToCoords(index: number): { x: number; y: number } {
 		return { x: index % width, y: Math.floor(index / width) };
+	}
+
+	function getSelectionRingClass(index: number): string {
+		if (selection.has(index)) return 'ring-2 ring-blue-500';
+		if (previewSelection.has(index)) return 'ring-2 ring-blue-300';
+		return '';
 	}
 
 	function computeBoxSelection(
@@ -44,14 +50,13 @@
 		const minY = Math.min(start.y, end.y);
 		const maxY = Math.max(start.y, end.y);
 
-		// eslint-disable-next-line svelte/prefer-svelte-reactivity -- pure function return value, not reactive state
-		const selected = new Set<number>();
+		const indices: number[] = [];
 		for (let y = minY; y <= maxY; y++) {
 			for (let x = minX; x <= maxX; x++) {
-				selected.add(y * width + x);
+				indices.push(y * width + x);
 			}
 		}
-		return selected;
+		return new Set(indices);
 	}
 
 	const previewSelection = $derived.by(() => {
@@ -71,7 +76,7 @@
 			} else {
 				// Start new box selection
 				isSelecting = true;
-				const coords = getCoords(index);
+				const coords = indexToCoords(index);
 				selectionStart = coords;
 				selectionEnd = coords;
 			}
@@ -82,7 +87,7 @@
 		if (mode === 'paint' && isPainting) {
 			paint(index);
 		} else if (mode === 'select' && isSelecting) {
-			selectionEnd = getCoords(index);
+			selectionEnd = indexToCoords(index);
 		}
 	}
 
@@ -91,8 +96,8 @@
 			const selected = computeBoxSelection(selectionStart, selectionEnd);
 			onSelect(selected);
 		} else if (mode === 'select' && isMoving && moveStartIndex !== null) {
-			const start = getCoords(moveStartIndex);
-			const end = getCoords(index);
+			const start = indexToCoords(moveStartIndex);
+			const end = indexToCoords(index);
 			const deltaX = end.x - start.x;
 			const deltaY = end.y - start.y;
 			if (deltaX !== 0 || deltaY !== 0) {
@@ -133,9 +138,7 @@
 				{@const i = y * width + x}
 				<button
 					type="button"
-					class="h-7 w-7 rounded border border-gray-300 {selection.has(i)
-						? 'ring-2 ring-blue-500'
-						: ''} {previewSelection.has(i) && !selection.has(i) ? 'ring-2 ring-blue-300' : ''}"
+					class="h-7 w-7 rounded border border-gray-300 {getSelectionRingClass(i)}"
 					style:background-color={packedToCss(pixels[i] ?? 0)}
 					onpointerdown={() => handlePointerDown(i)}
 					onpointerenter={() => handlePointerEnter(i)}

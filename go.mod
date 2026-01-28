@@ -3,6 +3,7 @@ module cubik
 go 1.25.5
 
 require (
+	github.com/caarlos0/env/v11 v11.3.1
 	github.com/go-faster/errors v0.7.1
 	github.com/go-faster/jx v1.2.0
 	github.com/golang-migrate/migrate/v4 v4.19.1
@@ -15,7 +16,6 @@ require (
 )
 
 require (
-	github.com/caarlos0/env/v11 v11.3.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/dlclark/regexp2 v1.11.5 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect

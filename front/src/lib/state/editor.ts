@@ -136,6 +136,18 @@ export function buildAnimationPayload(size: MatrixSize, frames: Frame[]): Animat
 	};
 }
 
+function indexToCoords(index: number, width: number): { x: number; y: number } {
+	return { x: index % width, y: Math.floor(index / width) };
+}
+
+function coordsToIndex(x: number, y: number, width: number): number {
+	return y * width + x;
+}
+
+function isInBounds(x: number, y: number, width: number, height: number): boolean {
+	return x >= 0 && x < width && y >= 0 && y < height;
+}
+
 export function moveSelection(
 	pixels: PackedRGB[],
 	selection: Set<number>,
@@ -148,37 +160,30 @@ export function moveSelection(
 
 	// Check if all destination positions are valid
 	for (const index of selection) {
-		const x = index % width;
-		const y = Math.floor(index / width);
-		const newX = x + deltaX;
-		const newY = y + deltaY;
-		if (newX < 0 || newX >= width || newY < 0 || newY >= height) {
-			return null; // Reject move if any pixel would go off-canvas
+		const { x, y } = indexToCoords(index, width);
+		if (!isInBounds(x + deltaX, y + deltaY, width, height)) {
+			return null;
 		}
 	}
 
-	// Collect colors from selected pixels first (to handle overlaps correctly)
+	// Collect colors from selected pixels (handles overlaps correctly)
 	const selectedColors = new Map<number, PackedRGB>();
 	for (const index of selection) {
 		selectedColors.set(index, pixels[index]);
 	}
 
-	// Create new pixel array
 	const newPixels = pixels.slice();
 	const newSelection = new Set<number>();
 
-	// Clear original positions (set to black)
+	// Clear original positions
 	for (const index of selection) {
 		newPixels[index] = 0x000000;
 	}
 
 	// Place pixels at new positions
 	for (const [index, color] of selectedColors) {
-		const x = index % width;
-		const y = Math.floor(index / width);
-		const newX = x + deltaX;
-		const newY = y + deltaY;
-		const newIndex = newY * width + newX;
+		const { x, y } = indexToCoords(index, width);
+		const newIndex = coordsToIndex(x + deltaX, y + deltaY, width);
 		newPixels[newIndex] = color;
 		newSelection.add(newIndex);
 	}
