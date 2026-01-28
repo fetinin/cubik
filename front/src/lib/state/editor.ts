@@ -3,6 +3,8 @@ import type { AnimationPayload, Device, MatrixSize } from '$lib/api/client';
 
 export type PackedRGB = number; // 0xRRGGBB
 
+export type EditorMode = 'paint' | 'select';
+
 export type Frame = {
 	id: string;
 	name: string;
@@ -51,6 +53,10 @@ export type EditorState = {
 
 	// apply
 	applyStatus: Writable<ApplyStatus>;
+
+	// editor mode and selection
+	mode: Writable<EditorMode>;
+	selection: Writable<Set<number>>;
 };
 
 export function createEditorState(): EditorState {
@@ -61,6 +67,8 @@ export function createEditorState(): EditorState {
 	const frames = writable<Frame[]>([]);
 	const selectedFrameId = writable<string | null>(null);
 	const applyStatus = writable<ApplyStatus>({ state: 'idle' });
+	const mode = writable<EditorMode>('paint');
+	const selection = writable<Set<number>>(new Set());
 
 	const selectedDevice = derived([devices, selectedDeviceId], ([$devices, $id]) => {
 		if (!$id) return null;
@@ -81,7 +89,9 @@ export function createEditorState(): EditorState {
 		selectedFrameId,
 		selectedDevice,
 		selectedFrame,
-		applyStatus
+		applyStatus,
+		mode,
+		selection
 	};
 }
 
@@ -124,4 +134,54 @@ export function buildAnimationPayload(size: MatrixSize, frames: Frame[]): Animat
 		height: size.height,
 		frames: frames.map((f) => f.pixels.slice())
 	};
+}
+
+export function moveSelection(
+	pixels: PackedRGB[],
+	selection: Set<number>,
+	deltaX: number,
+	deltaY: number,
+	width: number,
+	height: number
+): { pixels: PackedRGB[]; newSelection: Set<number> } | null {
+	if (selection.size === 0 || (deltaX === 0 && deltaY === 0)) return null;
+
+	// Check if all destination positions are valid
+	for (const index of selection) {
+		const x = index % width;
+		const y = Math.floor(index / width);
+		const newX = x + deltaX;
+		const newY = y + deltaY;
+		if (newX < 0 || newX >= width || newY < 0 || newY >= height) {
+			return null; // Reject move if any pixel would go off-canvas
+		}
+	}
+
+	// Collect colors from selected pixels first (to handle overlaps correctly)
+	const selectedColors = new Map<number, PackedRGB>();
+	for (const index of selection) {
+		selectedColors.set(index, pixels[index]);
+	}
+
+	// Create new pixel array
+	const newPixels = pixels.slice();
+	const newSelection = new Set<number>();
+
+	// Clear original positions (set to black)
+	for (const index of selection) {
+		newPixels[index] = 0x000000;
+	}
+
+	// Place pixels at new positions
+	for (const [index, color] of selectedColors) {
+		const x = index % width;
+		const y = Math.floor(index / width);
+		const newX = x + deltaX;
+		const newY = y + deltaY;
+		const newIndex = newY * width + newX;
+		newPixels[newIndex] = color;
+		newSelection.add(newIndex);
+	}
+
+	return { pixels: newPixels, newSelection };
 }

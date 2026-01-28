@@ -26,9 +26,11 @@
 		createFrameFromPixels,
 		initPixelsForSize,
 		loadFrameIntoPixels,
+		moveSelection,
 		paintPixel,
 		packRGB,
 		replaceSelectedFramePixels,
+		type EditorMode,
 		type PackedRGB
 	} from '$lib/state/editor';
 	import type { SavedAnimation } from '$lib/api/generated';
@@ -42,6 +44,8 @@
 	const frames = editor.frames;
 	const selectedFrameId = editor.selectedFrameId;
 	const applyStatus = editor.applyStatus;
+	const mode = editor.mode;
+	const selection = editor.selection;
 
 	let paintColor = $state<PackedRGB>(packRGB(255, 0, 0));
 	let loading = $state(true);
@@ -186,6 +190,35 @@
 		editor.pixels.update((p) => paintPixel(p, index, color));
 	}
 
+	function onSelect(indices: Set<number>) {
+		editor.selection.set(indices);
+	}
+
+	function onMove(deltaX: number, deltaY: number) {
+		const size = get(matrix);
+		if (!size) return;
+
+		const result = moveSelection(
+			get(pixels),
+			get(selection),
+			deltaX,
+			deltaY,
+			size.width,
+			size.height
+		);
+		if (result) {
+			editor.pixels.set(result.pixels);
+			editor.selection.set(result.newSelection);
+		}
+	}
+
+	function setMode(newMode: EditorMode) {
+		mode.set(newMode);
+		if (newMode === 'paint') {
+			selection.set(new Set());
+		}
+	}
+
 	function saveNewFrame() {
 		const n = get(frames).length + 1;
 		const frame = createFrameFromPixels(`Frame ${n}`, get(pixels));
@@ -279,7 +312,31 @@
 			<div class="flex flex-col gap-6">
 				<section class="rounded border border-gray-200 p-4">
 					<div class="flex items-center justify-between gap-4">
-						<div class="text-sm text-gray-600">Matrix: {size.width}×{size.height}</div>
+						<div class="flex items-center gap-4">
+							<div class="text-sm text-gray-600">Matrix: {size.width}×{size.height}</div>
+							<div class="flex gap-1">
+								<button
+									type="button"
+									class="rounded px-3 py-1.5 text-xs font-medium {$mode === 'paint'
+										? 'bg-blue-600 text-white'
+										: 'border border-gray-300 text-gray-700'}"
+									onclick={() => setMode('paint')}
+									data-testid="mode-paint"
+								>
+									Paint
+								</button>
+								<button
+									type="button"
+									class="rounded px-3 py-1.5 text-xs font-medium {$mode === 'select'
+										? 'bg-blue-600 text-white'
+										: 'border border-gray-300 text-gray-700'}"
+									onclick={() => setMode('select')}
+									data-testid="mode-select"
+								>
+									Select
+								</button>
+							</div>
+						</div>
 						<div class="flex items-center gap-2">
 							<button
 								type="button"
@@ -313,7 +370,11 @@
 							height={size.height}
 							pixels={$pixels}
 							{paintColor}
+							mode={$mode}
+							selection={$selection}
 							{onPaint}
+							{onSelect}
+							{onMove}
 						/>
 					</div>
 				</section>
