@@ -36,14 +36,21 @@
 	<div
 		class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
 		onclick={() => (open = false)}
+		onkeydown={(e) => e.key === 'Escape' && (open = false)}
+		role="presentation"
 		data-testid="save-modal-backdrop"
 	>
 		<div
 			class="mx-4 w-full max-w-md rounded-lg bg-white p-6 shadow-xl"
 			onclick={(e) => e.stopPropagation()}
+			onkeydown={(e) => e.stopPropagation()}
+			role="dialog"
+			aria-modal="true"
+			aria-labelledby="save-modal-title"
+			tabindex="-1"
 			data-testid="save-modal-content"
 		>
-			<h2 class="mb-4 text-xl font-semibold">Save Animation</h2>
+			<h2 id="save-modal-title" class="mb-4 text-xl font-semibold">Save Animation</h2>
 
 			<label class="mb-4 block">
 				<span class="mb-2 block text-sm font-medium text-gray-700">Animation Name:</span>

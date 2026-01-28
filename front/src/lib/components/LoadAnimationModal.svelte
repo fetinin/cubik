@@ -24,14 +24,21 @@
 	<div
 		class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
 		onclick={() => (open = false)}
+		onkeydown={(e) => e.key === 'Escape' && (open = false)}
+		role="presentation"
 		data-testid="load-modal-backdrop"
 	>
 		<div
 			class="mx-4 w-full max-w-md rounded-lg bg-white p-6 shadow-xl"
 			onclick={(e) => e.stopPropagation()}
+			onkeydown={(e) => e.stopPropagation()}
+			role="dialog"
+			aria-modal="true"
+			aria-labelledby="load-modal-title"
+			tabindex="-1"
 			data-testid="load-modal-content"
 		>
-			<h2 class="mb-4 text-xl font-semibold">Load Animation</h2>
+			<h2 id="load-modal-title" class="mb-4 text-xl font-semibold">Load Animation</h2>
 
 			{#if animations.length === 0}
 				<p class="mb-4 text-sm text-gray-600">No saved animations for this device.</p>
