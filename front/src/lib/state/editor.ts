@@ -30,6 +30,24 @@ export function packedToCss(rgb: PackedRGB): string {
 	return `rgb(${r}, ${g}, ${b})`;
 }
 
+/**
+ * Extract unique colors from pixel buffer, sorted by first appearance.
+ */
+export function extractPaletteFromPixels(pixels: PackedRGB[], maxColors: number = 12): PackedRGB[] {
+	const seen = new Set<PackedRGB>();
+	const palette: PackedRGB[] = [];
+
+	for (const color of pixels) {
+		if (!seen.has(color)) {
+			seen.add(color);
+			palette.push(color);
+			if (palette.length >= maxColors) break;
+		}
+	}
+
+	return palette;
+}
+
 function makeId(prefix: string) {
 	return `${prefix}-${Math.random().toString(16).slice(2)}-${Date.now().toString(16)}`;
 }
