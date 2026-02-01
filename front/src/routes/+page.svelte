@@ -262,9 +262,22 @@
 	});
 
 	function saveNewFrame() {
-		const n = get(frames).length + 1;
-		const frame = createFrameFromPixels(`Frame ${n}`, get(pixels));
-		editor.frames.update((list) => [...list, frame]);
+		const currentSelectedFrameId = get(selectedFrameId);
+		const frame = createFrameFromPixels(`Frame ${get(frames).length + 1}`, get(pixels));
+
+		editor.frames.update((list) => {
+			if (!currentSelectedFrameId) {
+				return [frame, ...list];
+			}
+			const index = list.findIndex((f) => f.id === currentSelectedFrameId);
+			if (index === -1) {
+				return [frame, ...list];
+			}
+			const newList = [...list];
+			newList.splice(index + 1, 0, frame);
+			return newList;
+		});
+
 		loadFrameIntoPixels(editor, frame.id);
 	}
 
