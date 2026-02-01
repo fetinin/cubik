@@ -29,3 +29,7 @@ description = "Run backend and frontend in parallel"
 run = [
     { tasks = ["back-dev", "front-dev"] },
 ]
+
+[tasks.release]
+description = "Create a GitHub release with date-based tag"
+run = "bun scripts/release.ts"
