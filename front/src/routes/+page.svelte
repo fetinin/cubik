@@ -219,6 +219,29 @@
 		}
 	}
 
+	function handleKeydown(event: KeyboardEvent) {
+		// Ignore if user is typing in an input field
+		if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) {
+			return;
+		}
+
+		switch (event.key.toLowerCase()) {
+			case 'p':
+				setMode('paint');
+				break;
+			case 's':
+				setMode('select');
+				break;
+		}
+	}
+
+	onMount(() => {
+		window.addEventListener('keydown', handleKeydown);
+		return () => {
+			window.removeEventListener('keydown', handleKeydown);
+		};
+	});
+
 	function saveNewFrame() {
 		const n = get(frames).length + 1;
 		const frame = createFrameFromPixels(`Frame ${n}`, get(pixels));
