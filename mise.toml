@@ -12,3 +12,18 @@ run = "golangci-lint run"
 [tasks.fmt]
 description = "Run golangci-lint"
 run = "golangci-lint run --fix"
+
+[tasks.back-dev]
+description = "Run the Go backend server"
+run = "go run ."
+
+[tasks.front-dev]
+description = "Run the frontend dev server"
+dir = "front"
+run = "bun run dev --open"
+
+[tasks.dev]
+description = "Run backend and frontend in parallel"
+run = [
+    { tasks = ["back-dev", "front-dev"] },
+]

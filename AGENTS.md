@@ -22,11 +22,20 @@ mise run lint
 # Run the linter with auto-fix
 mise run fmt
 
-# Run the application directly
-go run .
+# Run backend and frontend dev servers in parallel
+mise run dev
+
+# Run only the Go backend server
+mise run back-dev
+
+# Run only the frontend dev server
+mise run front-dev
+
+# Validate mise task configuration
+mise tasks validate
 ```
 
-**IMPORTANT**: After making any changes to Go code, you MUST run `mise run lint` to check for linting issues. Use `mise run fmt` to automatically fix formatting issues.
+**IMPORTANT**: After making any changes to Go code, you MUST run `mise run lint` to check for linting issues. Use `mise run fmt` to automatically fix formatting issues. After modifying `mise.toml`, run `mise tasks validate` to verify the configuration is valid.
 
 ## API Specification and Code Generation
 
