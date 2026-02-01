@@ -53,7 +53,11 @@
 		const indices: number[] = [];
 		for (let y = minY; y <= maxY; y++) {
 			for (let x = minX; x <= maxX; x++) {
-				indices.push(y * width + x);
+				const index = y * width + x;
+				// Skip black pixels (0x000000)
+				if (pixels[index] !== 0x000000) {
+					indices.push(index);
+				}
 			}
 		}
 		return new Set(indices);
