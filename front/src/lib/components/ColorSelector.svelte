@@ -1,7 +1,6 @@
 <script lang="ts">
-	import { SvelteMap } from 'svelte/reactivity';
 	import type { PackedRGB } from '$lib/state/editor';
-	import { packedToCss } from '$lib/state/editor';
+	import { packedToCss, extractPaletteFromPixels } from '$lib/state/editor';
 
 	type Props = {
 		pixels: PackedRGB[];
@@ -11,27 +10,7 @@
 
 	let { pixels, selectedColor, onSelectColor }: Props = $props();
 
-	// Extract unique colors from pixel buffer
-	const uniqueColors = $derived(() => {
-		// Deduplicate using Set
-		const uniqueSet = new Set<PackedRGB>(pixels);
-		const colors = Array.from(uniqueSet);
-
-		// Sort by first appearance
-		const indexMap = new SvelteMap<PackedRGB, number>();
-		pixels.forEach((color, idx) => {
-			if (!indexMap.has(color)) indexMap.set(color, idx);
-		});
-
-		const sorted = colors.sort((a, b) => {
-			const idxA = indexMap.get(a) ?? Infinity;
-			const idxB = indexMap.get(b) ?? Infinity;
-			return idxA - idxB;
-		});
-
-		// Limit to 12 colors
-		return sorted.slice(0, 12);
-	});
+	const uniqueColors = $derived(extractPaletteFromPixels(pixels));
 
 	// Convert packed RGB to hex string for display
 	function colorToHex(color: PackedRGB): string {
@@ -42,11 +21,11 @@
 <div class="flex flex-col gap-3">
 	<div class="text-sm font-medium">Palette</div>
 
-	{#if uniqueColors().length === 0}
+	{#if uniqueColors.length === 0}
 		<div class="text-sm text-gray-500">Draw to see colors</div>
 	{:else}
 		<div class="grid grid-cols-6 gap-2">
-			{#each uniqueColors() as color (color)}
+			{#each uniqueColors as color (color)}
 				<button
 					type="button"
 					class="h-8 w-8 rounded border-2 transition-transform hover:scale-110"

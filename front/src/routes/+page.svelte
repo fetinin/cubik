@@ -24,6 +24,7 @@
 		buildAnimationPayload,
 		createEditorState,
 		createFrameFromPixels,
+		extractPaletteFromPixels,
 		initPixelsForSize,
 		loadFrameIntoPixels,
 		moveSelection,
@@ -222,6 +223,24 @@
 	function handleKeydown(event: KeyboardEvent) {
 		// Ignore if user is typing in an input field
 		if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) {
+			return;
+		}
+
+		// Handle Tab for color cycling (only in paint mode)
+		if (event.key === 'Tab') {
+			if (get(mode) !== 'paint') return;
+
+			const palette = extractPaletteFromPixels(get(pixels));
+			if (palette.length === 0) return;
+
+			event.preventDefault();
+
+			const currentIndex = palette.indexOf(paintColor);
+			const startIndex = currentIndex === -1 ? 0 : currentIndex;
+			const delta = event.shiftKey ? -1 : 1;
+			const nextIndex = (startIndex + delta + palette.length) % palette.length;
+
+			paintColor = palette[nextIndex];
 			return;
 		}
 
