@@ -56,6 +56,26 @@ func (h *APIHandler) StopAnimation(_ context.Context, req *api.StopAnimationRequ
 	return &api.StopAnimationResponse{Message: "Animation stopped successfully"}, nil
 }
 
+func (h *APIHandler) PowerOn(_ context.Context, req *api.PowerOnRequest) (api.PowerOnRes, error) {
+	device := &DeviceInfo{Location: req.DeviceLocation}
+	if err := SetPower(device, "on"); err != nil {
+		return &api.PowerOnInternalServerError{
+			Error: fmt.Sprintf("failed to power on the device: %v", err),
+		}, nil
+	}
+	return &api.PowerOnNoContent{}, nil
+}
+
+func (h *APIHandler) PowerOff(_ context.Context, req *api.PowerOffRequest) (api.PowerOffRes, error) {
+	device := &DeviceInfo{Location: req.DeviceLocation}
+	if err := SetPower(device, "off"); err != nil {
+		return &api.PowerOffInternalServerError{
+			Error: fmt.Sprintf("failed to power off the device: %v", err),
+		}, nil
+	}
+	return &api.PowerOffNoContent{}, nil
+}
+
 func (h *APIHandler) SaveAnimation(ctx context.Context, req *api.SaveAnimationRequest) (api.SaveAnimationRes, error) {
 	frames := make([][]Color, len(req.Frames))
 	for i, apiFrame := range req.Frames {

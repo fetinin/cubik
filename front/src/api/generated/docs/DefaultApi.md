@@ -8,6 +8,8 @@ All URIs are relative to _http://localhost:9080_
 | [**getAnimation**](DefaultApi.md#getanimation)                | **GET** /api/animation/{id}             | Get a specific saved animation     |
 | [**getDevices**](DefaultApi.md#getdevices)                    | **GET** /api/devices                    | Discover Yeelight CubeLite devices |
 | [**listAnimations**](DefaultApi.md#listanimations)            | **GET** /api/animation/list/{device_id} | List saved animations for a device |
+| [**powerOff**](DefaultApi.md#poweroffoperation)               | **POST** /api/device/power/off          | Power off a device                 |
+| [**powerOn**](DefaultApi.md#poweronoperation)                 | **POST** /api/device/power/on           | Power on a device                  |
 | [**saveAnimation**](DefaultApi.md#saveanimationoperation)     | **POST** /api/animation/save            | Save animation to database         |
 | [**startAnimation**](DefaultApi.md#startanimationoperation)   | **POST** /api/animation/start           | Start animation playback on device |
 | [**stopAnimation**](DefaultApi.md#stopanimationoperation)     | **POST** /api/animation/stop            | Stop animation playback on device  |
@@ -263,6 +265,140 @@ No authorization required
 | ----------- | ------------------------ | ---------------- |
 | **200**     | List of saved animations | -                |
 | **500**     | Internal server error    | -                |
+
+[[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)
+
+## powerOff
+
+> powerOff(powerOffRequest)
+
+Power off a device
+
+Turns off the specified Yeelight device with a smooth transition effect
+
+### Example
+
+```ts
+import {
+  Configuration,
+  DefaultApi,
+} from '';
+import type { PowerOffOperationRequest } from '';
+
+async function example() {
+  console.log("🚀 Testing  SDK...");
+  const api = new DefaultApi();
+
+  const body = {
+    // PowerOffRequest
+    powerOffRequest: ...,
+  } satisfies PowerOffOperationRequest;
+
+  try {
+    const data = await api.powerOff(body);
+    console.log(data);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+// Run the test
+example().catch(console.error);
+```
+
+### Parameters
+
+| Name                | Type                                  | Description | Notes |
+| ------------------- | ------------------------------------- | ----------- | ----- |
+| **powerOffRequest** | [PowerOffRequest](PowerOffRequest.md) |             |       |
+
+### Return type
+
+`void` (Empty response body)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+- **Content-Type**: `application/json`
+- **Accept**: `application/json`
+
+### HTTP response details
+
+| Status code | Description                                  | Response headers |
+| ----------- | -------------------------------------------- | ---------------- |
+| **204**     | Device powered off successfully              | -                |
+| **400**     | Bad request - invalid device location format | -                |
+| **500**     | Internal server error                        | -                |
+
+[[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)
+
+## powerOn
+
+> powerOn(powerOnRequest)
+
+Power on a device
+
+Turns on the specified Yeelight device with a smooth transition effect
+
+### Example
+
+```ts
+import {
+  Configuration,
+  DefaultApi,
+} from '';
+import type { PowerOnOperationRequest } from '';
+
+async function example() {
+  console.log("🚀 Testing  SDK...");
+  const api = new DefaultApi();
+
+  const body = {
+    // PowerOnRequest
+    powerOnRequest: ...,
+  } satisfies PowerOnOperationRequest;
+
+  try {
+    const data = await api.powerOn(body);
+    console.log(data);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+// Run the test
+example().catch(console.error);
+```
+
+### Parameters
+
+| Name               | Type                                | Description | Notes |
+| ------------------ | ----------------------------------- | ----------- | ----- |
+| **powerOnRequest** | [PowerOnRequest](PowerOnRequest.md) |             |       |
+
+### Return type
+
+`void` (Empty response body)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+- **Content-Type**: `application/json`
+- **Accept**: `application/json`
+
+### HTTP response details
+
+| Status code | Description                                  | Response headers |
+| ----------- | -------------------------------------------- | ---------------- |
+| **204**     | Device powered on successfully               | -                |
+| **400**     | Bad request - invalid device location format | -                |
+| **500**     | Internal server error                        | -                |
 
 [[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)
 

@@ -32,6 +32,18 @@ type Handler interface {
 	//
 	// GET /api/animation/list/{device_id}
 	ListAnimations(ctx context.Context, params ListAnimationsParams) (ListAnimationsRes, error)
+	// PowerOff implements powerOff operation.
+	//
+	// Turns off the specified Yeelight device with a smooth transition effect.
+	//
+	// POST /api/device/power/off
+	PowerOff(ctx context.Context, req *PowerOffRequest) (PowerOffRes, error)
+	// PowerOn implements powerOn operation.
+	//
+	// Turns on the specified Yeelight device with a smooth transition effect.
+	//
+	// POST /api/device/power/on
+	PowerOn(ctx context.Context, req *PowerOnRequest) (PowerOnRes, error)
 	// SaveAnimation implements saveAnimation operation.
 	//
 	// Saves the current animation frames to the database with a name. Stored per device.

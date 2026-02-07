@@ -121,6 +121,15 @@ func TogglePower(device *DeviceInfo) error {
 	return fmt.Errorf("unexpected response from device: %+v", response.Result)
 }
 
+// SetPower turns the device on or off using a fire-and-forget approach.
+// The power parameter should be "on" or "off".
+func SetPower(device *DeviceInfo, power string) error {
+	if err := SendCommandNoResponse(device, "set_power", []any{power, "sudden", 0}); err != nil {
+		return fmt.Errorf("failed to set power: %w", err)
+	}
+	return nil
+}
+
 func encodeRGBColor(r, g, b uint8) string {
 	return base64.StdEncoding.EncodeToString([]byte{r, g, b})
 }

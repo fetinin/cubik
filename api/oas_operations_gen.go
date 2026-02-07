@@ -10,6 +10,8 @@ const (
 	GetAnimationOperation    OperationName = "GetAnimation"
 	GetDevicesOperation      OperationName = "GetDevices"
 	ListAnimationsOperation  OperationName = "ListAnimations"
+	PowerOffOperation        OperationName = "PowerOff"
+	PowerOnOperation         OperationName = "PowerOn"
 	SaveAnimationOperation   OperationName = "SaveAnimation"
 	StartAnimationOperation  OperationName = "StartAnimation"
 	StopAnimationOperation   OperationName = "StopAnimation"

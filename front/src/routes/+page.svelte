@@ -10,7 +10,9 @@
 		updateAnimation,
 		loadAnimation,
 		deleteAnimation,
-		listAnimations
+		listAnimations,
+		powerOnDevice,
+		powerOffDevice
 	} from '$lib/api/client';
 	import DeviceBar from '$lib/components/DeviceBar.svelte';
 	import AnimationPreview from '$lib/components/AnimationPreview.svelte';
@@ -54,6 +56,9 @@
 	let stoppedNotice = $state(false);
 	let stoppedNoticeTimeout: ReturnType<typeof setTimeout> | null = null;
 	let appliedNoticeTimeout: ReturnType<typeof setTimeout> | null = null;
+
+	// Track power state for each device locally (default: off)
+	let devicePowerState = $state<Record<string, 'on' | 'off'>>({});
 
 	// Saved animations state
 	let showLoadModal = $state(false);
@@ -342,12 +347,47 @@
 			stoppedNoticeTimeout = null;
 		}, 2000);
 	}
+
+	async function handlePowerToggle() {
+		const device = get(selectedDevice);
+		if (!device) return;
+
+		const currentState = devicePowerState[device.id] || 'off';
+		const newState = currentState === 'on' ? 'off' : 'on';
+
+		try {
+			if (newState === 'on') {
+				await powerOnDevice(device.location);
+			} else {
+				await powerOffDevice(device.location);
+			}
+			devicePowerState[device.id] = newState;
+		} catch (e) {
+			console.error('Failed to toggle power:', e);
+			error = 'Failed to control device power';
+		}
+	}
 </script>
 
 <main class="mx-auto max-w-6xl p-6">
 	<div class="flex items-center justify-between gap-4">
 		<h1 class="text-xl font-semibold">Cubik</h1>
-		<DeviceBar devices={$devices} selectedDeviceId={$selectedDeviceId} onSelect={selectDevice} />
+		<div class="flex items-center gap-3">
+			<DeviceBar devices={$devices} selectedDeviceId={$selectedDeviceId} onSelect={selectDevice} />
+			<button
+				type="button"
+				class="rounded border border-gray-300 px-3 py-1.5 text-xs font-medium disabled:opacity-50"
+				class:bg-green-600={$selectedDeviceId && devicePowerState[$selectedDeviceId] !== 'on'}
+				class:text-white={$selectedDeviceId && devicePowerState[$selectedDeviceId] !== 'on'}
+				disabled={!$selectedDeviceId}
+				onclick={handlePowerToggle}
+				data-testid="power-button"
+			>
+				{$selectedDeviceId && devicePowerState[$selectedDeviceId] === 'on'
+					? 'Power Off'
+					: 'Power On'}
+			</button>
+		</div>
 	</div>
 
 	{#if error}
