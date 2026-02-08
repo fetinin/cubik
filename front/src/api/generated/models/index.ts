@@ -1,5 +1,5 @@
 /* tslint:disable */
- 
+
 export * from './DeleteAnimationResponse';
 export * from './Device';
 export * from './GetAnimationResponse';
