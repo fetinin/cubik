@@ -17,6 +17,14 @@ type ListAnimationsRes interface {
 	listAnimationsRes()
 }
 
+type PowerOffRes interface {
+	powerOffRes()
+}
+
+type PowerOnRes interface {
+	powerOnRes()
+}
+
 type SaveAnimationRes interface {
 	saveAnimationRes()
 }

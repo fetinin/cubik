@@ -226,24 +226,92 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					return
 				}
 
-			case 'd': // Prefix: "devices"
+			case 'd': // Prefix: "device"
 
-				if l := len("devices"); len(elem) >= l && elem[0:l] == "devices" {
+				if l := len("device"); len(elem) >= l && elem[0:l] == "device" {
 					elem = elem[l:]
 				} else {
 					break
 				}
 
 				if len(elem) == 0 {
-					// Leaf node.
-					switch r.Method {
-					case "GET":
-						s.handleGetDevicesRequest([0]string{}, elemIsEscaped, w, r)
-					default:
-						s.notAllowed(w, r, "GET")
+					break
+				}
+				switch elem[0] {
+				case '/': // Prefix: "/power/o"
+
+					if l := len("/power/o"); len(elem) >= l && elem[0:l] == "/power/o" {
+						elem = elem[l:]
+					} else {
+						break
 					}
 
-					return
+					if len(elem) == 0 {
+						break
+					}
+					switch elem[0] {
+					case 'f': // Prefix: "ff"
+
+						if l := len("ff"); len(elem) >= l && elem[0:l] == "ff" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch r.Method {
+							case "POST":
+								s.handlePowerOffRequest([0]string{}, elemIsEscaped, w, r)
+							default:
+								s.notAllowed(w, r, "POST")
+							}
+
+							return
+						}
+
+					case 'n': // Prefix: "n"
+
+						if l := len("n"); len(elem) >= l && elem[0:l] == "n" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch r.Method {
+							case "POST":
+								s.handlePowerOnRequest([0]string{}, elemIsEscaped, w, r)
+							default:
+								s.notAllowed(w, r, "POST")
+							}
+
+							return
+						}
+
+					}
+
+				case 's': // Prefix: "s"
+
+					if l := len("s"); len(elem) >= l && elem[0:l] == "s" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch r.Method {
+						case "GET":
+							s.handleGetDevicesRequest([0]string{}, elemIsEscaped, w, r)
+						default:
+							s.notAllowed(w, r, "GET")
+						}
+
+						return
+					}
+
 				}
 
 			}
@@ -542,29 +610,107 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 					}
 				}
 
-			case 'd': // Prefix: "devices"
+			case 'd': // Prefix: "device"
 
-				if l := len("devices"); len(elem) >= l && elem[0:l] == "devices" {
+				if l := len("device"); len(elem) >= l && elem[0:l] == "device" {
 					elem = elem[l:]
 				} else {
 					break
 				}
 
 				if len(elem) == 0 {
-					// Leaf node.
-					switch method {
-					case "GET":
-						r.name = GetDevicesOperation
-						r.summary = "Discover Yeelight CubeLite devices"
-						r.operationID = "getDevices"
-						r.operationGroup = ""
-						r.pathPattern = "/api/devices"
-						r.args = args
-						r.count = 0
-						return r, true
-					default:
-						return
+					break
+				}
+				switch elem[0] {
+				case '/': // Prefix: "/power/o"
+
+					if l := len("/power/o"); len(elem) >= l && elem[0:l] == "/power/o" {
+						elem = elem[l:]
+					} else {
+						break
 					}
+
+					if len(elem) == 0 {
+						break
+					}
+					switch elem[0] {
+					case 'f': // Prefix: "ff"
+
+						if l := len("ff"); len(elem) >= l && elem[0:l] == "ff" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch method {
+							case "POST":
+								r.name = PowerOffOperation
+								r.summary = "Power off a device"
+								r.operationID = "powerOff"
+								r.operationGroup = ""
+								r.pathPattern = "/api/device/power/off"
+								r.args = args
+								r.count = 0
+								return r, true
+							default:
+								return
+							}
+						}
+
+					case 'n': // Prefix: "n"
+
+						if l := len("n"); len(elem) >= l && elem[0:l] == "n" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch method {
+							case "POST":
+								r.name = PowerOnOperation
+								r.summary = "Power on a device"
+								r.operationID = "powerOn"
+								r.operationGroup = ""
+								r.pathPattern = "/api/device/power/on"
+								r.args = args
+								r.count = 0
+								return r, true
+							default:
+								return
+							}
+						}
+
+					}
+
+				case 's': // Prefix: "s"
+
+					if l := len("s"); len(elem) >= l && elem[0:l] == "s" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch method {
+						case "GET":
+							r.name = GetDevicesOperation
+							r.summary = "Discover Yeelight CubeLite devices"
+							r.operationID = "getDevices"
+							r.operationGroup = ""
+							r.pathPattern = "/api/devices"
+							r.args = args
+							r.count = 0
+							return r, true
+						default:
+							return
+						}
+					}
+
 				}
 
 			}

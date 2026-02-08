@@ -26,9 +26,7 @@ run = "bun run dev --open"
 
 [tasks.dev]
 description = "Run backend and frontend in parallel"
-run = [
-    { tasks = ["back-dev", "front-dev"] },
-]
+run = [{ tasks = ["back-dev", "front-dev"] }]
 
 [tasks.release]
 description = "Create a GitHub release with date-based tag"

@@ -127,3 +127,19 @@ export async function updateAnimation(
 export async function deleteAnimation(id: string): Promise<void> {
 	await api.deleteAnimation({ id });
 }
+
+export async function powerOnDevice(deviceLocation: string): Promise<void> {
+	await api.powerOn({
+		powerOnRequest: {
+			deviceLocation
+		}
+	});
+}
+
+export async function powerOffDevice(deviceLocation: string): Promise<void> {
+	await api.powerOff({
+		powerOffRequest: {
+			deviceLocation
+		}
+	});
+}

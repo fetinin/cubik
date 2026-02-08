@@ -49,6 +49,24 @@ func (UnimplementedHandler) ListAnimations(ctx context.Context, params ListAnima
 	return r, ht.ErrNotImplemented
 }
 
+// PowerOff implements powerOff operation.
+//
+// Turns off the specified Yeelight device with a smooth transition effect.
+//
+// POST /api/device/power/off
+func (UnimplementedHandler) PowerOff(ctx context.Context, req *PowerOffRequest) (r PowerOffRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// PowerOn implements powerOn operation.
+//
+// Turns on the specified Yeelight device with a smooth transition effect.
+//
+// POST /api/device/power/on
+func (UnimplementedHandler) PowerOn(ctx context.Context, req *PowerOnRequest) (r PowerOnRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // SaveAnimation implements saveAnimation operation.
 //
 // Saves the current animation frames to the database with a name. Stored per device.

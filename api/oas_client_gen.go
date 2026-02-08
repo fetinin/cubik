@@ -51,6 +51,18 @@ type Invoker interface {
 	//
 	// GET /api/animation/list/{device_id}
 	ListAnimations(ctx context.Context, params ListAnimationsParams) (ListAnimationsRes, error)
+	// PowerOff invokes powerOff operation.
+	//
+	// Turns off the specified Yeelight device with a smooth transition effect.
+	//
+	// POST /api/device/power/off
+	PowerOff(ctx context.Context, request *PowerOffRequest) (PowerOffRes, error)
+	// PowerOn invokes powerOn operation.
+	//
+	// Turns on the specified Yeelight device with a smooth transition effect.
+	//
+	// POST /api/device/power/on
+	PowerOn(ctx context.Context, request *PowerOnRequest) (PowerOnRes, error)
 	// SaveAnimation invokes saveAnimation operation.
 	//
 	// Saves the current animation frames to the database with a name. Stored per device.
@@ -460,6 +472,158 @@ func (c *Client) sendListAnimations(ctx context.Context, params ListAnimationsPa
 
 	stage = "DecodeResponse"
 	result, err := decodeListAnimationsResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// PowerOff invokes powerOff operation.
+//
+// Turns off the specified Yeelight device with a smooth transition effect.
+//
+// POST /api/device/power/off
+func (c *Client) PowerOff(ctx context.Context, request *PowerOffRequest) (PowerOffRes, error) {
+	res, err := c.sendPowerOff(ctx, request)
+	return res, err
+}
+
+func (c *Client) sendPowerOff(ctx context.Context, request *PowerOffRequest) (res PowerOffRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("powerOff"),
+		semconv.HTTPRequestMethodKey.String("POST"),
+		semconv.URLTemplateKey.String("/api/device/power/off"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, PowerOffOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/api/device/power/off"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodePowerOffRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodePowerOffResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// PowerOn invokes powerOn operation.
+//
+// Turns on the specified Yeelight device with a smooth transition effect.
+//
+// POST /api/device/power/on
+func (c *Client) PowerOn(ctx context.Context, request *PowerOnRequest) (PowerOnRes, error) {
+	res, err := c.sendPowerOn(ctx, request)
+	return res, err
+}
+
+func (c *Client) sendPowerOn(ctx context.Context, request *PowerOnRequest) (res PowerOnRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("powerOn"),
+		semconv.HTTPRequestMethodKey.String("POST"),
+		semconv.URLTemplateKey.String("/api/device/power/on"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, PowerOnOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/api/device/power/on"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodePowerOnRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodePowerOnResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

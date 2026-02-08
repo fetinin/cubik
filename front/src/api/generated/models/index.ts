@@ -1,11 +1,13 @@
 /* tslint:disable */
-/* eslint-disable */
+
 export * from './DeleteAnimationResponse';
 export * from './Device';
 export * from './GetAnimationResponse';
 export * from './GetDevices200Response';
 export * from './ListAnimationsResponse';
 export * from './ModelError';
+export * from './PowerOffRequest';
+export * from './PowerOnRequest';
 export * from './RGBPixel';
 export * from './SaveAnimationRequest';
 export * from './SaveAnimationResponse';

@@ -179,6 +179,69 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  /api/device/power/on:
+    post:
+      operationId: powerOn
+      summary: Power on a device
+      description: Turns on the specified Yeelight device with a smooth transition effect
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PowerOnRequest'
+      responses:
+        '204':
+          description: Device powered on successfully
+        '400':
+          description: Bad request - invalid device location format
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                invalidDeviceLocation:
+                  summary: Invalid device location format
+                  value:
+                    error: "invalid device_location format"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /api/device/power/off:
+    post:
+      operationId: powerOff
+      summary: Power off a device
+      description: Turns off the specified Yeelight device with a smooth transition effect
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PowerOffRequest'
+      responses:
+        '204':
+          description: Device powered off successfully
+        '400':
+          description: Bad request - invalid device location format
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                invalidDeviceLocation:
+                  summary: Invalid device location format
+                  value:
+                    error: "invalid device_location format"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
   /api/animation/{id}:
     get:
       operationId: getAnimation
@@ -563,3 +626,25 @@ components:
           type: string
           description: Success message
           example: "Animation deleted successfully"
+    PowerOnRequest:
+      type: object
+      required:
+        - device_location
+      properties:
+        device_location:
+          type: string
+          pattern: '^yeelight://[0-9.]+:[0-9]+$'
+          description: Device location in format yeelight://IP:PORT
+          example: "yeelight://192.168.1.100:55443"
+      additionalProperties: false
+    PowerOffRequest:
+      type: object
+      required:
+        - device_location
+      properties:
+        device_location:
+          type: string
+          pattern: '^yeelight://[0-9.]+:[0-9]+$'
+          description: Device location in format yeelight://IP:PORT
+          example: "yeelight://192.168.1.100:55443"
+      additionalProperties: false

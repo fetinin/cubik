@@ -7,6 +7,8 @@ docs/GetAnimationResponse.md
 docs/GetDevices200Response.md
 docs/ListAnimationsResponse.md
 docs/ModelError.md
+docs/PowerOffRequest.md
+docs/PowerOnRequest.md
 docs/RGBPixel.md
 docs/SaveAnimationRequest.md
 docs/SaveAnimationResponse.md
@@ -24,6 +26,8 @@ models/GetAnimationResponse.ts
 models/GetDevices200Response.ts
 models/ListAnimationsResponse.ts
 models/ModelError.ts
+models/PowerOffRequest.ts
+models/PowerOnRequest.ts
 models/RGBPixel.ts
 models/SaveAnimationRequest.ts
 models/SaveAnimationResponse.ts

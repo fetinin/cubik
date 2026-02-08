@@ -18,6 +18,8 @@ import type {
 	GetAnimationResponse,
 	GetDevices200Response,
 	ListAnimationsResponse,
+	PowerOffRequest,
+	PowerOnRequest,
 	SaveAnimationRequest,
 	SaveAnimationResponse,
 	StartAnimationRequest,
@@ -36,6 +38,10 @@ import {
 	GetDevices200ResponseToJSON,
 	ListAnimationsResponseFromJSON,
 	ListAnimationsResponseToJSON,
+	PowerOffRequestFromJSON,
+	PowerOffRequestToJSON,
+	PowerOnRequestFromJSON,
+	PowerOnRequestToJSON,
 	SaveAnimationRequestFromJSON,
 	SaveAnimationRequestToJSON,
 	SaveAnimationResponseFromJSON,
@@ -64,6 +70,14 @@ export interface GetAnimationRequest {
 
 export interface ListAnimationsRequest {
 	deviceId: string;
+}
+
+export interface PowerOffOperationRequest {
+	powerOffRequest: PowerOffRequest;
+}
+
+export interface PowerOnOperationRequest {
+	powerOnRequest: PowerOnRequest;
 }
 
 export interface SaveAnimationOperationRequest {
@@ -274,6 +288,102 @@ export class DefaultApi extends runtime.BaseAPI {
 	): Promise<ListAnimationsResponse> {
 		const response = await this.listAnimationsRaw(requestParameters, initOverrides);
 		return await response.value();
+	}
+
+	/**
+	 * Turns off the specified Yeelight device with a smooth transition effect
+	 * Power off a device
+	 */
+	async powerOffRaw(
+		requestParameters: PowerOffOperationRequest,
+		initOverrides?: RequestInit | runtime.InitOverrideFunction
+	): Promise<runtime.ApiResponse<void>> {
+		if (requestParameters['powerOffRequest'] == null) {
+			throw new runtime.RequiredError(
+				'powerOffRequest',
+				'Required parameter "powerOffRequest" was null or undefined when calling powerOff().'
+			);
+		}
+
+		const queryParameters: any = {};
+
+		const headerParameters: runtime.HTTPHeaders = {};
+
+		headerParameters['Content-Type'] = 'application/json';
+
+		let urlPath = `/api/device/power/off`;
+
+		const response = await this.request(
+			{
+				path: urlPath,
+				method: 'POST',
+				headers: headerParameters,
+				query: queryParameters,
+				body: PowerOffRequestToJSON(requestParameters['powerOffRequest'])
+			},
+			initOverrides
+		);
+
+		return new runtime.VoidApiResponse(response);
+	}
+
+	/**
+	 * Turns off the specified Yeelight device with a smooth transition effect
+	 * Power off a device
+	 */
+	async powerOff(
+		requestParameters: PowerOffOperationRequest,
+		initOverrides?: RequestInit | runtime.InitOverrideFunction
+	): Promise<void> {
+		await this.powerOffRaw(requestParameters, initOverrides);
+	}
+
+	/**
+	 * Turns on the specified Yeelight device with a smooth transition effect
+	 * Power on a device
+	 */
+	async powerOnRaw(
+		requestParameters: PowerOnOperationRequest,
+		initOverrides?: RequestInit | runtime.InitOverrideFunction
+	): Promise<runtime.ApiResponse<void>> {
+		if (requestParameters['powerOnRequest'] == null) {
+			throw new runtime.RequiredError(
+				'powerOnRequest',
+				'Required parameter "powerOnRequest" was null or undefined when calling powerOn().'
+			);
+		}
+
+		const queryParameters: any = {};
+
+		const headerParameters: runtime.HTTPHeaders = {};
+
+		headerParameters['Content-Type'] = 'application/json';
+
+		let urlPath = `/api/device/power/on`;
+
+		const response = await this.request(
+			{
+				path: urlPath,
+				method: 'POST',
+				headers: headerParameters,
+				query: queryParameters,
+				body: PowerOnRequestToJSON(requestParameters['powerOnRequest'])
+			},
+			initOverrides
+		);
+
+		return new runtime.VoidApiResponse(response);
+	}
+
+	/**
+	 * Turns on the specified Yeelight device with a smooth transition effect
+	 * Power on a device
+	 */
+	async powerOn(
+		requestParameters: PowerOnOperationRequest,
+		initOverrides?: RequestInit | runtime.InitOverrideFunction
+	): Promise<void> {
+		await this.powerOnRaw(requestParameters, initOverrides);
 	}
 
 	/**

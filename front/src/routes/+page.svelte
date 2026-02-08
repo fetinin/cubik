@@ -10,7 +10,9 @@
 		updateAnimation,
 		loadAnimation,
 		deleteAnimation,
-		listAnimations
+		listAnimations,
+		powerOnDevice,
+		powerOffDevice
 	} from '$lib/api/client';
 	import DeviceBar from '$lib/components/DeviceBar.svelte';
 	import AnimationPreview from '$lib/components/AnimationPreview.svelte';
@@ -54,6 +56,13 @@
 	let stoppedNotice = $state(false);
 	let stoppedNoticeTimeout: ReturnType<typeof setTimeout> | null = null;
 	let appliedNoticeTimeout: ReturnType<typeof setTimeout> | null = null;
+
+	// Track power state for each device locally
+	const POWER_OFF = 'off' as const;
+	const POWER_ON = 'on' as const;
+	type PowerState = typeof POWER_ON | typeof POWER_OFF;
+
+	let devicePowerState = $state<Record<string, PowerState>>({});
 
 	// Saved animations state
 	let showLoadModal = $state(false);
@@ -342,12 +351,54 @@
 			stoppedNoticeTimeout = null;
 		}, 2000);
 	}
+
+	async function handlePowerToggle() {
+		const device = get(selectedDevice);
+		if (!device) return;
+
+		const currentState = devicePowerState[device.id] ?? POWER_OFF;
+		const newState: PowerState = currentState === POWER_ON ? POWER_OFF : POWER_ON;
+
+		try {
+			if (newState === POWER_ON) {
+				await powerOnDevice(device.location);
+			} else {
+				await powerOffDevice(device.location);
+			}
+			devicePowerState[device.id] = newState;
+		} catch (e) {
+			console.error('Failed to toggle power:', e);
+			error = 'Failed to control device power';
+		}
+	}
+
+	// Derived state for power button
+	const currentDevicePowerState = $derived(() => {
+		const deviceId = $selectedDeviceId;
+		if (!deviceId) return null;
+		return devicePowerState[deviceId] ?? POWER_OFF;
+	});
+
+	const isPowerOn = $derived(currentDevicePowerState() === POWER_ON);
 </script>
 
 <main class="mx-auto max-w-6xl p-6">
 	<div class="flex items-center justify-between gap-4">
 		<h1 class="text-xl font-semibold">Cubik</h1>
-		<DeviceBar devices={$devices} selectedDeviceId={$selectedDeviceId} onSelect={selectDevice} />
+		<div class="flex items-center gap-3">
+			<DeviceBar devices={$devices} selectedDeviceId={$selectedDeviceId} onSelect={selectDevice} />
+			<button
+				type="button"
+				class="rounded border border-gray-300 px-3 py-1.5 text-xs font-medium disabled:opacity-50"
+				class:bg-green-600={!isPowerOn}
+				class:text-white={!isPowerOn}
+				disabled={!$selectedDeviceId}
+				onclick={handlePowerToggle}
+				data-testid="power-button"
+			>
+				{isPowerOn ? 'Power Off' : 'Power On'}
+			</button>
+		</div>
 	</div>
 
 	{#if error}

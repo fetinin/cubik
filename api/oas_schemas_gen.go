@@ -152,6 +152,64 @@ func (s *ListAnimationsResponse) SetAnimations(val []SavedAnimation) {
 
 func (*ListAnimationsResponse) listAnimationsRes() {}
 
+type PowerOffBadRequest Error
+
+func (*PowerOffBadRequest) powerOffRes() {}
+
+type PowerOffInternalServerError Error
+
+func (*PowerOffInternalServerError) powerOffRes() {}
+
+// PowerOffNoContent is response for PowerOff operation.
+type PowerOffNoContent struct{}
+
+func (*PowerOffNoContent) powerOffRes() {}
+
+// Ref: #/components/schemas/PowerOffRequest
+type PowerOffRequest struct {
+	// Device location in format yeelight://IP:PORT.
+	DeviceLocation string `json:"device_location"`
+}
+
+// GetDeviceLocation returns the value of DeviceLocation.
+func (s *PowerOffRequest) GetDeviceLocation() string {
+	return s.DeviceLocation
+}
+
+// SetDeviceLocation sets the value of DeviceLocation.
+func (s *PowerOffRequest) SetDeviceLocation(val string) {
+	s.DeviceLocation = val
+}
+
+type PowerOnBadRequest Error
+
+func (*PowerOnBadRequest) powerOnRes() {}
+
+type PowerOnInternalServerError Error
+
+func (*PowerOnInternalServerError) powerOnRes() {}
+
+// PowerOnNoContent is response for PowerOn operation.
+type PowerOnNoContent struct{}
+
+func (*PowerOnNoContent) powerOnRes() {}
+
+// Ref: #/components/schemas/PowerOnRequest
+type PowerOnRequest struct {
+	// Device location in format yeelight://IP:PORT.
+	DeviceLocation string `json:"device_location"`
+}
+
+// GetDeviceLocation returns the value of DeviceLocation.
+func (s *PowerOnRequest) GetDeviceLocation() string {
+	return s.DeviceLocation
+}
+
+// SetDeviceLocation sets the value of DeviceLocation.
+func (s *PowerOnRequest) SetDeviceLocation(val string) {
+	s.DeviceLocation = val
+}
+
 // Ref: #/components/schemas/RGBPixel
 type RGBPixel struct {
 	// Red component (0-255).
