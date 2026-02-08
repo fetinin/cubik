@@ -16,23 +16,20 @@ This project uses [mise](https://mise.jdx.dev/getting-started.html) for task man
 # Build the application
 mise run build
 
-# Run the linter
+# Lint and format (runs both backend and frontend)
 mise run lint
-
-# Run the linter with auto-fix
 mise run fmt
 
-# Run backend and frontend dev servers in parallel
-mise run dev
+# Run tests (both backend and frontend)
+mise run test
 
-# Run only the Go backend server
-mise run back-dev
+# Generate API code from spec.yml (both backend and frontend)
+mise run gen
 
-# Run only the frontend dev server
-mise run front-dev
-
-# Validate mise task configuration
-mise tasks validate
+# Development servers
+mise run dev          # Run both backend and frontend in parallel
+mise run back-dev     # Backend only
+mise run front-dev    # Frontend only
 ```
 
 **IMPORTANT**: After making any changes to Go code, you MUST run `mise run lint` to check for linting issues. Use `mise run fmt` to automatically fix formatting issues. After modifying `mise.toml`, run `mise tasks validate` to verify the configuration is valid.
@@ -44,6 +41,7 @@ The project uses an **API spec-first development approach** with OpenAPI 3.1 and
 ### OpenAPI Specification
 
 The API is defined in `spec.yml` (OpenAPI 3.1 format):
+
 - **Endpoint**: `GET /api/devices`
 - **Server**: `http://localhost:9080`
 - **Response**: JSON array of devices with `id` and `name` fields
@@ -54,14 +52,15 @@ The API is defined in `spec.yml` (OpenAPI 3.1 format):
 The project uses [ogen-go/ogen](https://github.com/ogen-go/ogen) for automatic Go code generation from the OpenAPI spec:
 
 ```bash
-# Generate API code from spec.yml
-go generate ./...
+# Generate backend API code from spec.yml
+mise run gen        # Both backend and frontend
 
 # This creates/updates the api/ directory with ~17 auto-generated files
 # The api/ directory is committed to git for CI/CD and dependency management
 ```
 
 **Generated code includes:**
+
 - Server implementation (`api.NewServer`)
 - Request/response types (`api.Device`, `api.GetDevicesOK`, `api.Error`)
 - Handler interface (`api.Handler`)
@@ -72,6 +71,7 @@ go generate ./...
 ### Validation Behavior
 
 **IMPORTANT**: ogen automatically validates all request data based on the OpenAPI spec. Do NOT implement manual validation in handlers for:
+
 - Pattern matching (e.g., `pattern: '^yeelight://[0-9.]+:[0-9]+$'`)
 - Min/max length constraints (e.g., `minLength: 1`, `maxLength: 100`)
 - Required fields (e.g., `required: [device_id, name, frames]`)
@@ -84,30 +84,36 @@ If validation fails, ogen returns a 400 Bad Request with error details **before*
 ### API Implementation Files
 
 **Manual implementation:**
+
 - `spec.yml` - OpenAPI 3.1 specification (source of truth)
 - `generate.go` - go:generate directive for code generation
 - `handler.go` - Implements `api.Handler` interface, calls `DiscoverDevices()`
 - `server.go` - HTTP server setup with CORS middleware on port 9080
 
 **Auto-generated (committed to git):**
+
 - `api/*.go` - Generated server code (~17 files)
-- Should be regenerated after changes to `spec.yml` and committed
+- Regenerate with `mise run gen` after changes to `spec.yml`
 
 ### Running Modes
 
 The application supports two modes via command-line flag:
 
 **Demo Mode (default):**
+
 ```bash
 ./cubik
 ```
+
 - Discovers devices and runs animated LED patterns
 - Original CLI demonstration behavior
 
 **Server Mode:**
+
 ```bash
 ./cubik
 ```
+
 - Starts HTTP API server on port 9080
 - Endpoint: `GET http://localhost:9080/api/devices`
 - CORS enabled for frontend integration
@@ -116,22 +122,19 @@ The application supports two modes via command-line flag:
 ### Modifying the API
 
 1. Update `spec.yml` with new endpoints/schemas
-2. Run `go generate ./...` to regenerate backend code
-3. Run `cd front && bun run generate-api` to regenerate frontend client
-4. Implement new handler methods in `handler.go`
-5. Run `mise run lint` to check for linting issues
-6. Run `mise run build` to compile
+2. Run `mise run gen` to regenerate backend and frontend code
+3. Implement new handler methods in `handler.go`
+4. Run `mise run lint` to check for linting issues
+5. Run `mise run build` to compile
 
 **Example workflow:**
+
 ```bash
 # Edit spec.yml to add new endpoint
 vim spec.yml
 
-# Regenerate backend API code
-go generate ./...
-
-# Regenerate frontend API client
-cd front && bun run generate-api
+# Regenerate API code (both backend and frontend)
+mise run gen
 
 # Implement handler method
 vim handler.go
@@ -148,14 +151,16 @@ curl http://localhost:9080/api/devices
 The project includes automatic TypeScript client generation for the frontend:
 
 **Generate the client:**
+
 ```bash
-cd front
-bun run generate-api
+mise run front-gen  # Frontend only
+mise run gen        # Both backend and frontend
 ```
 
 This generates TypeScript types and API client code in `front/src/api/generated/` using the `openapitools/openapi-generator-cli` Docker image.
 
 **Using the generated client:**
+
 ```typescript
 import { DefaultApi, Configuration } from '$lib/api/generated';
 
@@ -223,6 +228,7 @@ await api.startAnimation({
 ### Data Structures
 
 **DeviceInfo**: Contains all device metadata from SSDP response
+
 - Location (format: `yeelight://IP:PORT`)
 - ID, Model, FwVer, Support capabilities
 - Current state: Power, Bright, ColorMode, CT, RGB, Hue, Sat, Name
@@ -251,6 +257,7 @@ await api.startAnimation({
 ## Reference Documentation
 
 See `docs/yeelight-protocol-guide.md` for comprehensive protocol documentation including:
+
 - Full command reference (set_power, toggle, set_bright, set_rgb, etc.)
 - Music mode for high-frequency updates (bypasses rate limiting)
 - Multi-module Matrix layouts and image display
@@ -258,6 +265,7 @@ See `docs/yeelight-protocol-guide.md` for comprehensive protocol documentation i
 - Troubleshooting common issues
 
 Additional protocol documentation in:
+
 - `docs/yeelight-protocol.md`
 - `docs/yeelight_protocol_analysis.md`
 
@@ -272,3 +280,4 @@ Additional protocol documentation in:
 - Demo mode runs infinite loop - user must Ctrl+C to exit
 - Yeelight cube device is limited to 60 RPS. Make sure not to exceed it
 - API code in `api/` directory is auto-generated - never edit manually, regenerate from `spec.yml`
+
