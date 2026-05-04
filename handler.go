@@ -170,6 +170,16 @@ func (h *APIHandler) DeleteAnimation(
 	return &api.DeleteAnimationResponse{Message: "Animation deleted successfully"}, nil
 }
 
+// ProbeSparseAnimation is a temporary echo handler that exists solely to keep
+// ogen-go's reachability analysis happy so it emits the SparseAnimation type.
+// It will be removed when /api/animations/import lands (T-import-endpoint).
+func (h *APIHandler) ProbeSparseAnimation(
+	_ context.Context,
+	req *api.SparseAnimation,
+) (api.ProbeSparseAnimationRes, error) {
+	return req, nil
+}
+
 func convertToAPIAnimation(anim *SavedAnimation) api.SavedAnimation {
 	apiFrames := make([]api.AnimationFrame, len(anim.Frames))
 	for i, frame := range anim.Frames {

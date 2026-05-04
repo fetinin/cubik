@@ -93,6 +93,34 @@ func (s *Error) SetError(val string) {
 func (*Error) getDevicesRes()     {}
 func (*Error) listAnimationsRes() {}
 
+// ErrorStatusCode wraps Error with StatusCode.
+type ErrorStatusCode struct {
+	StatusCode int
+	Response   Error
+}
+
+// GetStatusCode returns the value of StatusCode.
+func (s *ErrorStatusCode) GetStatusCode() int {
+	return s.StatusCode
+}
+
+// GetResponse returns the value of Response.
+func (s *ErrorStatusCode) GetResponse() Error {
+	return s.Response
+}
+
+// SetStatusCode sets the value of StatusCode.
+func (s *ErrorStatusCode) SetStatusCode(val int) {
+	s.StatusCode = val
+}
+
+// SetResponse sets the value of Response.
+func (s *ErrorStatusCode) SetResponse(val Error) {
+	s.Response = val
+}
+
+func (*ErrorStatusCode) probeSparseAnimationRes() {}
+
 type GetAnimationInternalServerError Error
 
 func (*GetAnimationInternalServerError) getAnimationRes() {}
@@ -413,6 +441,115 @@ func (s *SavedAnimation) SetCreatedAt(val time.Time) {
 // SetUpdatedAt sets the value of UpdatedAt.
 func (s *SavedAnimation) SetUpdatedAt(val time.Time) {
 	s.UpdatedAt = val
+}
+
+// Ref: #/components/schemas/SparseAnimation
+type SparseAnimation struct {
+	// Semver-style major.minor of the wire format. Same major guarantees forward-compatibility (older
+	// readers ignore unknown optional fields); a different major may be rejected by older decoders.
+	Version string `json:"version"`
+	// Human-readable animation name.
+	Name string `json:"name"`
+	// Matrix width in pixels.
+	Width int32 `json:"width"`
+	// Matrix height in pixels.
+	Height int32 `json:"height"`
+	// Sequence of sparse frames; each frame lists only non-black pixels.
+	Frames []SparseFrame `json:"frames"`
+}
+
+// GetVersion returns the value of Version.
+func (s *SparseAnimation) GetVersion() string {
+	return s.Version
+}
+
+// GetName returns the value of Name.
+func (s *SparseAnimation) GetName() string {
+	return s.Name
+}
+
+// GetWidth returns the value of Width.
+func (s *SparseAnimation) GetWidth() int32 {
+	return s.Width
+}
+
+// GetHeight returns the value of Height.
+func (s *SparseAnimation) GetHeight() int32 {
+	return s.Height
+}
+
+// GetFrames returns the value of Frames.
+func (s *SparseAnimation) GetFrames() []SparseFrame {
+	return s.Frames
+}
+
+// SetVersion sets the value of Version.
+func (s *SparseAnimation) SetVersion(val string) {
+	s.Version = val
+}
+
+// SetName sets the value of Name.
+func (s *SparseAnimation) SetName(val string) {
+	s.Name = val
+}
+
+// SetWidth sets the value of Width.
+func (s *SparseAnimation) SetWidth(val int32) {
+	s.Width = val
+}
+
+// SetHeight sets the value of Height.
+func (s *SparseAnimation) SetHeight(val int32) {
+	s.Height = val
+}
+
+// SetFrames sets the value of Frames.
+func (s *SparseAnimation) SetFrames(val []SparseFrame) {
+	s.Frames = val
+}
+
+func (*SparseAnimation) probeSparseAnimationRes() {}
+
+type SparseFrame []SparsePixel
+
+// Ref: #/components/schemas/SparsePixel
+type SparsePixel struct {
+	// Zero-based column index of the lit pixel.
+	X int32 `json:"x"`
+	// Zero-based row index of the lit pixel.
+	Y int32 `json:"y"`
+	// 24-bit packed RGB color (0xRRGGBB).
+	C int32 `json:"c"`
+}
+
+// GetX returns the value of X.
+func (s *SparsePixel) GetX() int32 {
+	return s.X
+}
+
+// GetY returns the value of Y.
+func (s *SparsePixel) GetY() int32 {
+	return s.Y
+}
+
+// GetC returns the value of C.
+func (s *SparsePixel) GetC() int32 {
+	return s.C
+}
+
+// SetX sets the value of X.
+func (s *SparsePixel) SetX(val int32) {
+	s.X = val
+}
+
+// SetY sets the value of Y.
+func (s *SparsePixel) SetY(val int32) {
+	s.Y = val
+}
+
+// SetC sets the value of C.
+func (s *SparsePixel) SetC(val int32) {
+	s.C = val
 }
 
 type StartAnimationBadRequest Error

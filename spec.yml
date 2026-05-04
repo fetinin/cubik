@@ -179,6 +179,32 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  /api/_internal/sparse-probe:
+    post:
+      operationId: probeSparseAnimation
+      deprecated: true
+      summary: Internal schema probe for SparseAnimation (do not use)
+      description: "Temporary endpoint added to force ogen-go schema emission for SparseAnimation. Will be removed when /api/animations/import lands (T-import-endpoint)."
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SparseAnimation'
+      responses:
+        '200':
+          description: Echo of the request body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SparseAnimation'
+        default:
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
   /api/device/power/on:
     post:
       operationId: powerOn

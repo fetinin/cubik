@@ -25,6 +25,10 @@ type PowerOnRes interface {
 	powerOnRes()
 }
 
+type ProbeSparseAnimationRes interface {
+	probeSparseAnimationRes()
+}
+
 type SaveAnimationRes interface {
 	saveAnimationRes()
 }

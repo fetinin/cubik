@@ -67,6 +67,18 @@ func (UnimplementedHandler) PowerOn(ctx context.Context, req *PowerOnRequest) (r
 	return r, ht.ErrNotImplemented
 }
 
+// ProbeSparseAnimation implements probeSparseAnimation operation.
+//
+// Temporary endpoint added to force ogen-go schema emission for SparseAnimation. Will be removed
+// when /api/animations/import lands (T-import-endpoint).
+//
+// Deprecated: schema marks this operation as deprecated.
+//
+// POST /api/_internal/sparse-probe
+func (UnimplementedHandler) ProbeSparseAnimation(ctx context.Context, req *SparseAnimation) (r ProbeSparseAnimationRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // SaveAnimation implements saveAnimation operation.
 //
 // Saves the current animation frames to the database with a name. Stored per device.
