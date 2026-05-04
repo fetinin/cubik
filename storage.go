@@ -215,3 +215,59 @@ func DeleteAnimation(ctx context.Context, db *sql.DB, id string) error {
 	}
 	return nil
 }
+
+// NameExists reports whether an animation with the given name already exists for the device.
+// Returns false on no-row, true on hit, error on other DB failures.
+func NameExists(ctx context.Context, db *sql.DB, deviceID, name string) (bool, error) {
+	var sentinel int
+	queryErr := db.QueryRowContext(
+		ctx,
+		`SELECT 1 FROM saved_animations WHERE device_id = ? AND name = ? LIMIT 1`,
+		deviceID, name,
+	).Scan(&sentinel)
+
+	if errors.Is(queryErr, sql.ErrNoRows) {
+		return false, nil
+	}
+	if queryErr != nil {
+		return false, fmt.Errorf("failed to check animation existence: %w", queryErr)
+	}
+	return true, nil
+}
+
+// AnimationByName fetches a saved animation by (deviceID, name). Returns ErrNotFound if there is none.
+// Mirrors the GetAnimation shape but keys on name within a device scope.
+func AnimationByName(ctx context.Context, db *sql.DB, deviceID, name string) (*SavedAnimation, error) {
+	var id, framesJSON, createdAt, updatedAt string
+
+	queryErr := db.QueryRowContext(
+		ctx,
+		`SELECT id, frames_json, created_at, updated_at
+		 FROM saved_animations WHERE device_id = ? AND name = ?`,
+		deviceID, name,
+	).Scan(&id, &framesJSON, &createdAt, &updatedAt)
+
+	if errors.Is(queryErr, sql.ErrNoRows) {
+		return nil, ErrNotFound
+	}
+	if queryErr != nil {
+		return nil, fmt.Errorf("failed to query animation: %w", queryErr)
+	}
+
+	frames, deserializeErr := deserializeFrames(framesJSON)
+	if deserializeErr != nil {
+		return nil, deserializeErr
+	}
+
+	createdTime, _ := time.Parse(time.RFC3339, createdAt)
+	updatedTime, _ := time.Parse(time.RFC3339, updatedAt)
+
+	return &SavedAnimation{
+		ID:        id,
+		DeviceID:  deviceID,
+		Name:      name,
+		Frames:    frames,
+		CreatedAt: createdTime,
+		UpdatedAt: updatedTime,
+	}, nil
+}
