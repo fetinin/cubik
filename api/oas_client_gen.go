@@ -16,7 +16,7 @@ import (
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/metric"
-	semconv "go.opentelemetry.io/otel/semconv/v1.37.0"
+	semconv "go.opentelemetry.io/otel/semconv/v1.39.0"
 	"go.opentelemetry.io/otel/trace"
 )
 
@@ -95,10 +95,6 @@ type Client struct {
 	serverURL *url.URL
 	baseClient
 }
-
-var _ Handler = struct {
-	*Client
-}{}
 
 // NewClient initializes new Client defined by OAS.
 func NewClient(serverURL string, opts ...ClientOption) (*Client, error) {
@@ -213,7 +209,8 @@ func (c *Client) sendDeleteAnimation(ctx context.Context, params DeleteAnimation
 	if err != nil {
 		return res, errors.Wrap(err, "do request")
 	}
-	defer resp.Body.Close()
+	body := resp.Body
+	defer body.Close()
 
 	stage = "DecodeResponse"
 	result, err := decodeDeleteAnimationResponse(resp)
@@ -304,7 +301,8 @@ func (c *Client) sendGetAnimation(ctx context.Context, params GetAnimationParams
 	if err != nil {
 		return res, errors.Wrap(err, "do request")
 	}
-	defer resp.Body.Close()
+	body := resp.Body
+	defer body.Close()
 
 	stage = "DecodeResponse"
 	result, err := decodeGetAnimationResponse(resp)
@@ -377,7 +375,8 @@ func (c *Client) sendGetDevices(ctx context.Context) (res GetDevicesRes, err err
 	if err != nil {
 		return res, errors.Wrap(err, "do request")
 	}
-	defer resp.Body.Close()
+	body := resp.Body
+	defer body.Close()
 
 	stage = "DecodeResponse"
 	result, err := decodeGetDevicesResponse(resp)
@@ -468,7 +467,8 @@ func (c *Client) sendListAnimations(ctx context.Context, params ListAnimationsPa
 	if err != nil {
 		return res, errors.Wrap(err, "do request")
 	}
-	defer resp.Body.Close()
+	body := resp.Body
+	defer body.Close()
 
 	stage = "DecodeResponse"
 	result, err := decodeListAnimationsResponse(resp)
@@ -544,7 +544,8 @@ func (c *Client) sendPowerOff(ctx context.Context, request *PowerOffRequest) (re
 	if err != nil {
 		return res, errors.Wrap(err, "do request")
 	}
-	defer resp.Body.Close()
+	body := resp.Body
+	defer body.Close()
 
 	stage = "DecodeResponse"
 	result, err := decodePowerOffResponse(resp)
@@ -620,7 +621,8 @@ func (c *Client) sendPowerOn(ctx context.Context, request *PowerOnRequest) (res 
 	if err != nil {
 		return res, errors.Wrap(err, "do request")
 	}
-	defer resp.Body.Close()
+	body := resp.Body
+	defer body.Close()
 
 	stage = "DecodeResponse"
 	result, err := decodePowerOnResponse(resp)
@@ -696,7 +698,8 @@ func (c *Client) sendSaveAnimation(ctx context.Context, request *SaveAnimationRe
 	if err != nil {
 		return res, errors.Wrap(err, "do request")
 	}
-	defer resp.Body.Close()
+	body := resp.Body
+	defer body.Close()
 
 	stage = "DecodeResponse"
 	result, err := decodeSaveAnimationResponse(resp)
@@ -773,7 +776,8 @@ func (c *Client) sendStartAnimation(ctx context.Context, request *StartAnimation
 	if err != nil {
 		return res, errors.Wrap(err, "do request")
 	}
-	defer resp.Body.Close()
+	body := resp.Body
+	defer body.Close()
 
 	stage = "DecodeResponse"
 	result, err := decodeStartAnimationResponse(resp)
@@ -849,7 +853,8 @@ func (c *Client) sendStopAnimation(ctx context.Context, request *StopAnimationRe
 	if err != nil {
 		return res, errors.Wrap(err, "do request")
 	}
-	defer resp.Body.Close()
+	body := resp.Body
+	defer body.Close()
 
 	stage = "DecodeResponse"
 	result, err := decodeStopAnimationResponse(resp)
@@ -943,7 +948,8 @@ func (c *Client) sendUpdateAnimation(ctx context.Context, request *UpdateAnimati
 	if err != nil {
 		return res, errors.Wrap(err, "do request")
 	}
-	defer resp.Body.Close()
+	body := resp.Body
+	defer body.Close()
 
 	stage = "DecodeResponse"
 	result, err := decodeUpdateAnimationResponse(resp)
