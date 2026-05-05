@@ -692,6 +692,87 @@
       },
       "created_at": 1777980428,
       "pinned_git_sha": "e6b338b279d4acfa69fb183850453d789a78e751"
+    },
+    {
+      "id": "01KQVYZN4HYYWT89TA1QXW6WH4",
+      "scope_path": "",
+      "version_id": {
+        "type": "WORKING"
+      },
+      "spec_ref": {
+        "Node": "backend"
+      },
+      "code_ref": {
+        "file": "mise.toml",
+        "symbol": null,
+        "span": null,
+        "symbol_hash": "4bd98e33817bd2ba5aa7dc4def0a593ed5be0b73c376477cd8ea4eefb53e8585",
+        "canonicalizer_version": {
+          "parser": "bytes",
+          "rules": "v1"
+        }
+      },
+      "kind": "indirect",
+      "role": "gen-check",
+      "origin": {
+        "type": "agent"
+      },
+      "created_at": 1777981183,
+      "pinned_git_sha": "0e189da19627f1747730454d9b3b8767371c26f8"
+    },
+    {
+      "id": "01KQVYZN5FM7VT7KVVGEKPTEBN",
+      "scope_path": "",
+      "version_id": {
+        "type": "WORKING"
+      },
+      "spec_ref": {
+        "Node": "backend"
+      },
+      "code_ref": {
+        "file": "server.go",
+        "symbol": null,
+        "span": null,
+        "symbol_hash": "f3bd5268fa2c61b3ffb105487b2b411d4632630ade403823435b1ae9afee48ef",
+        "canonicalizer_version": {
+          "parser": "bytes",
+          "rules": "v1"
+        }
+      },
+      "kind": "literal",
+      "role": "mount",
+      "origin": {
+        "type": "agent"
+      },
+      "created_at": 1777981183,
+      "pinned_git_sha": "0e189da19627f1747730454d9b3b8767371c26f8"
+    },
+    {
+      "id": "01KQVYZN6E64Q5509QPCRR15N2",
+      "scope_path": "",
+      "version_id": {
+        "type": "WORKING"
+      },
+      "spec_ref": {
+        "Node": "backend"
+      },
+      "code_ref": {
+        "file": "handler.go",
+        "symbol": null,
+        "span": null,
+        "symbol_hash": "48c76621ccb12c20d4e7b1be7a9ef4ed2b6b39631fd8d86ff0a7723f0d9b133c",
+        "canonicalizer_version": {
+          "parser": "bytes",
+          "rules": "v1"
+        }
+      },
+      "kind": "literal",
+      "role": "handlers",
+      "origin": {
+        "type": "agent"
+      },
+      "created_at": 1777981183,
+      "pinned_git_sha": "0e189da19627f1747730454d9b3b8767371c26f8"
     }
   ]
 }

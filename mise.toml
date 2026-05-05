@@ -95,6 +95,13 @@ run = [{ tasks = ["back-lint", "front-lint"] }]
 description = "Format all code (backend and frontend)"
 run = [{ tasks = ["back-fmt", "front-fmt"] }]
 
+[tasks.gen-check]
+description = "Verify spec.yml and committed api/ are in sync"
+run = [
+  "mise run back-gen",
+  "git diff --exit-code -- api/ go.mod go.sum || (echo 'spec.yml and api/ are out of sync — run \"mise run back-gen\" and commit the result' && exit 1)",
+]
+
 [tasks.check]
 description = "Run all checks (tests, lint, type check)"
-run = [{ tasks = ["test", "lint", "front-check"] }]
+run = [{ tasks = ["test", "lint", "front-check", "gen-check"] }]
