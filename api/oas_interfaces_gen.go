@@ -5,6 +5,10 @@ type DeleteAnimationRes interface {
 	deleteAnimationRes()
 }
 
+type ExportAnimationRes interface {
+	exportAnimationRes()
+}
+
 type GetAnimationRes interface {
 	getAnimationRes()
 }

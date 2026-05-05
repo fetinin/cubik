@@ -77,13 +77,19 @@ func corsMiddleware(next http.Handler) http.Handler {
 // buildAPIHandler composes the API middleware chain (size cap + CORS) around
 // the ogen server, without mounting the SPA. Extracted so tests can drive
 // the wire path with [httptest.NewServer].
+//
+// The export endpoint is special-cased via exportRouteOverride: ogen's
+// typed-handler signature does not expose [http.ResponseWriter], so the
+// Content-Disposition: attachment header — which is part of the export
+// contract — is set by a tiny non-ogen route mounted directly on the chain.
+// All other operations flow through the ogen server unchanged.
 func buildAPIHandler(db *sql.DB) (http.Handler, error) {
 	handler := &APIHandler{db: db}
 	srv, srvErr := api.NewServer(handler)
 	if srvErr != nil {
 		return nil, fmt.Errorf("failed to create server: %w", srvErr)
 	}
-	return importBodyLimitMiddleware(corsMiddleware(srv)), nil
+	return importBodyLimitMiddleware(corsMiddleware(exportRouteOverride(db, srv))), nil
 }
 
 func StartServer(ctx context.Context, db *sql.DB, port string) error {

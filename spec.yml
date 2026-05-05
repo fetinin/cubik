@@ -294,6 +294,54 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  /api/animation/{id}/export:
+    get:
+      operationId: exportAnimation
+      summary: Export a saved animation as portable Sparse JSON
+      description: |
+        Fetches the saved animation and returns a versioned Sparse JSON
+        representation suitable for sharing across devices and users. The
+        response carries a Content-Disposition attachment header so browsers
+        treat it as a downloadable file. Note: the Content-Disposition header
+        is set by the Go HTTP layer, not by ogen; the spec documents it for
+        clients but does not drive code generation for it.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Unique identifier of the saved animation
+          example: "550e8400-e29b-41d4-a716-446655440000"
+      responses:
+        '200':
+          description: |
+            Animation exported successfully. The response carries a
+            `Content-Disposition: attachment; filename="<sanitized-name>.cubik.json"`
+            header so browsers treat the body as a downloadable file.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SparseAnimation'
+        '404':
+          description: Animation not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                notFound:
+                  summary: Animation does not exist
+                  value:
+                    error: "animation not found"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
   /api/animation/{id}:
     get:
       operationId: getAnimation

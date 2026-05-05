@@ -7,6 +7,7 @@ type OperationName = string
 
 const (
 	DeleteAnimationOperation OperationName = "DeleteAnimation"
+	ExportAnimationOperation OperationName = "ExportAnimation"
 	GetAnimationOperation    OperationName = "GetAnimation"
 	GetDevicesOperation      OperationName = "GetDevices"
 	ImportAnimationOperation OperationName = "ImportAnimation"

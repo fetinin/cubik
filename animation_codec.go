@@ -26,6 +26,16 @@ const CURRENT_FORMAT_MAJOR = 1
 //nolint:revive,staticcheck // name fixed by T-codec plan
 const CURRENT_FORMAT_VERSION = "1.0"
 
+// MatrixWidth and MatrixHeight are the LED dimensions of the only supported
+// device today (Yeelight CubeLite). The encoder needs these to flatten the
+// row-major frame buffer into Sparse {x, y} coordinates; they live here next
+// to the other format-side constants so both the codec and any handler that
+// orchestrates the codec can find them in one place.
+const (
+	MatrixWidth  = 20
+	MatrixHeight = 5
+)
+
 // ImportMode controls the behaviour of PersistImported when the incoming
 // animation collides with an existing record by name on the same device.
 type ImportMode string

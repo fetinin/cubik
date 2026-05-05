@@ -263,6 +263,27 @@ func mapImportMode(opt api.OptImportAnimationMode) ImportMode {
 	}
 }
 
+// ExportAnimation is wired into ogen's Handler interface but is not the live
+// path: GET /api/animation/{id}/export is served by a dedicated, non-ogen
+// HTTP route mounted in server.go (see exportAnimationRoute) so the response
+// can carry a Content-Disposition: attachment header keyed off the
+// animation's name. Ogen's typed-handler signature does not expose the raw
+// [http.ResponseWriter] to the handler, and the simplest "set the header from
+// the typed handler" workarounds (ResponseWriter-via-context, custom encoder)
+// produced more glue than the entire feature does. The non-ogen route owns
+// the whole request; this method exists only to satisfy api.Handler at
+// compile time and returns 500 if it is ever reached, which would indicate
+// the export route override regressed.
+func (h *APIHandler) ExportAnimation(
+	_ context.Context,
+	_ api.ExportAnimationParams,
+) (api.ExportAnimationRes, error) {
+	slog.Error("ExportAnimation reached the ogen handler; the non-ogen route override is missing")
+	return &api.ExportAnimationInternalServerError{
+		Error: "export route misconfigured",
+	}, nil
+}
+
 func (h *APIHandler) DeleteAnimation(
 	ctx context.Context,
 	params api.DeleteAnimationParams,

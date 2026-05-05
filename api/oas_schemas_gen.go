@@ -96,6 +96,14 @@ func (s *Error) SetError(val string) {
 func (*Error) getDevicesRes()     {}
 func (*Error) listAnimationsRes() {}
 
+type ExportAnimationInternalServerError Error
+
+func (*ExportAnimationInternalServerError) exportAnimationRes() {}
+
+type ExportAnimationNotFound Error
+
+func (*ExportAnimationNotFound) exportAnimationRes() {}
+
 type GetAnimationInternalServerError Error
 
 func (*GetAnimationInternalServerError) getAnimationRes() {}
@@ -745,6 +753,8 @@ func (s *SparseAnimation) SetHeight(val int32) {
 func (s *SparseAnimation) SetFrames(val []SparseFrame) {
 	s.Frames = val
 }
+
+func (*SparseAnimation) exportAnimationRes() {}
 
 type SparseFrame []SparsePixel
 
