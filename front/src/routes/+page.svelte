@@ -22,6 +22,7 @@
 	import MatrixGrid from '$lib/components/MatrixGrid.svelte';
 	import LoadAnimationModal from '$lib/components/LoadAnimationModal.svelte';
 	import SaveAnimationModal from '$lib/components/SaveAnimationModal.svelte';
+	import AnimationLibraryActions from '$lib/components/AnimationLibraryActions.svelte';
 	import {
 		buildAnimationPayload,
 		createEditorState,
@@ -584,6 +585,17 @@
 					{#if stoppedNotice}
 						<div class="mt-3 text-sm text-gray-600">Animation stopped.</div>
 					{/if}
+				</section>
+
+				<section class="rounded border border-gray-200 p-4">
+					<AnimationLibraryActions
+						animations={savedAnimations}
+						deviceId={$selectedDeviceId}
+						onrefresh={async () => {
+							const device = get(selectedDevice);
+							if (device) await refreshSavedAnimations(device.id);
+						}}
+					/>
 				</section>
 			</aside>
 		</div>

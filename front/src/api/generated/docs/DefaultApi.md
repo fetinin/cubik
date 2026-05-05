@@ -2,19 +2,20 @@
 
 All URIs are relative to _http://localhost:9080_
 
-| Method                                                        | HTTP request                            | Description                                    |
-| ------------------------------------------------------------- | --------------------------------------- | ---------------------------------------------- |
-| [**deleteAnimation**](DefaultApi.md#deleteanimation)          | **DELETE** /api/animation/{id}          | Delete a saved animation                       |
-| [**getAnimation**](DefaultApi.md#getanimation)                | **GET** /api/animation/{id}             | Get a specific saved animation                 |
-| [**getDevices**](DefaultApi.md#getdevices)                    | **GET** /api/devices                    | Discover Yeelight CubeLite devices             |
-| [**importAnimation**](DefaultApi.md#importanimationoperation) | **POST** /api/animation/import          | Import an animation from a Sparse JSON payload |
-| [**listAnimations**](DefaultApi.md#listanimations)            | **GET** /api/animation/list/{device_id} | List saved animations for a device             |
-| [**powerOff**](DefaultApi.md#poweroffoperation)               | **POST** /api/device/power/off          | Power off a device                             |
-| [**powerOn**](DefaultApi.md#poweronoperation)                 | **POST** /api/device/power/on           | Power on a device                              |
-| [**saveAnimation**](DefaultApi.md#saveanimationoperation)     | **POST** /api/animation/save            | Save animation to database                     |
-| [**startAnimation**](DefaultApi.md#startanimationoperation)   | **POST** /api/animation/start           | Start animation playback on device             |
-| [**stopAnimation**](DefaultApi.md#stopanimationoperation)     | **POST** /api/animation/stop            | Stop animation playback on device              |
-| [**updateAnimation**](DefaultApi.md#updateanimationoperation) | **PUT** /api/animation/{id}             | Update an existing saved animation             |
+| Method                                                        | HTTP request                            | Description                                      |
+| ------------------------------------------------------------- | --------------------------------------- | ------------------------------------------------ |
+| [**deleteAnimation**](DefaultApi.md#deleteanimation)          | **DELETE** /api/animation/{id}          | Delete a saved animation                         |
+| [**exportAnimation**](DefaultApi.md#exportanimation)          | **GET** /api/animation/{id}/export      | Export a saved animation as portable Sparse JSON |
+| [**getAnimation**](DefaultApi.md#getanimation)                | **GET** /api/animation/{id}             | Get a specific saved animation                   |
+| [**getDevices**](DefaultApi.md#getdevices)                    | **GET** /api/devices                    | Discover Yeelight CubeLite devices               |
+| [**importAnimation**](DefaultApi.md#importanimationoperation) | **POST** /api/animation/import          | Import an animation from a Sparse JSON payload   |
+| [**listAnimations**](DefaultApi.md#listanimations)            | **GET** /api/animation/list/{device_id} | List saved animations for a device               |
+| [**powerOff**](DefaultApi.md#poweroffoperation)               | **POST** /api/device/power/off          | Power off a device                               |
+| [**powerOn**](DefaultApi.md#poweronoperation)                 | **POST** /api/device/power/on           | Power on a device                                |
+| [**saveAnimation**](DefaultApi.md#saveanimationoperation)     | **POST** /api/animation/save            | Save animation to database                       |
+| [**startAnimation**](DefaultApi.md#startanimationoperation)   | **POST** /api/animation/start           | Start animation playback on device               |
+| [**stopAnimation**](DefaultApi.md#stopanimationoperation)     | **POST** /api/animation/stop            | Stop animation playback on device                |
+| [**updateAnimation**](DefaultApi.md#updateanimationoperation) | **PUT** /api/animation/{id}             | Update an existing saved animation               |
 
 ## deleteAnimation
 
@@ -80,6 +81,73 @@ No authorization required
 | **200**     | Animation deleted successfully | -                |
 | **404**     | Animation not found            | -                |
 | **500**     | Internal server error          | -                |
+
+[[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)
+
+## exportAnimation
+
+> SparseAnimation exportAnimation(id)
+
+Export a saved animation as portable Sparse JSON
+
+Fetches the saved animation and returns a versioned Sparse JSON representation suitable for sharing across devices and users. The response carries a Content-Disposition attachment header so browsers treat it as a downloadable file. Note: the Content-Disposition header is set by the Go HTTP layer, not by ogen; the spec documents it for clients but does not drive code generation for it.
+
+### Example
+
+```ts
+import {
+  Configuration,
+  DefaultApi,
+} from '';
+import type { ExportAnimationRequest } from '';
+
+async function example() {
+  console.log("🚀 Testing  SDK...");
+  const api = new DefaultApi();
+
+  const body = {
+    // string | Unique identifier of the saved animation
+    id: 550e8400-e29b-41d4-a716-446655440000,
+  } satisfies ExportAnimationRequest;
+
+  try {
+    const data = await api.exportAnimation(body);
+    console.log(data);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+// Run the test
+example().catch(console.error);
+```
+
+### Parameters
+
+| Name   | Type     | Description                              | Notes                     |
+| ------ | -------- | ---------------------------------------- | ------------------------- |
+| **id** | `string` | Unique identifier of the saved animation | [Defaults to `undefined`] |
+
+### Return type
+
+[**SparseAnimation**](SparseAnimation.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: `application/json`
+
+### HTTP response details
+
+| Status code | Description                                                                                                                                                                                                                  | Response headers |
+| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------- |
+| **200**     | Animation exported successfully. The response carries a &#x60;Content-Disposition: attachment; filename&#x3D;\&quot;&lt;sanitized-name&gt;.cubik.json\&quot;&#x60; header so browsers treat the body as a downloadable file. | -                |
+| **404**     | Animation not found                                                                                                                                                                                                          | -                |
+| **500**     | Internal server error                                                                                                                                                                                                        | -                |
 
 [[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)
 

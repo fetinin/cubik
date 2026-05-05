@@ -773,6 +773,157 @@
       },
       "created_at": 1777981183,
       "pinned_git_sha": "0e189da19627f1747730454d9b3b8767371c26f8"
+    },
+    {
+      "id": "01KQW01Y9767YP4Z933BVJVYF0",
+      "scope_path": "",
+      "version_id": {
+        "type": "WORKING"
+      },
+      "spec_ref": {
+        "Node": "frontend"
+      },
+      "code_ref": {
+        "file": "front/src/lib/components/AnimationLibraryActions.svelte",
+        "symbol": null,
+        "span": null,
+        "symbol_hash": "b66816e684337b8cb312c77d66f357f283e00184fa50f60645eb1ecbfe0ab3cf",
+        "canonicalizer_version": {
+          "parser": "bytes",
+          "rules": "v1"
+        }
+      },
+      "kind": "literal",
+      "role": "library-actions",
+      "origin": {
+        "type": "agent"
+      },
+      "created_at": 1777982306,
+      "pinned_git_sha": "74f19de60764958f1f5599876cbdc61a73f3abff"
+    },
+    {
+      "id": "01KQW022CV90306Y91QG68WW69",
+      "scope_path": "",
+      "version_id": {
+        "type": "WORKING"
+      },
+      "spec_ref": {
+        "Edge": {
+          "from": "frontend",
+          "to": "clipboard_channel",
+          "edge_type": "ingests_from"
+        }
+      },
+      "code_ref": {
+        "file": "front/src/lib/components/AnimationLibraryActions.svelte",
+        "symbol": null,
+        "span": null,
+        "symbol_hash": "b66816e684337b8cb312c77d66f357f283e00184fa50f60645eb1ecbfe0ab3cf",
+        "canonicalizer_version": {
+          "parser": "bytes",
+          "rules": "v1"
+        }
+      },
+      "kind": "indirect",
+      "role": "paste-flow",
+      "origin": {
+        "type": "agent"
+      },
+      "created_at": 1777982310,
+      "pinned_git_sha": "74f19de60764958f1f5599876cbdc61a73f3abff"
+    },
+    {
+      "id": "01KQW0247CXVZH84E846SGY3WX",
+      "scope_path": "",
+      "version_id": {
+        "type": "WORKING"
+      },
+      "spec_ref": {
+        "Edge": {
+          "from": "frontend",
+          "to": "clipboard_channel",
+          "edge_type": "emits_to"
+        }
+      },
+      "code_ref": {
+        "file": "front/src/lib/components/AnimationLibraryActions.svelte",
+        "symbol": null,
+        "span": null,
+        "symbol_hash": "b66816e684337b8cb312c77d66f357f283e00184fa50f60645eb1ecbfe0ab3cf",
+        "canonicalizer_version": {
+          "parser": "bytes",
+          "rules": "v1"
+        }
+      },
+      "kind": "indirect",
+      "role": "copy-flow",
+      "origin": {
+        "type": "agent"
+      },
+      "created_at": 1777982312,
+      "pinned_git_sha": "74f19de60764958f1f5599876cbdc61a73f3abff"
+    },
+    {
+      "id": "01KQW024JPSCBJQ85MB8TVW6VG",
+      "scope_path": "",
+      "version_id": {
+        "type": "WORKING"
+      },
+      "spec_ref": {
+        "Edge": {
+          "from": "frontend",
+          "to": "file_channel",
+          "edge_type": "ingests_from"
+        }
+      },
+      "code_ref": {
+        "file": "front/src/lib/components/AnimationLibraryActions.svelte",
+        "symbol": null,
+        "span": null,
+        "symbol_hash": "b66816e684337b8cb312c77d66f357f283e00184fa50f60645eb1ecbfe0ab3cf",
+        "canonicalizer_version": {
+          "parser": "bytes",
+          "rules": "v1"
+        }
+      },
+      "kind": "indirect",
+      "role": "file-import",
+      "origin": {
+        "type": "agent"
+      },
+      "created_at": 1777982313,
+      "pinned_git_sha": "74f19de60764958f1f5599876cbdc61a73f3abff"
+    },
+    {
+      "id": "01KQW0250WAZ30J9EH3BPMQV5Y",
+      "scope_path": "",
+      "version_id": {
+        "type": "WORKING"
+      },
+      "spec_ref": {
+        "Edge": {
+          "from": "frontend",
+          "to": "file_channel",
+          "edge_type": "emits_to"
+        }
+      },
+      "code_ref": {
+        "file": "front/src/lib/components/AnimationLibraryActions.svelte",
+        "symbol": null,
+        "span": null,
+        "symbol_hash": "b66816e684337b8cb312c77d66f357f283e00184fa50f60645eb1ecbfe0ab3cf",
+        "canonicalizer_version": {
+          "parser": "bytes",
+          "rules": "v1"
+        }
+      },
+      "kind": "indirect",
+      "role": "file-export",
+      "origin": {
+        "type": "agent"
+      },
+      "created_at": 1777982313,
+      "pinned_git_sha": "74f19de60764958f1f5599876cbdc61a73f3abff"
     }
   ]
 }

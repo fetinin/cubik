@@ -70,6 +70,11 @@ import {
 	SaveAnimationResponseToJSON
 } from '../models/SaveAnimationResponse';
 import {
+	type SparseAnimation,
+	SparseAnimationFromJSON,
+	SparseAnimationToJSON
+} from '../models/SparseAnimation';
+import {
 	type StartAnimationRequest,
 	StartAnimationRequestFromJSON,
 	StartAnimationRequestToJSON
@@ -101,6 +106,10 @@ import {
 } from '../models/UpdateAnimationResponse';
 
 export interface DeleteAnimationRequest {
+	id: string;
+}
+
+export interface ExportAnimationRequest {
 	id: string;
 }
 
@@ -199,6 +208,60 @@ export class DefaultApi extends runtime.BaseAPI {
 		initOverrides?: RequestInit | runtime.InitOverrideFunction
 	): Promise<DeleteAnimationResponse> {
 		const response = await this.deleteAnimationRaw(requestParameters, initOverrides);
+		return await response.value();
+	}
+
+	/**
+	 * Creates request options for exportAnimation without sending the request
+	 */
+	async exportAnimationRequestOpts(
+		requestParameters: ExportAnimationRequest
+	): Promise<runtime.RequestOpts> {
+		if (requestParameters['id'] == null) {
+			throw new runtime.RequiredError(
+				'id',
+				'Required parameter "id" was null or undefined when calling exportAnimation().'
+			);
+		}
+
+		const queryParameters: any = {};
+
+		const headerParameters: runtime.HTTPHeaders = {};
+
+		let urlPath = `/api/animation/{id}/export`;
+		urlPath = urlPath.replace('{id}', encodeURIComponent(String(requestParameters['id'])));
+
+		return {
+			path: urlPath,
+			method: 'GET',
+			headers: headerParameters,
+			query: queryParameters
+		};
+	}
+
+	/**
+	 * Fetches the saved animation and returns a versioned Sparse JSON representation suitable for sharing across devices and users. The response carries a Content-Disposition attachment header so browsers treat it as a downloadable file. Note: the Content-Disposition header is set by the Go HTTP layer, not by ogen; the spec documents it for clients but does not drive code generation for it.
+	 * Export a saved animation as portable Sparse JSON
+	 */
+	async exportAnimationRaw(
+		requestParameters: ExportAnimationRequest,
+		initOverrides?: RequestInit | runtime.InitOverrideFunction
+	): Promise<runtime.ApiResponse<SparseAnimation>> {
+		const requestOptions = await this.exportAnimationRequestOpts(requestParameters);
+		const response = await this.request(requestOptions, initOverrides);
+
+		return new runtime.JSONApiResponse(response, (jsonValue) => SparseAnimationFromJSON(jsonValue));
+	}
+
+	/**
+	 * Fetches the saved animation and returns a versioned Sparse JSON representation suitable for sharing across devices and users. The response carries a Content-Disposition attachment header so browsers treat it as a downloadable file. Note: the Content-Disposition header is set by the Go HTTP layer, not by ogen; the spec documents it for clients but does not drive code generation for it.
+	 * Export a saved animation as portable Sparse JSON
+	 */
+	async exportAnimation(
+		requestParameters: ExportAnimationRequest,
+		initOverrides?: RequestInit | runtime.InitOverrideFunction
+	): Promise<SparseAnimation> {
+		const response = await this.exportAnimationRaw(requestParameters, initOverrides);
 		return await response.value();
 	}
 
