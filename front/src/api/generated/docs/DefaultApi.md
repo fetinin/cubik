@@ -2,18 +2,19 @@
 
 All URIs are relative to _http://localhost:9080_
 
-| Method                                                        | HTTP request                            | Description                        |
-| ------------------------------------------------------------- | --------------------------------------- | ---------------------------------- |
-| [**deleteAnimation**](DefaultApi.md#deleteanimation)          | **DELETE** /api/animation/{id}          | Delete a saved animation           |
-| [**getAnimation**](DefaultApi.md#getanimation)                | **GET** /api/animation/{id}             | Get a specific saved animation     |
-| [**getDevices**](DefaultApi.md#getdevices)                    | **GET** /api/devices                    | Discover Yeelight CubeLite devices |
-| [**listAnimations**](DefaultApi.md#listanimations)            | **GET** /api/animation/list/{device_id} | List saved animations for a device |
-| [**powerOff**](DefaultApi.md#poweroffoperation)               | **POST** /api/device/power/off          | Power off a device                 |
-| [**powerOn**](DefaultApi.md#poweronoperation)                 | **POST** /api/device/power/on           | Power on a device                  |
-| [**saveAnimation**](DefaultApi.md#saveanimationoperation)     | **POST** /api/animation/save            | Save animation to database         |
-| [**startAnimation**](DefaultApi.md#startanimationoperation)   | **POST** /api/animation/start           | Start animation playback on device |
-| [**stopAnimation**](DefaultApi.md#stopanimationoperation)     | **POST** /api/animation/stop            | Stop animation playback on device  |
-| [**updateAnimation**](DefaultApi.md#updateanimationoperation) | **PUT** /api/animation/{id}             | Update an existing saved animation |
+| Method                                                        | HTTP request                            | Description                                    |
+| ------------------------------------------------------------- | --------------------------------------- | ---------------------------------------------- |
+| [**deleteAnimation**](DefaultApi.md#deleteanimation)          | **DELETE** /api/animation/{id}          | Delete a saved animation                       |
+| [**getAnimation**](DefaultApi.md#getanimation)                | **GET** /api/animation/{id}             | Get a specific saved animation                 |
+| [**getDevices**](DefaultApi.md#getdevices)                    | **GET** /api/devices                    | Discover Yeelight CubeLite devices             |
+| [**importAnimation**](DefaultApi.md#importanimationoperation) | **POST** /api/animation/import          | Import an animation from a Sparse JSON payload |
+| [**listAnimations**](DefaultApi.md#listanimations)            | **GET** /api/animation/list/{device_id} | List saved animations for a device             |
+| [**powerOff**](DefaultApi.md#poweroffoperation)               | **POST** /api/device/power/off          | Power off a device                             |
+| [**powerOn**](DefaultApi.md#poweronoperation)                 | **POST** /api/device/power/on           | Power on a device                              |
+| [**saveAnimation**](DefaultApi.md#saveanimationoperation)     | **POST** /api/animation/save            | Save animation to database                     |
+| [**startAnimation**](DefaultApi.md#startanimationoperation)   | **POST** /api/animation/start           | Start animation playback on device             |
+| [**stopAnimation**](DefaultApi.md#stopanimationoperation)     | **POST** /api/animation/stop            | Stop animation playback on device              |
+| [**updateAnimation**](DefaultApi.md#updateanimationoperation) | **PUT** /api/animation/{id}             | Update an existing saved animation             |
 
 ## deleteAnimation
 
@@ -202,6 +203,78 @@ No authorization required
 | ----------- | -------------------------- | ---------------- |
 | **200**     | List of discovered devices | -                |
 | **500**     | Internal server error      | -                |
+
+[[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)
+
+## importAnimation
+
+> ImportAnimationResponse importAnimation(importAnimationRequest, mode)
+
+Import an animation from a Sparse JSON payload
+
+Accepts a Sparse JSON animation payload (with target device id) and persists it. Validation runs first; on success the codec persists via the configured conflict-resolution mode.
+
+### Example
+
+```ts
+import {
+  Configuration,
+  DefaultApi,
+} from '';
+import type { ImportAnimationOperationRequest } from '';
+
+async function example() {
+  console.log("🚀 Testing  SDK...");
+  const api = new DefaultApi();
+
+  const body = {
+    // ImportAnimationRequest
+    importAnimationRequest: ...,
+    // 'rename' | 'overwrite' | 'cancel' | Conflict resolution policy when an animation with the same name already exists for the device (optional)
+    mode: mode_example,
+  } satisfies ImportAnimationOperationRequest;
+
+  try {
+    const data = await api.importAnimation(body);
+    console.log(data);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+// Run the test
+example().catch(console.error);
+```
+
+### Parameters
+
+| Name                       | Type                                                | Description                                                                                   | Notes                                                                         |
+| -------------------------- | --------------------------------------------------- | --------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| **importAnimationRequest** | [ImportAnimationRequest](ImportAnimationRequest.md) |                                                                                               |                                                                               |
+| **mode**                   | `rename`, `overwrite`, `cancel`                     | Conflict resolution policy when an animation with the same name already exists for the device | [Optional] [Defaults to `&#39;rename&#39;`] [Enum: rename, overwrite, cancel] |
+
+### Return type
+
+[**ImportAnimationResponse**](ImportAnimationResponse.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+- **Content-Type**: `application/json`
+- **Accept**: `application/json`
+
+### HTTP response details
+
+| Status code | Description                                          | Response headers |
+| ----------- | ---------------------------------------------------- | ---------------- |
+| **200**     | Animation imported successfully                      | -                |
+| **400**     | Validation error                                     | -                |
+| **409**     | Name collision (only returned when mode&#x3D;cancel) | -                |
+| **413**     | Request body exceeds size cap                        | -                |
+| **500**     | Server error                                         | -                |
 
 [[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)
 

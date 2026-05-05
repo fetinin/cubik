@@ -26,6 +26,13 @@ type Handler interface {
 	//
 	// GET /api/devices
 	GetDevices(ctx context.Context) (GetDevicesRes, error)
+	// ImportAnimation implements importAnimation operation.
+	//
+	// Accepts a Sparse JSON animation payload (with target device id) and persists it. Validation runs
+	// first; on success the codec persists via the configured conflict-resolution mode.
+	//
+	// POST /api/animation/import
+	ImportAnimation(ctx context.Context, req *ImportAnimationRequest, params ImportAnimationParams) (ImportAnimationRes, error)
 	// ListAnimations implements listAnimations operation.
 	//
 	// Returns all saved animations for the specified device, ordered by most recently updated.
@@ -44,15 +51,6 @@ type Handler interface {
 	//
 	// POST /api/device/power/on
 	PowerOn(ctx context.Context, req *PowerOnRequest) (PowerOnRes, error)
-	// ProbeSparseAnimation implements probeSparseAnimation operation.
-	//
-	// Temporary endpoint added to force ogen-go schema emission for SparseAnimation. Will be removed
-	// when /api/animations/import lands (T-import-endpoint).
-	//
-	// Deprecated: schema marks this operation as deprecated.
-	//
-	// POST /api/_internal/sparse-probe
-	ProbeSparseAnimation(ctx context.Context, req *SparseAnimation) (ProbeSparseAnimationRes, error)
 	// SaveAnimation implements saveAnimation operation.
 	//
 	// Saves the current animation frames to the database with a name. Stored per device.

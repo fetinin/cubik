@@ -1,0 +1,554 @@
+{
+  "schema_version": 1,
+  "links": [
+    {
+      "id": "01KQT86RGVGHYMBDAA2029F35M",
+      "scope_path": "",
+      "version_id": {
+        "type": "WORKING"
+      },
+      "spec_ref": {
+        "Node": "format_sparse"
+      },
+      "code_ref": {
+        "file": "spec.yml",
+        "symbol": null,
+        "span": null,
+        "symbol_hash": "dd6a4ce4a1f2bac0b630ff66ef0b58045baa44f9fe6f128e1932bb7df8003ff6",
+        "canonicalizer_version": {
+          "parser": "bytes",
+          "rules": "v1"
+        }
+      },
+      "kind": "literal",
+      "role": "schema",
+      "origin": {
+        "type": "agent"
+      },
+      "created_at": 1777923744,
+      "pinned_git_sha": "49985e91e6f6dc3731815c57841b7a59281bf5df"
+    },
+    {
+      "id": "01KQT86SD2RP4JXG6J0YKD83KW",
+      "scope_path": "",
+      "version_id": {
+        "type": "WORKING"
+      },
+      "spec_ref": {
+        "Node": "db"
+      },
+      "code_ref": {
+        "file": "migrations/000001_create_animations_table.up.sql",
+        "symbol": null,
+        "span": null,
+        "symbol_hash": "8ba21328d7c90bcf024c205a2b54c17903ef3b6b1c344f3a2af009e75718a510",
+        "canonicalizer_version": {
+          "parser": "bytes",
+          "rules": "v1"
+        }
+      },
+      "kind": "literal",
+      "role": "schema",
+      "origin": {
+        "type": "agent"
+      },
+      "created_at": 1777923745,
+      "pinned_git_sha": "49985e91e6f6dc3731815c57841b7a59281bf5df"
+    },
+    {
+      "id": "01KQT86T12Z6T4S859Y5XMAEXA",
+      "scope_path": "",
+      "version_id": {
+        "type": "WORKING"
+      },
+      "spec_ref": {
+        "Node": "db"
+      },
+      "code_ref": {
+        "file": "storage.go",
+        "symbol": null,
+        "span": null,
+        "symbol_hash": "82b5dfea5543b35807b0cb5e70da128140e31e03a23606087e0a9d51c643c6e2",
+        "canonicalizer_version": {
+          "parser": "bytes",
+          "rules": "v1"
+        }
+      },
+      "kind": "indirect",
+      "role": "helpers",
+      "origin": {
+        "type": "agent"
+      },
+      "created_at": 1777923745,
+      "pinned_git_sha": "49985e91e6f6dc3731815c57841b7a59281bf5df"
+    },
+    {
+      "id": "01KQT86TS37C7Z6TNE626BMVA7",
+      "scope_path": "",
+      "version_id": {
+        "type": "WORKING"
+      },
+      "spec_ref": {
+        "Node": "clipboard_channel"
+      },
+      "code_ref": {
+        "file": "front/src/lib/io/clipboardChannel.ts",
+        "symbol": null,
+        "span": null,
+        "symbol_hash": "db12c4848addac7c70a68faf64942a3e79fdbcf6a18fd9ed8eb03e8999fdfe50",
+        "canonicalizer_version": {
+          "parser": "bytes",
+          "rules": "v1"
+        }
+      },
+      "kind": "literal",
+      "role": "helper",
+      "origin": {
+        "type": "agent"
+      },
+      "created_at": 1777923746,
+      "pinned_git_sha": "49985e91e6f6dc3731815c57841b7a59281bf5df"
+    },
+    {
+      "id": "01KQT86VD8RG7VWM4T6VFXCK39",
+      "scope_path": "",
+      "version_id": {
+        "type": "WORKING"
+      },
+      "spec_ref": {
+        "Node": "clipboard_channel"
+      },
+      "code_ref": {
+        "file": "front/src/lib/io/PasteFallbackModal.svelte",
+        "symbol": null,
+        "span": null,
+        "symbol_hash": "bab1d7fca9cdd86fcf4f5d53efd67eda5ad1cc86dadc0dab4edf463165b935de",
+        "canonicalizer_version": {
+          "parser": "bytes",
+          "rules": "v1"
+        }
+      },
+      "kind": "indirect",
+      "role": "modal",
+      "origin": {
+        "type": "agent"
+      },
+      "created_at": 1777923747,
+      "pinned_git_sha": "49985e91e6f6dc3731815c57841b7a59281bf5df"
+    },
+    {
+      "id": "01KQT95RN3JH6KEN535E1PGG7F",
+      "scope_path": "",
+      "version_id": {
+        "type": "WORKING"
+      },
+      "spec_ref": {
+        "Node": "codec"
+      },
+      "code_ref": {
+        "file": "animation_codec.go",
+        "symbol": null,
+        "span": null,
+        "symbol_hash": "f8ff52b3f253ae3e082ba1472c67581ca2bc89ea3d6768931781659e46e3b9cb",
+        "canonicalizer_version": {
+          "parser": "bytes",
+          "rules": "v1"
+        }
+      },
+      "kind": "literal",
+      "role": "module",
+      "origin": {
+        "type": "agent"
+      },
+      "created_at": 1777924760,
+      "pinned_git_sha": "49985e91e6f6dc3731815c57841b7a59281bf5df"
+    },
+    {
+      "id": "01KQT95XAD6MWR7KRQPE8ZY8KF",
+      "scope_path": "",
+      "version_id": {
+        "type": "WORKING"
+      },
+      "spec_ref": {
+        "Edge": {
+          "from": "codec",
+          "to": "format_sparse",
+          "edge_type": "uses"
+        }
+      },
+      "code_ref": {
+        "file": "animation_codec.go",
+        "symbol": null,
+        "span": null,
+        "symbol_hash": "f8ff52b3f253ae3e082ba1472c67581ca2bc89ea3d6768931781659e46e3b9cb",
+        "canonicalizer_version": {
+          "parser": "bytes",
+          "rules": "v1"
+        }
+      },
+      "kind": "indirect",
+      "role": "consumer",
+      "origin": {
+        "type": "agent"
+      },
+      "created_at": 1777924765,
+      "pinned_git_sha": "49985e91e6f6dc3731815c57841b7a59281bf5df"
+    },
+    {
+      "id": "01KQT95XBG1KVWKA2MP6338JXE",
+      "scope_path": "",
+      "version_id": {
+        "type": "WORKING"
+      },
+      "spec_ref": {
+        "Edge": {
+          "from": "codec",
+          "to": "db",
+          "edge_type": "writes"
+        }
+      },
+      "code_ref": {
+        "file": "animation_codec.go",
+        "symbol": null,
+        "span": null,
+        "symbol_hash": "f8ff52b3f253ae3e082ba1472c67581ca2bc89ea3d6768931781659e46e3b9cb",
+        "canonicalizer_version": {
+          "parser": "bytes",
+          "rules": "v1"
+        }
+      },
+      "kind": "indirect",
+      "role": "writer",
+      "origin": {
+        "type": "agent"
+      },
+      "created_at": 1777924765,
+      "pinned_git_sha": "49985e91e6f6dc3731815c57841b7a59281bf5df"
+    },
+    {
+      "id": "01KQT95XC7V0DMSQ1M6TMKTX8B",
+      "scope_path": "",
+      "version_id": {
+        "type": "WORKING"
+      },
+      "spec_ref": {
+        "Edge": {
+          "from": "codec",
+          "to": "db",
+          "edge_type": "reads"
+        }
+      },
+      "code_ref": {
+        "file": "animation_codec.go",
+        "symbol": null,
+        "span": null,
+        "symbol_hash": "f8ff52b3f253ae3e082ba1472c67581ca2bc89ea3d6768931781659e46e3b9cb",
+        "canonicalizer_version": {
+          "parser": "bytes",
+          "rules": "v1"
+        }
+      },
+      "kind": "indirect",
+      "role": "reader",
+      "origin": {
+        "type": "agent"
+      },
+      "created_at": 1777924765,
+      "pinned_git_sha": "49985e91e6f6dc3731815c57841b7a59281bf5df"
+    },
+    {
+      "id": "01KQT95XD0R87JVH6QW31E0TXW",
+      "scope_path": "",
+      "version_id": {
+        "type": "WORKING"
+      },
+      "spec_ref": {
+        "Edge": {
+          "from": "import_endpoint",
+          "to": "codec",
+          "edge_type": "routes_to"
+        }
+      },
+      "code_ref": {
+        "file": "animation_codec.go",
+        "symbol": null,
+        "span": null,
+        "symbol_hash": "f8ff52b3f253ae3e082ba1472c67581ca2bc89ea3d6768931781659e46e3b9cb",
+        "canonicalizer_version": {
+          "parser": "bytes",
+          "rules": "v1"
+        }
+      },
+      "kind": "indirect",
+      "role": "import-target",
+      "origin": {
+        "type": "agent"
+      },
+      "created_at": 1777924765,
+      "pinned_git_sha": "49985e91e6f6dc3731815c57841b7a59281bf5df"
+    },
+    {
+      "id": "01KQT95XDRQKW2WVZAFD18JAC6",
+      "scope_path": "",
+      "version_id": {
+        "type": "WORKING"
+      },
+      "spec_ref": {
+        "Edge": {
+          "from": "export_endpoint",
+          "to": "codec",
+          "edge_type": "routes_to"
+        }
+      },
+      "code_ref": {
+        "file": "animation_codec.go",
+        "symbol": null,
+        "span": null,
+        "symbol_hash": "f8ff52b3f253ae3e082ba1472c67581ca2bc89ea3d6768931781659e46e3b9cb",
+        "canonicalizer_version": {
+          "parser": "bytes",
+          "rules": "v1"
+        }
+      },
+      "kind": "indirect",
+      "role": "export-target",
+      "origin": {
+        "type": "agent"
+      },
+      "created_at": 1777924765,
+      "pinned_git_sha": "49985e91e6f6dc3731815c57841b7a59281bf5df"
+    },
+    {
+      "id": "01KQT9ZW6NSJR44KR1A3RYZJ5Y",
+      "scope_path": "",
+      "version_id": {
+        "type": "WORKING"
+      },
+      "spec_ref": {
+        "Node": "validator"
+      },
+      "code_ref": {
+        "file": "import_validator.go",
+        "symbol": null,
+        "span": null,
+        "symbol_hash": "1b45629ca4d48579937b64afef8bd58d82006408be5929e3759c14551b9951ab",
+        "canonicalizer_version": {
+          "parser": "bytes",
+          "rules": "v1"
+        }
+      },
+      "kind": "literal",
+      "role": "module",
+      "origin": {
+        "type": "agent"
+      },
+      "created_at": 1777925615,
+      "pinned_git_sha": "e48e64287fceb4d03bf708e311ee58766fdf1f21"
+    },
+    {
+      "id": "01KQT9ZZJG1VXJH19Q0YHHZ9X6",
+      "scope_path": "",
+      "version_id": {
+        "type": "WORKING"
+      },
+      "spec_ref": {
+        "Edge": {
+          "from": "import_endpoint",
+          "to": "validator",
+          "edge_type": "routes_to"
+        }
+      },
+      "code_ref": {
+        "file": "import_validator.go",
+        "symbol": null,
+        "span": null,
+        "symbol_hash": "1b45629ca4d48579937b64afef8bd58d82006408be5929e3759c14551b9951ab",
+        "canonicalizer_version": {
+          "parser": "bytes",
+          "rules": "v1"
+        }
+      },
+      "kind": "indirect",
+      "role": "downstream",
+      "origin": {
+        "type": "agent"
+      },
+      "created_at": 1777925619,
+      "pinned_git_sha": "e48e64287fceb4d03bf708e311ee58766fdf1f21"
+    },
+    {
+      "id": "01KQTA00H2F4FZPTQZ5ZR2T725",
+      "scope_path": "",
+      "version_id": {
+        "type": "WORKING"
+      },
+      "spec_ref": {
+        "Edge": {
+          "from": "validator",
+          "to": "format_sparse",
+          "edge_type": "uses"
+        }
+      },
+      "code_ref": {
+        "file": "import_validator.go",
+        "symbol": null,
+        "span": null,
+        "symbol_hash": "1b45629ca4d48579937b64afef8bd58d82006408be5929e3759c14551b9951ab",
+        "canonicalizer_version": {
+          "parser": "bytes",
+          "rules": "v1"
+        }
+      },
+      "kind": "indirect",
+      "role": "consumer",
+      "origin": {
+        "type": "agent"
+      },
+      "created_at": 1777925620,
+      "pinned_git_sha": "e48e64287fceb4d03bf708e311ee58766fdf1f21"
+    },
+    {
+      "id": "01KQVKR7DRBF3FZ2AS631R7HHB",
+      "scope_path": "",
+      "version_id": {
+        "type": "WORKING"
+      },
+      "spec_ref": {
+        "Node": "file_channel"
+      },
+      "code_ref": {
+        "file": "front/src/lib/io/fileChannel.ts",
+        "symbol": null,
+        "span": null,
+        "symbol_hash": "1e7ddb07838ac4741531644d7af7ed77250c1ee356f47e6941e1bb7ba48296c9",
+        "canonicalizer_version": {
+          "parser": "bytes",
+          "rules": "v1"
+        }
+      },
+      "kind": "literal",
+      "role": "helper",
+      "origin": {
+        "type": "agent"
+      },
+      "created_at": 1777969405,
+      "pinned_git_sha": "aad5a87b67eebffdb01b7bf7b8fcda55a36be51a"
+    },
+    {
+      "id": "01KQVMVY7ZZC1EGDPS9E719T3G",
+      "scope_path": "",
+      "version_id": {
+        "type": "WORKING"
+      },
+      "spec_ref": {
+        "Node": "import_endpoint"
+      },
+      "code_ref": {
+        "file": "spec.yml",
+        "symbol": null,
+        "span": null,
+        "symbol_hash": "cd200cfdbf663ffe048038a72907b9a59dd92387672d7b1e206beb883e4659d0",
+        "canonicalizer_version": {
+          "parser": "bytes",
+          "rules": "v1"
+        }
+      },
+      "kind": "literal",
+      "role": "spec",
+      "origin": {
+        "type": "agent"
+      },
+      "created_at": 1777970575,
+      "pinned_git_sha": "1c3e077706d29a75437dc96c0aa36c1208b0a90e"
+    },
+    {
+      "id": "01KQVMW1KA15FZZZVGJB13RD81",
+      "scope_path": "",
+      "version_id": {
+        "type": "WORKING"
+      },
+      "spec_ref": {
+        "Node": "import_endpoint"
+      },
+      "code_ref": {
+        "file": "handler.go",
+        "symbol": null,
+        "span": null,
+        "symbol_hash": "4d7f014090ca9ea90a4aad7f0bf1b0b17564f006f8438c35fc5190e7ec71b702",
+        "canonicalizer_version": {
+          "parser": "bytes",
+          "rules": "v1"
+        }
+      },
+      "kind": "literal",
+      "role": "handler",
+      "origin": {
+        "type": "agent"
+      },
+      "created_at": 1777970579,
+      "pinned_git_sha": "1c3e077706d29a75437dc96c0aa36c1208b0a90e"
+    },
+    {
+      "id": "01KQVMW5XR3BNPZ86D59236JZ8",
+      "scope_path": "",
+      "version_id": {
+        "type": "WORKING"
+      },
+      "spec_ref": {
+        "Edge": {
+          "from": "backend",
+          "to": "import_endpoint",
+          "edge_type": "exposes"
+        }
+      },
+      "code_ref": {
+        "file": "server.go",
+        "symbol": null,
+        "span": null,
+        "symbol_hash": "2e33601b75bcc6087a9f47fc8d4519ee94a97b052679af7bde337285f248e3f5",
+        "canonicalizer_version": {
+          "parser": "bytes",
+          "rules": "v1"
+        }
+      },
+      "kind": "indirect",
+      "role": "mount",
+      "origin": {
+        "type": "agent"
+      },
+      "created_at": 1777970583,
+      "pinned_git_sha": "1c3e077706d29a75437dc96c0aa36c1208b0a90e"
+    },
+    {
+      "id": "01KQVMW5ZDE7CSCW2DXQJ94CKF",
+      "scope_path": "",
+      "version_id": {
+        "type": "WORKING"
+      },
+      "spec_ref": {
+        "Edge": {
+          "from": "frontend",
+          "to": "import_endpoint",
+          "edge_type": "calls"
+        }
+      },
+      "code_ref": {
+        "file": "spec.yml",
+        "symbol": null,
+        "span": null,
+        "symbol_hash": "cd200cfdbf663ffe048038a72907b9a59dd92387672d7b1e206beb883e4659d0",
+        "canonicalizer_version": {
+          "parser": "bytes",
+          "rules": "v1"
+        }
+      },
+      "kind": "indirect",
+      "role": "contract",
+      "origin": {
+        "type": "agent"
+      },
+      "created_at": 1777970583,
+      "pinned_git_sha": "1c3e077706d29a75437dc96c0aa36c1208b0a90e"
+    }
+  ]
+}

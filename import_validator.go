@@ -75,17 +75,19 @@ func ValidateImport(payload []byte) (*api.SparseAnimation, *ValidationError) {
 		return nil, &ValidationError{Field: field, Reason: reason}
 	}
 
-	if verr := checkPixelBounds(&anim); verr != nil {
+	if verr := ValidatePixelBounds(&anim); verr != nil {
 		return nil, verr
 	}
 
 	return &anim, nil
 }
 
-// checkPixelBounds enforces pixel.X < anim.Width and pixel.Y < anim.Height.
+// ValidatePixelBounds enforces pixel.X < anim.Width and pixel.Y < anim.Height.
 // ogen's Validate() only confirms 0..254 (the schema-level upper bound on
 // SparsePixel.x/y), so we re-check against the animation's declared dims.
-func checkPixelBounds(anim *api.SparseAnimation) *ValidationError {
+// Exported so handlers that already have an ogen-decoded SparseAnimation can
+// run the cross-field bounds check without repeating the JSON decode.
+func ValidatePixelBounds(anim *api.SparseAnimation) *ValidationError {
 	for fi, frame := range anim.Frames {
 		for pi, px := range frame {
 			if px.X >= anim.Width {

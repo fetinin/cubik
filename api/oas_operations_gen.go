@@ -6,15 +6,15 @@ package api
 type OperationName = string
 
 const (
-	DeleteAnimationOperation      OperationName = "DeleteAnimation"
-	GetAnimationOperation         OperationName = "GetAnimation"
-	GetDevicesOperation           OperationName = "GetDevices"
-	ListAnimationsOperation       OperationName = "ListAnimations"
-	PowerOffOperation             OperationName = "PowerOff"
-	PowerOnOperation              OperationName = "PowerOn"
-	ProbeSparseAnimationOperation OperationName = "ProbeSparseAnimation"
-	SaveAnimationOperation        OperationName = "SaveAnimation"
-	StartAnimationOperation       OperationName = "StartAnimation"
-	StopAnimationOperation        OperationName = "StopAnimation"
-	UpdateAnimationOperation      OperationName = "UpdateAnimation"
+	DeleteAnimationOperation OperationName = "DeleteAnimation"
+	GetAnimationOperation    OperationName = "GetAnimation"
+	GetDevicesOperation      OperationName = "GetDevices"
+	ImportAnimationOperation OperationName = "ImportAnimation"
+	ListAnimationsOperation  OperationName = "ListAnimations"
+	PowerOffOperation        OperationName = "PowerOff"
+	PowerOnOperation         OperationName = "PowerOn"
+	SaveAnimationOperation   OperationName = "SaveAnimation"
+	StartAnimationOperation  OperationName = "StartAnimation"
+	StopAnimationOperation   OperationName = "StopAnimation"
+	UpdateAnimationOperation OperationName = "UpdateAnimation"
 )

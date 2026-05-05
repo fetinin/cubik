@@ -92,10 +92,8 @@ export const DefaultConfig = new Configuration();
  * This is the base class for all generated API classes.
  */
 export class BaseAPI {
-	private static readonly jsonRegex = new RegExp(
-		'^(:?application\/json|[^;/ \t]+\/[^;/ \t]+[+]json)[ \t]*(:?;.*)?$',
-		'i'
-	);
+	private static readonly jsonRegex =
+		/^(:?application\/json|[^;/ \t]+\/[^;/ \t]+[+]json)[ \t]*(:?;.*)?$/i;
 	private middleware: Middleware[];
 
 	constructor(protected configuration = DefaultConfig) {
@@ -280,6 +278,12 @@ export class ResponseError extends Error {
 		msg?: string
 	) {
 		super(msg);
+
+		// restore prototype chain
+		const actualProto = new.target.prototype;
+		if (Object.setPrototypeOf) {
+			Object.setPrototypeOf(this, actualProto);
+		}
 	}
 }
 
@@ -290,6 +294,12 @@ export class FetchError extends Error {
 		msg?: string
 	) {
 		super(msg);
+
+		// restore prototype chain
+		const actualProto = new.target.prototype;
+		if (Object.setPrototypeOf) {
+			Object.setPrototypeOf(this, actualProto);
+		}
 	}
 }
 
@@ -300,6 +310,12 @@ export class RequiredError extends Error {
 		msg?: string
 	) {
 		super(msg);
+
+		// restore prototype chain
+		const actualProto = new.target.prototype;
+		if (Object.setPrototypeOf) {
+			Object.setPrototypeOf(this, actualProto);
+		}
 	}
 }
 

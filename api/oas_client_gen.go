@@ -45,6 +45,13 @@ type Invoker interface {
 	//
 	// GET /api/devices
 	GetDevices(ctx context.Context) (GetDevicesRes, error)
+	// ImportAnimation invokes importAnimation operation.
+	//
+	// Accepts a Sparse JSON animation payload (with target device id) and persists it. Validation runs
+	// first; on success the codec persists via the configured conflict-resolution mode.
+	//
+	// POST /api/animation/import
+	ImportAnimation(ctx context.Context, request *ImportAnimationRequest, params ImportAnimationParams) (ImportAnimationRes, error)
 	// ListAnimations invokes listAnimations operation.
 	//
 	// Returns all saved animations for the specified device, ordered by most recently updated.
@@ -63,15 +70,6 @@ type Invoker interface {
 	//
 	// POST /api/device/power/on
 	PowerOn(ctx context.Context, request *PowerOnRequest) (PowerOnRes, error)
-	// ProbeSparseAnimation invokes probeSparseAnimation operation.
-	//
-	// Temporary endpoint added to force ogen-go schema emission for SparseAnimation. Will be removed
-	// when /api/animations/import lands (T-import-endpoint).
-	//
-	// Deprecated: schema marks this operation as deprecated.
-	//
-	// POST /api/_internal/sparse-probe
-	ProbeSparseAnimation(ctx context.Context, request *SparseAnimation) (ProbeSparseAnimationRes, error)
 	// SaveAnimation invokes saveAnimation operation.
 	//
 	// Saves the current animation frames to the database with a name. Stored per device.
@@ -396,6 +394,105 @@ func (c *Client) sendGetDevices(ctx context.Context) (res GetDevicesRes, err err
 	return result, nil
 }
 
+// ImportAnimation invokes importAnimation operation.
+//
+// Accepts a Sparse JSON animation payload (with target device id) and persists it. Validation runs
+// first; on success the codec persists via the configured conflict-resolution mode.
+//
+// POST /api/animation/import
+func (c *Client) ImportAnimation(ctx context.Context, request *ImportAnimationRequest, params ImportAnimationParams) (ImportAnimationRes, error) {
+	res, err := c.sendImportAnimation(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendImportAnimation(ctx context.Context, request *ImportAnimationRequest, params ImportAnimationParams) (res ImportAnimationRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("importAnimation"),
+		semconv.HTTPRequestMethodKey.String("POST"),
+		semconv.URLTemplateKey.String("/api/animation/import"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, ImportAnimationOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/api/animation/import"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeQueryParams"
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "mode" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "mode",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Mode.Get(); ok {
+				return e.EncodeValue(conv.StringToString(string(val)))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeImportAnimationRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeImportAnimationResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // ListAnimations invokes listAnimations operation.
 //
 // Returns all saved animations for the specified device, ordered by most recently updated.
@@ -635,86 +732,6 @@ func (c *Client) sendPowerOn(ctx context.Context, request *PowerOnRequest) (res 
 
 	stage = "DecodeResponse"
 	result, err := decodePowerOnResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
-}
-
-// ProbeSparseAnimation invokes probeSparseAnimation operation.
-//
-// Temporary endpoint added to force ogen-go schema emission for SparseAnimation. Will be removed
-// when /api/animations/import lands (T-import-endpoint).
-//
-// Deprecated: schema marks this operation as deprecated.
-//
-// POST /api/_internal/sparse-probe
-func (c *Client) ProbeSparseAnimation(ctx context.Context, request *SparseAnimation) (ProbeSparseAnimationRes, error) {
-	res, err := c.sendProbeSparseAnimation(ctx, request)
-	return res, err
-}
-
-func (c *Client) sendProbeSparseAnimation(ctx context.Context, request *SparseAnimation) (res ProbeSparseAnimationRes, err error) {
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("probeSparseAnimation"),
-		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.URLTemplateKey.String("/api/_internal/sparse-probe"),
-	}
-	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
-
-	// Run stopwatch.
-	startTime := time.Now()
-	defer func() {
-		// Use floating point division here for higher precision (instead of Millisecond method).
-		elapsedDuration := time.Since(startTime)
-		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
-	}()
-
-	// Increment request counter.
-	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-
-	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, ProbeSparseAnimationOperation,
-		trace.WithAttributes(otelAttrs...),
-		clientSpanKind,
-	)
-	// Track stage for error reporting.
-	var stage string
-	defer func() {
-		if err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, stage)
-			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-		}
-		span.End()
-	}()
-
-	stage = "BuildURL"
-	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [1]string
-	pathParts[0] = "/api/_internal/sparse-probe"
-	uri.AddPathParts(u, pathParts[:]...)
-
-	stage = "EncodeRequest"
-	r, err := ht.NewRequest(ctx, "POST", u)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-	if err := encodeProbeSparseAnimationRequest(request, r); err != nil {
-		return res, errors.Wrap(err, "encode request")
-	}
-
-	stage = "SendRequest"
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	body := resp.Body
-	defer body.Close()
-
-	stage = "DecodeResponse"
-	result, err := decodeProbeSparseAnimationResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

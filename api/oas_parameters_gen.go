@@ -146,6 +146,91 @@ func decodeGetAnimationParams(args [1]string, argsEscaped bool, r *http.Request)
 	return params, nil
 }
 
+// ImportAnimationParams is parameters of importAnimation operation.
+type ImportAnimationParams struct {
+	// Conflict resolution policy when an animation with the same name already exists for the device.
+	Mode OptImportAnimationMode `json:",omitempty,omitzero"`
+}
+
+func unpackImportAnimationParams(packed middleware.Parameters) (params ImportAnimationParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "mode",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Mode = v.(OptImportAnimationMode)
+		}
+	}
+	return params
+}
+
+func decodeImportAnimationParams(args [0]string, argsEscaped bool, r *http.Request) (params ImportAnimationParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	// Set default value for query: mode.
+	{
+		val := ImportAnimationMode("rename")
+		params.Mode.SetTo(val)
+	}
+	// Decode query: mode.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "mode",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotModeVal ImportAnimationMode
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotModeVal = ImportAnimationMode(c)
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Mode.SetTo(paramsDotModeVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.Mode.Get(); ok {
+					if err := func() error {
+						if err := value.Validate(); err != nil {
+							return err
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "mode",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // ListAnimationsParams is parameters of listAnimations operation.
 type ListAnimationsParams struct {
 	// Unique device identifier.

@@ -1,0 +1,399 @@
+{
+  "node_types": [
+    {
+      "name": "Service",
+      "definition": "Deployable runtime component (process, server, browser app) that exposes endpoints, calls other services, or interfaces with channels",
+      "layer": "epistatic",
+      "aspects": []
+    },
+    {
+      "name": "Endpoint",
+      "definition": "REST API endpoint exposed by a service; receives a request and routes to an internal module",
+      "layer": "epistatic",
+      "aspects": []
+    },
+    {
+      "name": "Store",
+      "definition": "Persistent data store (SQLite, file system) that modules read from and write to",
+      "layer": "epistatic",
+      "aspects": []
+    },
+    {
+      "name": "Module",
+      "definition": "Internal logic unit inside a service; performs encode/decode/validation/persistence work, not directly addressable from outside",
+      "layer": "epistatic",
+      "aspects": []
+    },
+    {
+      "name": "Format",
+      "definition": "Wire format contract describing the byte-level structure of data exchanged between services or persisted to channels",
+      "layer": "epistatic",
+      "aspects": []
+    },
+    {
+      "name": "Channel",
+      "definition": "External interface to the user's environment (file download/upload, clipboard, network) that a service emits to or ingests from",
+      "layer": "epistatic",
+      "aspects": []
+    }
+  ],
+  "edge_types": [
+    {
+      "name": "exposes",
+      "layer": "epistatic",
+      "from_types": [
+        "Service"
+      ],
+      "to_types": [
+        "Endpoint"
+      ]
+    },
+    {
+      "name": "calls",
+      "layer": "epistatic",
+      "from_types": [
+        "Service"
+      ],
+      "to_types": [
+        "Endpoint"
+      ]
+    },
+    {
+      "name": "routes_to",
+      "layer": "epistatic",
+      "from_types": [
+        "Endpoint"
+      ],
+      "to_types": [
+        "Module"
+      ]
+    },
+    {
+      "name": "reads",
+      "layer": "epistatic",
+      "from_types": [
+        "Module"
+      ],
+      "to_types": [
+        "Store"
+      ]
+    },
+    {
+      "name": "writes",
+      "layer": "epistatic",
+      "from_types": [
+        "Module"
+      ],
+      "to_types": [
+        "Store"
+      ]
+    },
+    {
+      "name": "uses",
+      "layer": "epistatic",
+      "from_types": [
+        "Module"
+      ],
+      "to_types": [
+        "Format"
+      ]
+    },
+    {
+      "name": "emits_to",
+      "layer": "epistatic",
+      "from_types": [
+        "Service"
+      ],
+      "to_types": [
+        "Channel"
+      ]
+    },
+    {
+      "name": "ingests_from",
+      "layer": "epistatic",
+      "from_types": [
+        "Service"
+      ],
+      "to_types": [
+        "Channel"
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "id": "frontend",
+      "node_type": "Service",
+      "definition": "Svelte SPA running in the browser; provides the animation editor and library UI; calls backend REST endpoints; emits to and ingests from file and clipboard channels",
+      "aspects": []
+    },
+    {
+      "id": "backend",
+      "node_type": "Service",
+      "definition": "Go HTTP server on port 9080 using ogen-generated handlers from spec.yml; exposes REST endpoints for animation export and import",
+      "aspects": []
+    },
+    {
+      "id": "db",
+      "node_type": "Store",
+      "definition": "SQLite database with the saved_animations table holding name, dimensions, and frames_json for each saved animation",
+      "aspects": []
+    },
+    {
+      "id": "export_endpoint",
+      "node_type": "Endpoint",
+      "definition": "GET /api/animations/{id}/export returning the saved animation serialized as Sparse JSON in the response body",
+      "aspects": []
+    },
+    {
+      "id": "import_endpoint",
+      "node_type": "Endpoint",
+      "definition": "POST /api/animations/import accepting a Sparse JSON payload and persisting the decoded animation into the saved_animations library",
+      "aspects": []
+    },
+    {
+      "id": "codec",
+      "node_type": "Module",
+      "definition": "Encode/decode logic that converts between the internal saved-animation representation and the Sparse JSON wire format; also persists decoded animations via the store",
+      "aspects": []
+    },
+    {
+      "id": "format_sparse",
+      "node_type": "Format",
+      "definition": "Sparse JSON wire format with shape {name, width, height, frames:[[{x,y,c}, ...], ...]} where c is a 24-bit RGB integer; only non-black pixels stored",
+      "aspects": []
+    },
+    {
+      "id": "file_channel",
+      "node_type": "Channel",
+      "definition": "Browser file download (export) and file picker upload (import) for .json files containing Sparse JSON",
+      "aspects": []
+    },
+    {
+      "id": "clipboard_channel",
+      "node_type": "Channel",
+      "definition": "Browser clipboard read/write for copy-paste sharing of Sparse JSON animation text",
+      "aspects": []
+    }
+  ],
+  "edges": [
+    [
+      "backend",
+      "export_endpoint",
+      {
+        "edge_type": "exposes"
+      }
+    ],
+    [
+      "backend",
+      "import_endpoint",
+      {
+        "edge_type": "exposes"
+      }
+    ],
+    [
+      "frontend",
+      "export_endpoint",
+      {
+        "edge_type": "calls"
+      }
+    ],
+    [
+      "frontend",
+      "import_endpoint",
+      {
+        "edge_type": "calls"
+      }
+    ],
+    [
+      "export_endpoint",
+      "codec",
+      {
+        "edge_type": "routes_to"
+      }
+    ],
+    [
+      "import_endpoint",
+      "codec",
+      {
+        "edge_type": "routes_to"
+      }
+    ],
+    [
+      "codec",
+      "db",
+      {
+        "edge_type": "reads"
+      }
+    ],
+    [
+      "codec",
+      "db",
+      {
+        "edge_type": "writes"
+      }
+    ],
+    [
+      "codec",
+      "format_sparse",
+      {
+        "edge_type": "uses"
+      }
+    ],
+    [
+      "frontend",
+      "file_channel",
+      {
+        "edge_type": "emits_to"
+      }
+    ],
+    [
+      "frontend",
+      "file_channel",
+      {
+        "edge_type": "ingests_from"
+      }
+    ],
+    [
+      "frontend",
+      "clipboard_channel",
+      {
+        "edge_type": "emits_to"
+      }
+    ],
+    [
+      "frontend",
+      "clipboard_channel",
+      {
+        "edge_type": "ingests_from"
+      }
+    ]
+  ],
+  "requirements": [
+    {
+      "id": "R-export-file",
+      "targets": [
+        {
+          "Node": "export_endpoint"
+        }
+      ],
+      "description": "Users can export any saved animation as a file from the library UI",
+      "origin": {
+        "type": "Initial"
+      }
+    },
+    {
+      "id": "R-import-file",
+      "targets": [
+        {
+          "Node": "import_endpoint"
+        }
+      ],
+      "description": "Users can import a Sparse JSON file into their animation library via the library UI",
+      "origin": {
+        "type": "Initial"
+      }
+    },
+    {
+      "id": "R-format-sparse",
+      "targets": [
+        {
+          "Node": "format_sparse"
+        }
+      ],
+      "description": "Wire format is the chosen Sparse JSON encoding (selected after benchmark study)",
+      "origin": {
+        "type": "Initial"
+      }
+    },
+    {
+      "id": "R-format-self-describing",
+      "targets": [
+        {
+          "Node": "format_sparse"
+        }
+      ],
+      "description": "Exported file carries name, matrix dimensions and frame data without requiring external context to interpret",
+      "origin": {
+        "type": "Initial"
+      }
+    },
+    {
+      "id": "R-roundtrip",
+      "targets": [
+        {
+          "Node": "codec"
+        }
+      ],
+      "description": "Export-then-import yields an animation with identical frames, name and dimensions to the original",
+      "origin": {
+        "type": "Initial"
+      }
+    },
+    {
+      "id": "R-validate-import",
+      "targets": [
+        {
+          "Node": "import_endpoint"
+        }
+      ],
+      "description": "Malformed, oversized or off-spec import payloads are rejected with clear error and library remains untouched",
+      "origin": {
+        "type": "Initial"
+      }
+    },
+    {
+      "id": "R-spec-first",
+      "targets": [
+        {
+          "Node": "backend"
+        }
+      ],
+      "description": "Export and import are declared in spec.yml (OpenAPI 3.1) and the backend handlers are ogen-generated",
+      "origin": {
+        "type": "Initial"
+      }
+    },
+    {
+      "id": "R-share-clipboard",
+      "targets": [
+        {
+          "Node": "clipboard_channel"
+        }
+      ],
+      "description": "Users can copy a Sparse JSON animation to clipboard and paste one to import, without saving a file",
+      "origin": {
+        "type": "Initial"
+      }
+    }
+  ],
+  "satisfactions": [
+    {
+      "requirement_id": "R-export-file",
+      "explanation": "export_endpoint exists, routes to codec which reads db and serializes to format_sparse"
+    },
+    {
+      "requirement_id": "R-import-file",
+      "explanation": "import_endpoint exists, routes to codec which decodes format_sparse and writes db"
+    },
+    {
+      "requirement_id": "R-format-sparse",
+      "explanation": "format_sparse node defines Sparse JSON encoding chosen by benchmark; codec uses it for both directions"
+    },
+    {
+      "requirement_id": "R-format-self-describing",
+      "explanation": "format_sparse shape {name, width, height, frames} carries all context needed to reconstruct an animation without external metadata"
+    },
+    {
+      "requirement_id": "R-roundtrip",
+      "explanation": "codec encode and decode are inverses by construction over the format_sparse fields (name, width, height, every non-black pixel coord); black pixels reconstructed as default fill"
+    },
+    {
+      "requirement_id": "R-spec-first",
+      "explanation": "backend node is defined as ogen-generated from spec.yml; new endpoints will be declared there and regenerated via 'mise run gen'"
+    },
+    {
+      "requirement_id": "R-share-clipboard",
+      "explanation": "clipboard_channel exists; frontend emits_to and ingests_from it, sending/receiving Sparse JSON text"
+    }
+  ]
+}

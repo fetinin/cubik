@@ -13,6 +13,10 @@ type GetDevicesRes interface {
 	getDevicesRes()
 }
 
+type ImportAnimationRes interface {
+	importAnimationRes()
+}
+
 type ListAnimationsRes interface {
 	listAnimationsRes()
 }
@@ -23,10 +27,6 @@ type PowerOffRes interface {
 
 type PowerOnRes interface {
 	powerOnRes()
-}
-
-type ProbeSparseAnimationRes interface {
-	probeSparseAnimationRes()
 }
 
 type SaveAnimationRes interface {

@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	rn11AllowedHeaders = map[string]string{
+	rn5AllowedHeaders = map[string]string{
 		"POST": "Content-Type",
 	}
 	rn12AllowedHeaders = map[string]string{
@@ -26,10 +26,10 @@ var (
 	rn2AllowedHeaders = map[string]string{
 		"PUT": "Content-Type",
 	}
-	rn8AllowedHeaders = map[string]string{
+	rn9AllowedHeaders = map[string]string{
 		"POST": "Content-Type",
 	}
-	rn10AllowedHeaders = map[string]string{
+	rn11AllowedHeaders = map[string]string{
 		"POST": "Content-Type",
 	}
 )
@@ -85,31 +85,6 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				break
 			}
 			switch elem[0] {
-			case '_': // Prefix: "_internal/sparse-probe"
-
-				if l := len("_internal/sparse-probe"); len(elem) >= l && elem[0:l] == "_internal/sparse-probe" {
-					elem = elem[l:]
-				} else {
-					break
-				}
-
-				if len(elem) == 0 {
-					// Leaf node.
-					switch r.Method {
-					case "POST":
-						s.handleProbeSparseAnimationRequest([0]string{}, elemIsEscaped, w, r)
-					default:
-						s.notAllowed(w, r, notAllowedParams{
-							allowedMethods: "POST",
-							allowedHeaders: rn11AllowedHeaders,
-							acceptPost:     "application/json",
-							acceptPatch:    "",
-						})
-					}
-
-					return
-				}
-
 			case 'a': // Prefix: "animation/"
 
 				if l := len("animation/"); len(elem) >= l && elem[0:l] == "animation/" {
@@ -122,6 +97,32 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					break
 				}
 				switch elem[0] {
+				case 'i': // Prefix: "import"
+					origElem := elem
+					if l := len("import"); len(elem) >= l && elem[0:l] == "import" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch r.Method {
+						case "POST":
+							s.handleImportAnimationRequest([0]string{}, elemIsEscaped, w, r)
+						default:
+							s.notAllowed(w, r, notAllowedParams{
+								allowedMethods: "POST",
+								allowedHeaders: rn5AllowedHeaders,
+								acceptPost:     "application/json",
+								acceptPatch:    "",
+							})
+						}
+
+						return
+					}
+
+					elem = origElem
 				case 'l': // Prefix: "list/"
 					origElem := elem
 					if l := len("list/"); len(elem) >= l && elem[0:l] == "list/" {
@@ -340,7 +341,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							default:
 								s.notAllowed(w, r, notAllowedParams{
 									allowedMethods: "POST",
-									allowedHeaders: rn8AllowedHeaders,
+									allowedHeaders: rn9AllowedHeaders,
 									acceptPost:     "application/json",
 									acceptPatch:    "",
 								})
@@ -365,7 +366,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							default:
 								s.notAllowed(w, r, notAllowedParams{
 									allowedMethods: "POST",
-									allowedHeaders: rn10AllowedHeaders,
+									allowedHeaders: rn11AllowedHeaders,
 									acceptPost:     "application/json",
 									acceptPatch:    "",
 								})
@@ -503,31 +504,6 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 				break
 			}
 			switch elem[0] {
-			case '_': // Prefix: "_internal/sparse-probe"
-
-				if l := len("_internal/sparse-probe"); len(elem) >= l && elem[0:l] == "_internal/sparse-probe" {
-					elem = elem[l:]
-				} else {
-					break
-				}
-
-				if len(elem) == 0 {
-					// Leaf node.
-					switch method {
-					case "POST":
-						r.name = ProbeSparseAnimationOperation
-						r.summary = "Internal schema probe for SparseAnimation (do not use)"
-						r.operationID = "probeSparseAnimation"
-						r.operationGroup = ""
-						r.pathPattern = "/api/_internal/sparse-probe"
-						r.args = args
-						r.count = 0
-						return r, true
-					default:
-						return
-					}
-				}
-
 			case 'a': // Prefix: "animation/"
 
 				if l := len("animation/"); len(elem) >= l && elem[0:l] == "animation/" {
@@ -540,6 +516,32 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 					break
 				}
 				switch elem[0] {
+				case 'i': // Prefix: "import"
+					origElem := elem
+					if l := len("import"); len(elem) >= l && elem[0:l] == "import" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch method {
+						case "POST":
+							r.name = ImportAnimationOperation
+							r.summary = "Import an animation from a Sparse JSON payload"
+							r.operationID = "importAnimation"
+							r.operationGroup = ""
+							r.pathPattern = "/api/animation/import"
+							r.args = args
+							r.count = 0
+							return r, true
+						default:
+							return
+						}
+					}
+
+					elem = origElem
 				case 'l': // Prefix: "list/"
 					origElem := elem
 					if l := len("list/"); len(elem) >= l && elem[0:l] == "list/" {

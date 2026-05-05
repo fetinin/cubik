@@ -1,17 +1,23 @@
 /* tslint:disable */
-
+/* eslint-disable */
 export * from './DeleteAnimationResponse';
 export * from './Device';
 export * from './GetAnimationResponse';
 export * from './GetDevices200Response';
+export * from './ImportAnimationRequest';
+export * from './ImportAnimationResponse';
+export * from './ImportError';
 export * from './ListAnimationsResponse';
 export * from './ModelError';
+export * from './NameConflict';
 export * from './PowerOffRequest';
 export * from './PowerOnRequest';
 export * from './RGBPixel';
 export * from './SaveAnimationRequest';
 export * from './SaveAnimationResponse';
 export * from './SavedAnimation';
+export * from './SparseAnimation';
+export * from './SparsePixel';
 export * from './StartAnimationRequest';
 export * from './StartAnimationResponse';
 export * from './StopAnimationRequest';

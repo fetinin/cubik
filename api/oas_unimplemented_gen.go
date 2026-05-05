@@ -40,6 +40,16 @@ func (UnimplementedHandler) GetDevices(ctx context.Context) (r GetDevicesRes, _ 
 	return r, ht.ErrNotImplemented
 }
 
+// ImportAnimation implements importAnimation operation.
+//
+// Accepts a Sparse JSON animation payload (with target device id) and persists it. Validation runs
+// first; on success the codec persists via the configured conflict-resolution mode.
+//
+// POST /api/animation/import
+func (UnimplementedHandler) ImportAnimation(ctx context.Context, req *ImportAnimationRequest, params ImportAnimationParams) (r ImportAnimationRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // ListAnimations implements listAnimations operation.
 //
 // Returns all saved animations for the specified device, ordered by most recently updated.
@@ -64,18 +74,6 @@ func (UnimplementedHandler) PowerOff(ctx context.Context, req *PowerOffRequest) 
 //
 // POST /api/device/power/on
 func (UnimplementedHandler) PowerOn(ctx context.Context, req *PowerOnRequest) (r PowerOnRes, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// ProbeSparseAnimation implements probeSparseAnimation operation.
-//
-// Temporary endpoint added to force ogen-go schema emission for SparseAnimation. Will be removed
-// when /api/animations/import lands (T-import-endpoint).
-//
-// Deprecated: schema marks this operation as deprecated.
-//
-// POST /api/_internal/sparse-probe
-func (UnimplementedHandler) ProbeSparseAnimation(ctx context.Context, req *SparseAnimation) (r ProbeSparseAnimationRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
