@@ -91,5 +91,10 @@ jobs:
           context: .
           push: false
           platforms: linux/amd64
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          # Reuse layers from the last release build (public GHCR cache; build
+          # stages run natively, so they match this amd64 build), plus a
+          # per-PR gha cache so pushes to the same PR rebuild quickly.
+          cache-from: |
+            type=registry,ref=ghcr.io/${{ github.repository }}:buildcache
+            type=gha,scope=pr-check
+          cache-to: type=gha,scope=pr-check,mode=max
