@@ -29,8 +29,6 @@ import {
 export interface ListAnimationsResponse {
 	/**
 	 * List of saved animations for the device, ordered by updated_at descending
-	 * @type {Array<SavedAnimation>}
-	 * @memberof ListAnimationsResponse
 	 */
 	animations: Array<SavedAnimation>;
 }

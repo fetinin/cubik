@@ -7,6 +7,8 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+
+	"github.com/google/uuid"
 )
 
 type APIHandler struct {
@@ -83,6 +85,9 @@ func (h *APIHandler) SaveAnimation(ctx context.Context, req *api.SaveAnimationRe
 	}
 
 	animation, err := SaveAnimation(ctx, h.db, req.DeviceID, req.Name, frames)
+	if errors.Is(err, ErrNameTaken) {
+		return &api.SaveAnimationConflict{Error: ErrNameTaken.Error()}, nil
+	}
 	if err != nil {
 		return &api.SaveAnimationInternalServerError{
 			Error: fmt.Sprintf("failed to save animation: %v", err),
@@ -141,6 +146,9 @@ func (h *APIHandler) UpdateAnimation(
 	if errors.Is(err, ErrNotFound) {
 		return &api.UpdateAnimationNotFound{Error: "animation not found"}, nil
 	}
+	if errors.Is(err, ErrNameTaken) {
+		return &api.UpdateAnimationConflict{Error: ErrNameTaken.Error()}, nil
+	}
 	if err != nil {
 		return &api.UpdateAnimationInternalServerError{
 			Error: fmt.Sprintf("failed to update animation: %v", err),
@@ -150,6 +158,135 @@ func (h *APIHandler) UpdateAnimation(
 	return &api.UpdateAnimationResponse{
 		Message:   "Animation updated successfully",
 		Animation: convertToAPIAnimation(animation),
+	}, nil
+}
+
+// ImportAnimation accepts a Sparse JSON payload (already shape-validated by
+// ogen) and persists it via the codec. The size cap is enforced upstream by
+// importBodyLimitMiddleware in server.go; oversize requests are mapped to
+// 413 there and never reach this handler.
+func (h *APIHandler) ImportAnimation(
+	ctx context.Context,
+	req *api.ImportAnimationRequest,
+	params api.ImportAnimationParams,
+) (api.ImportAnimationRes, error) {
+	if res := classifyImportInput(&req.Animation); res != nil {
+		return res, nil
+	}
+
+	decoded, decErr := DecodeAnimation(req.Animation)
+	if decErr != nil {
+		return classifyDecodeError(decErr), nil
+	}
+
+	mode := mapImportMode(params.Mode)
+	persisted, persistErr := PersistImported(ctx, h.db, req.DeviceID, decoded, mode)
+	if persistErr != nil {
+		return classifyPersistError(persistErr), nil
+	}
+
+	response := &api.ImportAnimationResponse{
+		Animation: convertToAPIAnimation(persisted),
+	}
+	if persisted.Name != decoded.Name {
+		response.RenamedFrom = api.NewOptString(decoded.Name)
+	}
+	return response, nil
+}
+
+// classifyImportInput runs the cross-field bounds check the ogen schema
+// can't express. Returns nil when the payload is acceptable, or an
+// *api.ImportError ready to be returned to the client.
+func classifyImportInput(anim *api.SparseAnimation) api.ImportAnimationRes {
+	verr := ValidatePixelBounds(anim)
+	if verr == nil {
+		return nil
+	}
+	return &api.ImportError{
+		Field:  verr.Field,
+		Reason: verr.Reason,
+	}
+}
+
+// classifyDecodeError maps a codec-decode failure to a sanitized
+// ImportError. Only version-shape problems carry through their detail; any
+// other decode failure is reported with a generic reason to avoid leaking
+// internal context.
+func classifyDecodeError(err error) api.ImportAnimationRes {
+	var unkVer *UnknownMajorVersionError
+	if errors.As(err, &unkVer) {
+		return &api.ImportError{
+			Field:  "animation.version",
+			Reason: unkVer.Error(),
+		}
+	}
+	var malformedVer *MalformedVersionError
+	if errors.As(err, &malformedVer) {
+		return &api.ImportError{
+			Field:  "animation.version",
+			Reason: malformedVer.Error(),
+		}
+	}
+	return &api.ImportError{
+		Field:  "",
+		Reason: "decode failed",
+	}
+}
+
+// classifyPersistError handles codec.PersistImported errors: name conflicts
+// become 409 NameConflict bodies; everything else is logged and surfaced as
+// a 500 with a sanitized message.
+func classifyPersistError(err error) api.ImportAnimationRes {
+	var conflict *NameConflictError
+	if errors.As(err, &conflict) {
+		existingUUID, _ := uuid.Parse(conflict.ExistingID)
+		return &api.NameConflict{
+			ExistingID:   existingUUID,
+			ExistingName: conflict.Name,
+		}
+	}
+	slog.Error("import persist failed", "error", err)
+	return &api.ImportAnimationInternalServerError{
+		Error: fmt.Sprintf("failed to import animation: %v", err),
+	}
+}
+
+// mapImportMode maps the optional ogen-decoded mode parameter to the
+// internal ImportMode enum, defaulting to ImportModeRename when unset.
+func mapImportMode(opt api.OptImportAnimationMode) ImportMode {
+	if !opt.IsSet() {
+		return ImportModeRename
+	}
+	switch opt.Value {
+	case api.ImportAnimationModeRename:
+		return ImportModeRename
+	case api.ImportAnimationModeOverwrite:
+		return ImportModeOverwrite
+	case api.ImportAnimationModeCancel:
+		return ImportModeCancel
+	default:
+		return ImportModeRename
+	}
+}
+
+// ExportAnimation is wired into ogen's Handler interface but is not the live
+// path: GET /api/animation/{id}/export is served by a dedicated, non-ogen
+// HTTP route mounted in server.go (see exportAnimationRoute) so the response
+// can carry a Content-Disposition: attachment header keyed off the
+// animation's name. Ogen's typed-handler signature does not expose the raw
+// [http.ResponseWriter] to the handler, and the simplest "set the header from
+// the typed handler" workarounds (ResponseWriter-via-context, custom encoder)
+// produced more glue than the entire feature does. The non-ogen route owns
+// the whole request; this method exists only to satisfy api.Handler at
+// compile time and returns 500 if it is ever reached, which would indicate
+// the export route override regressed.
+func (h *APIHandler) ExportAnimation(
+	_ context.Context,
+	_ api.ExportAnimationParams,
+) (api.ExportAnimationRes, error) {
+	slog.Error("ExportAnimation reached the ogen handler; the non-ogen route override is missing")
+	return &api.ExportAnimationInternalServerError{
+		Error: "export route misconfigured",
 	}, nil
 }
 

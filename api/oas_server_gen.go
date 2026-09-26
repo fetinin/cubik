@@ -14,6 +14,15 @@ type Handler interface {
 	//
 	// DELETE /api/animation/{id}
 	DeleteAnimation(ctx context.Context, params DeleteAnimationParams) (DeleteAnimationRes, error)
+	// ExportAnimation implements exportAnimation operation.
+	//
+	// Fetches the saved animation and returns a versioned Sparse JSON representation suitable for sharing
+	// across devices and users. The response carries a Content-Disposition attachment header so browsers
+	// treat it as a downloadable file. Note: the Content-Disposition header is set by the Go HTTP layer,
+	// not by ogen; the spec documents it for clients but does not drive code generation for it.
+	//
+	// GET /api/animation/{id}/export
+	ExportAnimation(ctx context.Context, params ExportAnimationParams) (ExportAnimationRes, error)
 	// GetAnimation implements getAnimation operation.
 	//
 	// Retrieves a saved animation by its ID.
@@ -26,6 +35,13 @@ type Handler interface {
 	//
 	// GET /api/devices
 	GetDevices(ctx context.Context) (GetDevicesRes, error)
+	// ImportAnimation implements importAnimation operation.
+	//
+	// Accepts a Sparse JSON animation payload (with target device id) and persists it. Validation runs
+	// first; on success the codec persists via the configured conflict-resolution mode.
+	//
+	// POST /api/animation/import
+	ImportAnimation(ctx context.Context, req *ImportAnimationRequest, params ImportAnimationParams) (ImportAnimationRes, error)
 	// ListAnimations implements listAnimations operation.
 	//
 	// Returns all saved animations for the specified device, ordered by most recently updated.
@@ -52,8 +68,8 @@ type Handler interface {
 	SaveAnimation(ctx context.Context, req *SaveAnimationRequest) (SaveAnimationRes, error)
 	// StartAnimation implements startAnimation operation.
 	//
-	// Starts playing an animation loop on the specified device. Only one animation can run per device at
-	// a time.
+	// Starts playing an animation loop on the specified device. Only one animation can run per device at a
+	// time.
 	//
 	// POST /api/animation/start
 	StartAnimation(ctx context.Context, req *StartAnimationRequest) (StartAnimationRes, error)

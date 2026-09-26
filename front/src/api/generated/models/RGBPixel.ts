@@ -21,20 +21,14 @@ import { mapValues } from '../runtime';
 export interface RGBPixel {
 	/**
 	 * Red component (0-255)
-	 * @type {number}
-	 * @memberof RGBPixel
 	 */
 	r: number;
 	/**
 	 * Green component (0-255)
-	 * @type {number}
-	 * @memberof RGBPixel
 	 */
 	g: number;
 	/**
 	 * Blue component (0-255)
-	 * @type {number}
-	 * @memberof RGBPixel
 	 */
 	b: number;
 }

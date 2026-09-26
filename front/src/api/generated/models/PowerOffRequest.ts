@@ -21,8 +21,6 @@ import { mapValues } from '../runtime';
 export interface PowerOffRequest {
 	/**
 	 * Device location in format yeelight://IP:PORT
-	 * @type {string}
-	 * @memberof PowerOffRequest
 	 */
 	deviceLocation: string;
 }
@@ -31,7 +29,13 @@ export interface PowerOffRequest {
  * Check if a given object implements the PowerOffRequest interface.
  */
 export function instanceOfPowerOffRequest(value: object): value is PowerOffRequest {
-	if (!('deviceLocation' in value) || value['deviceLocation'] === undefined) return false;
+	if (
+		(!('deviceLocation' in (value as Record<string, any>)) &&
+			!('device_location' in (value as Record<string, any>))) ||
+		((value as Record<string, any>)['deviceLocation'] === undefined &&
+			(value as Record<string, any>)['device_location'] === undefined)
+	)
+		return false;
 	return true;
 }
 

@@ -29,8 +29,6 @@ import {
 export interface GetAnimationResponse {
 	/**
 	 *
-	 * @type {SavedAnimation}
-	 * @memberof GetAnimationResponse
 	 */
 	animation: SavedAnimation;
 }

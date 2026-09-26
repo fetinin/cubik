@@ -12,7 +12,7 @@
  * Do not edit the class manually.
  */
 
-import { mapValues } from '../runtime';
+import { mapValues, parseDate, parseDateTime, serializeDate, serializeDateTime } from '../runtime';
 import type { RGBPixel } from './RGBPixel';
 import {
 	RGBPixelFromJSON,
@@ -29,38 +29,26 @@ import {
 export interface SavedAnimation {
 	/**
 	 * Unique animation identifier
-	 * @type {string}
-	 * @memberof SavedAnimation
 	 */
 	id: string;
 	/**
 	 * Unique device identifier this animation is saved for
-	 * @type {string}
-	 * @memberof SavedAnimation
 	 */
 	deviceId: string;
 	/**
 	 * User-provided name for the animation
-	 * @type {string}
-	 * @memberof SavedAnimation
 	 */
 	name: string;
 	/**
 	 * Array of animation frames
-	 * @type {Array<Array<RGBPixel>>}
-	 * @memberof SavedAnimation
 	 */
 	frames: Array<Array<RGBPixel>>;
 	/**
 	 * Timestamp when animation was created
-	 * @type {Date}
-	 * @memberof SavedAnimation
 	 */
 	createdAt: Date;
 	/**
 	 * Timestamp when animation was last updated
-	 * @type {Date}
-	 * @memberof SavedAnimation
 	 */
 	updatedAt: Date;
 }
@@ -70,11 +58,29 @@ export interface SavedAnimation {
  */
 export function instanceOfSavedAnimation(value: object): value is SavedAnimation {
 	if (!('id' in value) || value['id'] === undefined) return false;
-	if (!('deviceId' in value) || value['deviceId'] === undefined) return false;
+	if (
+		(!('deviceId' in (value as Record<string, any>)) &&
+			!('device_id' in (value as Record<string, any>))) ||
+		((value as Record<string, any>)['deviceId'] === undefined &&
+			(value as Record<string, any>)['device_id'] === undefined)
+	)
+		return false;
 	if (!('name' in value) || value['name'] === undefined) return false;
 	if (!('frames' in value) || value['frames'] === undefined) return false;
-	if (!('createdAt' in value) || value['createdAt'] === undefined) return false;
-	if (!('updatedAt' in value) || value['updatedAt'] === undefined) return false;
+	if (
+		(!('createdAt' in (value as Record<string, any>)) &&
+			!('created_at' in (value as Record<string, any>))) ||
+		((value as Record<string, any>)['createdAt'] === undefined &&
+			(value as Record<string, any>)['created_at'] === undefined)
+	)
+		return false;
+	if (
+		(!('updatedAt' in (value as Record<string, any>)) &&
+			!('updated_at' in (value as Record<string, any>))) ||
+		((value as Record<string, any>)['updatedAt'] === undefined &&
+			(value as Record<string, any>)['updated_at'] === undefined)
+	)
+		return false;
 	return true;
 }
 
@@ -94,8 +100,8 @@ export function SavedAnimationFromJSONTyped(
 		deviceId: json['device_id'],
 		name: json['name'],
 		frames: json['frames'],
-		createdAt: new Date(json['created_at']),
-		updatedAt: new Date(json['updated_at'])
+		createdAt: json['created_at'] == null ? json['created_at'] : parseDateTime(json['created_at']),
+		updatedAt: json['updated_at'] == null ? json['updated_at'] : parseDateTime(json['updated_at'])
 	};
 }
 
@@ -116,7 +122,9 @@ export function SavedAnimationToJSONTyped(
 		device_id: value['deviceId'],
 		name: value['name'],
 		frames: value['frames'],
-		created_at: value['createdAt'].toISOString(),
-		updated_at: value['updatedAt'].toISOString()
+		created_at:
+			value['createdAt'] == null ? value['createdAt'] : serializeDateTime(value['createdAt']),
+		updated_at:
+			value['updatedAt'] == null ? value['updatedAt'] : serializeDateTime(value['updatedAt'])
 	};
 }

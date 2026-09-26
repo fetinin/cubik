@@ -29,14 +29,10 @@ import {
 export interface UpdateAnimationResponse {
 	/**
 	 * Success message
-	 * @type {string}
-	 * @memberof UpdateAnimationResponse
 	 */
 	message: string;
 	/**
 	 *
-	 * @type {SavedAnimation}
-	 * @memberof UpdateAnimationResponse
 	 */
 	animation: SavedAnimation;
 }

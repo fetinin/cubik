@@ -145,6 +145,17 @@ paths:
                   summary: Invalid device ID format
                   value:
                     error: "invalid device_id format"
+        '409':
+          description: An animation with this name already exists for the device
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                nameTaken:
+                  summary: Name already used on this device
+                  value:
+                    error: "animation name already taken"
         '500':
           description: Internal server error
           content:
@@ -174,6 +185,58 @@ paths:
                 $ref: '#/components/schemas/ListAnimationsResponse'
         '500':
           description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/animation/import:
+    post:
+      operationId: importAnimation
+      summary: Import an animation from a Sparse JSON payload
+      description: Accepts a Sparse JSON animation payload (with target device id) and persists it. Validation runs first; on success the codec persists via the configured conflict-resolution mode.
+      parameters:
+        - name: mode
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [rename, overwrite, cancel]
+            default: rename
+          description: Conflict resolution policy when an animation with the same name already exists for the device
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ImportAnimationRequest'
+      responses:
+        '200':
+          description: Animation imported successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportAnimationResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportError'
+        '409':
+          description: Name collision (only returned when mode=cancel)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NameConflict'
+        '413':
+          description: Request body exceeds size cap
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Server error
           content:
             application/json:
               schema:
@@ -235,6 +298,54 @@ paths:
                   summary: Invalid device location format
                   value:
                     error: "invalid device_location format"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/animation/{id}/export:
+    get:
+      operationId: exportAnimation
+      summary: Export a saved animation as portable Sparse JSON
+      description: |
+        Fetches the saved animation and returns a versioned Sparse JSON
+        representation suitable for sharing across devices and users. The
+        response carries a Content-Disposition attachment header so browsers
+        treat it as a downloadable file. Note: the Content-Disposition header
+        is set by the Go HTTP layer, not by ogen; the spec documents it for
+        clients but does not drive code generation for it.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Unique identifier of the saved animation
+          example: "550e8400-e29b-41d4-a716-446655440000"
+      responses:
+        '200':
+          description: |
+            Animation exported successfully. The response carries a
+            `Content-Disposition: attachment; filename="<sanitized-name>.cubik.json"`
+            header so browsers treat the body as a downloadable file.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SparseAnimation'
+        '404':
+          description: Animation not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                notFound:
+                  summary: Animation does not exist
+                  value:
+                    error: "animation not found"
         '500':
           description: Internal server error
           content:
@@ -330,6 +441,17 @@ paths:
                   summary: Animation does not exist
                   value:
                     error: "animation not found"
+        '409':
+          description: An animation with this name already exists for the device
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                nameTaken:
+                  summary: Name already used on this device
+                  value:
+                    error: "animation name already taken"
         '500':
           description: Internal server error
           content:
@@ -647,4 +769,126 @@ components:
           pattern: '^yeelight://[0-9.]+:[0-9]+$'
           description: Device location in format yeelight://IP:PORT
           example: "yeelight://192.168.1.100:55443"
+      additionalProperties: false
+    SparsePixel:
+      type: object
+      required:
+        - x
+        - "y"
+        - c
+      properties:
+        x:
+          type: integer
+          format: int32
+          minimum: 0
+          maximum: 254
+          description: Zero-based column index of the lit pixel
+          example: 9
+        "y":
+          type: integer
+          format: int32
+          minimum: 0
+          maximum: 254
+          description: Zero-based row index of the lit pixel
+          example: 0
+        c:
+          type: integer
+          format: int32
+          minimum: 0
+          maximum: 16777215
+          description: 24-bit packed RGB color (0xRRGGBB)
+          example: 14414386
+    SparseFrame:
+      type: array
+      items:
+        $ref: '#/components/schemas/SparsePixel'
+      description: A single animation frame as an array of non-black pixels. May be empty for an all-black frame.
+    SparseAnimation:
+      type: object
+      required:
+        - version
+        - name
+        - width
+        - height
+        - frames
+      properties:
+        version:
+          type: string
+          pattern: '^[0-9]+\.[0-9]+$'
+          description: Semver-style major.minor of the wire format. Same major guarantees forward-compatibility (older readers ignore unknown optional fields); a different major may be rejected by older decoders.
+          example: "1.0"
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Human-readable animation name
+          example: "Rainbow Wave"
+        width:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 255
+          description: Matrix width in pixels
+          example: 20
+        height:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 255
+          description: Matrix height in pixels
+          example: 5
+        frames:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/SparseFrame'
+          description: Sequence of sparse frames; each frame lists only non-black pixels
+    ImportAnimationRequest:
+      type: object
+      required:
+        - device_id
+        - animation
+      properties:
+        device_id:
+          type: string
+          description: Target device for the imported animation
+          example: "0x000000000abc1234"
+        animation:
+          $ref: '#/components/schemas/SparseAnimation'
+      additionalProperties: false
+    ImportAnimationResponse:
+      type: object
+      required:
+        - animation
+      properties:
+        animation:
+          $ref: '#/components/schemas/SavedAnimation'
+        renamed_from:
+          type: string
+          description: Original name when the server renamed to avoid a collision; absent when no rename occurred
+      additionalProperties: false
+    ImportError:
+      type: object
+      required:
+        - field
+        - reason
+      properties:
+        field:
+          type: string
+          description: Dotted JSON-path to the failing field (e.g. "frames[3].pixels[7].x"); empty string when the failure is not field-specific
+        reason:
+          type: string
+          description: Human-readable, server-internal-detail-free explanation
+      additionalProperties: false
+    NameConflict:
+      type: object
+      required:
+        - existing_id
+        - existing_name
+      properties:
+        existing_id:
+          type: string
+          format: uuid
+        existing_name:
+          type: string
       additionalProperties: false

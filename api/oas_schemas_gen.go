@@ -4,6 +4,9 @@ package api
 
 import (
 	"time"
+
+	"github.com/go-faster/errors"
+	"github.com/google/uuid"
 )
 
 type AnimationFrame []RGBPixel
@@ -93,6 +96,14 @@ func (s *Error) SetError(val string) {
 func (*Error) getDevicesRes()     {}
 func (*Error) listAnimationsRes() {}
 
+type ExportAnimationInternalServerError Error
+
+func (*ExportAnimationInternalServerError) exportAnimationRes() {}
+
+type ExportAnimationNotFound Error
+
+func (*ExportAnimationNotFound) exportAnimationRes() {}
+
 type GetAnimationInternalServerError Error
 
 func (*GetAnimationInternalServerError) getAnimationRes() {}
@@ -134,6 +145,149 @@ func (s *GetDevicesOK) SetDevices(val []Device) {
 
 func (*GetDevicesOK) getDevicesRes() {}
 
+type ImportAnimationInternalServerError Error
+
+func (*ImportAnimationInternalServerError) importAnimationRes() {}
+
+type ImportAnimationMode string
+
+const (
+	ImportAnimationModeRename    ImportAnimationMode = "rename"
+	ImportAnimationModeOverwrite ImportAnimationMode = "overwrite"
+	ImportAnimationModeCancel    ImportAnimationMode = "cancel"
+)
+
+// AllValues returns all ImportAnimationMode values.
+func (ImportAnimationMode) AllValues() []ImportAnimationMode {
+	return []ImportAnimationMode{
+		ImportAnimationModeRename,
+		ImportAnimationModeOverwrite,
+		ImportAnimationModeCancel,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s ImportAnimationMode) MarshalText() ([]byte, error) {
+	switch s {
+	case ImportAnimationModeRename:
+		return []byte(s), nil
+	case ImportAnimationModeOverwrite:
+		return []byte(s), nil
+	case ImportAnimationModeCancel:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *ImportAnimationMode) UnmarshalText(data []byte) error {
+	switch ImportAnimationMode(data) {
+	case ImportAnimationModeRename:
+		*s = ImportAnimationModeRename
+		return nil
+	case ImportAnimationModeOverwrite:
+		*s = ImportAnimationModeOverwrite
+		return nil
+	case ImportAnimationModeCancel:
+		*s = ImportAnimationModeCancel
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/ImportAnimationRequest
+type ImportAnimationRequest struct {
+	// Target device for the imported animation.
+	DeviceID  string          `json:"device_id"`
+	Animation SparseAnimation `json:"animation"`
+}
+
+// GetDeviceID returns the value of DeviceID.
+func (s *ImportAnimationRequest) GetDeviceID() string {
+	return s.DeviceID
+}
+
+// GetAnimation returns the value of Animation.
+func (s *ImportAnimationRequest) GetAnimation() SparseAnimation {
+	return s.Animation
+}
+
+// SetDeviceID sets the value of DeviceID.
+func (s *ImportAnimationRequest) SetDeviceID(val string) {
+	s.DeviceID = val
+}
+
+// SetAnimation sets the value of Animation.
+func (s *ImportAnimationRequest) SetAnimation(val SparseAnimation) {
+	s.Animation = val
+}
+
+type ImportAnimationRequestEntityTooLarge Error
+
+func (*ImportAnimationRequestEntityTooLarge) importAnimationRes() {}
+
+// Ref: #/components/schemas/ImportAnimationResponse
+type ImportAnimationResponse struct {
+	Animation SavedAnimation `json:"animation"`
+	// Original name when the server renamed to avoid a collision; absent when no rename occurred.
+	RenamedFrom OptString `json:"renamed_from"`
+}
+
+// GetAnimation returns the value of Animation.
+func (s *ImportAnimationResponse) GetAnimation() SavedAnimation {
+	return s.Animation
+}
+
+// GetRenamedFrom returns the value of RenamedFrom.
+func (s *ImportAnimationResponse) GetRenamedFrom() OptString {
+	return s.RenamedFrom
+}
+
+// SetAnimation sets the value of Animation.
+func (s *ImportAnimationResponse) SetAnimation(val SavedAnimation) {
+	s.Animation = val
+}
+
+// SetRenamedFrom sets the value of RenamedFrom.
+func (s *ImportAnimationResponse) SetRenamedFrom(val OptString) {
+	s.RenamedFrom = val
+}
+
+func (*ImportAnimationResponse) importAnimationRes() {}
+
+// Ref: #/components/schemas/ImportError
+type ImportError struct {
+	// Dotted JSON-path to the failing field (e.g. "frames[3].pixels[7].x"); empty string when the failure
+	// is not field-specific.
+	Field string `json:"field"`
+	// Human-readable, server-internal-detail-free explanation.
+	Reason string `json:"reason"`
+}
+
+// GetField returns the value of Field.
+func (s *ImportError) GetField() string {
+	return s.Field
+}
+
+// GetReason returns the value of Reason.
+func (s *ImportError) GetReason() string {
+	return s.Reason
+}
+
+// SetField sets the value of Field.
+func (s *ImportError) SetField(val string) {
+	s.Field = val
+}
+
+// SetReason sets the value of Reason.
+func (s *ImportError) SetReason(val string) {
+	s.Reason = val
+}
+
+func (*ImportError) importAnimationRes() {}
+
 // Ref: #/components/schemas/ListAnimationsResponse
 type ListAnimationsResponse struct {
 	// List of saved animations for the device, ordered by updated_at descending.
@@ -151,6 +305,126 @@ func (s *ListAnimationsResponse) SetAnimations(val []SavedAnimation) {
 }
 
 func (*ListAnimationsResponse) listAnimationsRes() {}
+
+// Ref: #/components/schemas/NameConflict
+type NameConflict struct {
+	ExistingID   uuid.UUID `json:"existing_id"`
+	ExistingName string    `json:"existing_name"`
+}
+
+// GetExistingID returns the value of ExistingID.
+func (s *NameConflict) GetExistingID() uuid.UUID {
+	return s.ExistingID
+}
+
+// GetExistingName returns the value of ExistingName.
+func (s *NameConflict) GetExistingName() string {
+	return s.ExistingName
+}
+
+// SetExistingID sets the value of ExistingID.
+func (s *NameConflict) SetExistingID(val uuid.UUID) {
+	s.ExistingID = val
+}
+
+// SetExistingName sets the value of ExistingName.
+func (s *NameConflict) SetExistingName(val string) {
+	s.ExistingName = val
+}
+
+func (*NameConflict) importAnimationRes() {}
+
+// NewOptImportAnimationMode returns new OptImportAnimationMode with value set to v.
+func NewOptImportAnimationMode(v ImportAnimationMode) OptImportAnimationMode {
+	return OptImportAnimationMode{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptImportAnimationMode is optional ImportAnimationMode.
+type OptImportAnimationMode struct {
+	Value ImportAnimationMode
+	Set   bool
+}
+
+// IsSet returns true if OptImportAnimationMode was set.
+func (o OptImportAnimationMode) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptImportAnimationMode) Reset() {
+	var v ImportAnimationMode
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptImportAnimationMode) SetTo(v ImportAnimationMode) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptImportAnimationMode) Get() (v ImportAnimationMode, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptImportAnimationMode) Or(d ImportAnimationMode) ImportAnimationMode {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptString returns new OptString with value set to v.
+func NewOptString(v string) OptString {
+	return OptString{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptString is optional string.
+type OptString struct {
+	Value string
+	Set   bool
+}
+
+// IsSet returns true if OptString was set.
+func (o OptString) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptString) Reset() {
+	var v string
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptString) SetTo(v string) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptString) Get() (v string, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptString) Or(d string) string {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
 
 type PowerOffBadRequest Error
 
@@ -253,6 +527,10 @@ func (s *RGBPixel) SetB(val int32) {
 type SaveAnimationBadRequest Error
 
 func (*SaveAnimationBadRequest) saveAnimationRes() {}
+
+type SaveAnimationConflict Error
+
+func (*SaveAnimationConflict) saveAnimationRes() {}
 
 type SaveAnimationInternalServerError Error
 
@@ -415,6 +693,115 @@ func (s *SavedAnimation) SetUpdatedAt(val time.Time) {
 	s.UpdatedAt = val
 }
 
+// Ref: #/components/schemas/SparseAnimation
+type SparseAnimation struct {
+	// Semver-style major.minor of the wire format. Same major guarantees forward-compatibility (older
+	// readers ignore unknown optional fields); a different major may be rejected by older decoders.
+	Version string `json:"version"`
+	// Human-readable animation name.
+	Name string `json:"name"`
+	// Matrix width in pixels.
+	Width int32 `json:"width"`
+	// Matrix height in pixels.
+	Height int32 `json:"height"`
+	// Sequence of sparse frames; each frame lists only non-black pixels.
+	Frames []SparseFrame `json:"frames"`
+}
+
+// GetVersion returns the value of Version.
+func (s *SparseAnimation) GetVersion() string {
+	return s.Version
+}
+
+// GetName returns the value of Name.
+func (s *SparseAnimation) GetName() string {
+	return s.Name
+}
+
+// GetWidth returns the value of Width.
+func (s *SparseAnimation) GetWidth() int32 {
+	return s.Width
+}
+
+// GetHeight returns the value of Height.
+func (s *SparseAnimation) GetHeight() int32 {
+	return s.Height
+}
+
+// GetFrames returns the value of Frames.
+func (s *SparseAnimation) GetFrames() []SparseFrame {
+	return s.Frames
+}
+
+// SetVersion sets the value of Version.
+func (s *SparseAnimation) SetVersion(val string) {
+	s.Version = val
+}
+
+// SetName sets the value of Name.
+func (s *SparseAnimation) SetName(val string) {
+	s.Name = val
+}
+
+// SetWidth sets the value of Width.
+func (s *SparseAnimation) SetWidth(val int32) {
+	s.Width = val
+}
+
+// SetHeight sets the value of Height.
+func (s *SparseAnimation) SetHeight(val int32) {
+	s.Height = val
+}
+
+// SetFrames sets the value of Frames.
+func (s *SparseAnimation) SetFrames(val []SparseFrame) {
+	s.Frames = val
+}
+
+func (*SparseAnimation) exportAnimationRes() {}
+
+type SparseFrame []SparsePixel
+
+// Ref: #/components/schemas/SparsePixel
+type SparsePixel struct {
+	// Zero-based column index of the lit pixel.
+	X int32 `json:"x"`
+	// Zero-based row index of the lit pixel.
+	Y int32 `json:"y"`
+	// 24-bit packed RGB color (0xRRGGBB).
+	C int32 `json:"c"`
+}
+
+// GetX returns the value of X.
+func (s *SparsePixel) GetX() int32 {
+	return s.X
+}
+
+// GetY returns the value of Y.
+func (s *SparsePixel) GetY() int32 {
+	return s.Y
+}
+
+// GetC returns the value of C.
+func (s *SparsePixel) GetC() int32 {
+	return s.C
+}
+
+// SetX sets the value of X.
+func (s *SparsePixel) SetX(val int32) {
+	s.X = val
+}
+
+// SetY sets the value of Y.
+func (s *SparsePixel) SetY(val int32) {
+	s.Y = val
+}
+
+// SetC sets the value of C.
+func (s *SparsePixel) SetC(val int32) {
+	s.C = val
+}
+
 type StartAnimationBadRequest Error
 
 func (*StartAnimationBadRequest) startAnimationRes() {}
@@ -526,6 +913,10 @@ func (*StopAnimationResponse) stopAnimationRes() {}
 type UpdateAnimationBadRequest Error
 
 func (*UpdateAnimationBadRequest) updateAnimationRes() {}
+
+type UpdateAnimationConflict Error
+
+func (*UpdateAnimationConflict) updateAnimationRes() {}
 
 type UpdateAnimationInternalServerError Error
 

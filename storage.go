@@ -9,9 +9,29 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"modernc.org/sqlite"
+	sqlite3 "modernc.org/sqlite/lib"
 )
 
 var ErrNotFound = errors.New("animation not found")
+
+// ErrNameTaken is returned when a write would violate the
+// UNIQUE(device_id, name) index on saved_animations.
+var ErrNameTaken = errors.New("animation name already taken")
+
+func isUniqueViolation(err error) bool {
+	var sqliteErr *sqlite.Error
+	return errors.As(err, &sqliteErr) && sqliteErr.Code() == sqlite3.SQLITE_CONSTRAINT_UNIQUE
+}
+
+// DBTX is the subset of [sql.DB] / [sql.Tx] that storage helpers need.
+// Both *[sql.DB] and *[sql.Tx] satisfy this interface, allowing helpers to
+// participate transparently in a transaction when callers pass a *[sql.Tx].
+type DBTX interface {
+	ExecContext(ctx context.Context, query string, args ...any) (sql.Result, error)
+	QueryContext(ctx context.Context, query string, args ...any) (*sql.Rows, error)
+	QueryRowContext(ctx context.Context, query string, args ...any) *sql.Row
+}
 
 type SavedAnimation struct {
 	ID        string
@@ -65,7 +85,7 @@ func deserializeFrames(jsonStr string) ([][]Color, error) {
 	return frames, nil
 }
 
-func SaveAnimation(ctx context.Context, db *sql.DB, deviceID, name string, frames [][]Color) (*SavedAnimation, error) {
+func SaveAnimation(ctx context.Context, db DBTX, deviceID, name string, frames [][]Color) (*SavedAnimation, error) {
 	id := uuid.New().String()
 	framesJSON, err := serializeFrames(frames)
 	if err != nil {
@@ -81,6 +101,9 @@ func SaveAnimation(ctx context.Context, db *sql.DB, deviceID, name string, frame
 		 VALUES (?, ?, ?, ?, ?, ?)`,
 		id, deviceID, name, framesJSON, timestamp, timestamp,
 	)
+	if isUniqueViolation(execErr) {
+		return nil, ErrNameTaken
+	}
 	if execErr != nil {
 		return nil, fmt.Errorf("failed to insert animation: %w", execErr)
 	}
@@ -95,7 +118,7 @@ func SaveAnimation(ctx context.Context, db *sql.DB, deviceID, name string, frame
 	}, nil
 }
 
-func GetAnimation(ctx context.Context, db *sql.DB, id string) (*SavedAnimation, error) {
+func GetAnimation(ctx context.Context, db DBTX, id string) (*SavedAnimation, error) {
 	var deviceID, name, framesJSON, createdAt, updatedAt string
 
 	queryErr := db.QueryRowContext(
@@ -130,7 +153,7 @@ func GetAnimation(ctx context.Context, db *sql.DB, id string) (*SavedAnimation, 
 	}, nil
 }
 
-func ListAnimationsByDevice(ctx context.Context, db *sql.DB, deviceID string) ([]*SavedAnimation, error) {
+func ListAnimationsByDevice(ctx context.Context, db DBTX, deviceID string) ([]*SavedAnimation, error) {
 	rows, queryErr := db.QueryContext(
 		ctx,
 		`SELECT id, name, frames_json, created_at, updated_at
@@ -173,7 +196,7 @@ func ListAnimationsByDevice(ctx context.Context, db *sql.DB, deviceID string) ([
 	return animations, nil
 }
 
-func UpdateAnimation(ctx context.Context, db *sql.DB, id, name string, frames [][]Color) (*SavedAnimation, error) {
+func UpdateAnimation(ctx context.Context, db DBTX, id, name string, frames [][]Color) (*SavedAnimation, error) {
 	framesJSON, err := serializeFrames(frames)
 	if err != nil {
 		return nil, err
@@ -185,6 +208,9 @@ func UpdateAnimation(ctx context.Context, db *sql.DB, id, name string, frames []
 		`UPDATE saved_animations SET name = ?, frames_json = ?, updated_at = ? WHERE id = ?`,
 		name, framesJSON, updatedAt, id,
 	)
+	if isUniqueViolation(execErr) {
+		return nil, ErrNameTaken
+	}
 	if execErr != nil {
 		return nil, fmt.Errorf("failed to update animation: %w", execErr)
 	}
@@ -200,7 +226,7 @@ func UpdateAnimation(ctx context.Context, db *sql.DB, id, name string, frames []
 	return GetAnimation(ctx, db, id)
 }
 
-func DeleteAnimation(ctx context.Context, db *sql.DB, id string) error {
+func DeleteAnimation(ctx context.Context, db DBTX, id string) error {
 	result, execErr := db.ExecContext(ctx, `DELETE FROM saved_animations WHERE id = ?`, id)
 	if execErr != nil {
 		return fmt.Errorf("failed to delete animation: %w", execErr)
@@ -214,4 +240,60 @@ func DeleteAnimation(ctx context.Context, db *sql.DB, id string) error {
 		return ErrNotFound
 	}
 	return nil
+}
+
+// NameExists reports whether an animation with the given name already exists for the device.
+// Returns false on no-row, true on hit, error on other DB failures.
+func NameExists(ctx context.Context, db DBTX, deviceID, name string) (bool, error) {
+	var sentinel int
+	queryErr := db.QueryRowContext(
+		ctx,
+		`SELECT 1 FROM saved_animations WHERE device_id = ? AND name = ? LIMIT 1`,
+		deviceID, name,
+	).Scan(&sentinel)
+
+	if errors.Is(queryErr, sql.ErrNoRows) {
+		return false, nil
+	}
+	if queryErr != nil {
+		return false, fmt.Errorf("failed to check animation existence: %w", queryErr)
+	}
+	return true, nil
+}
+
+// AnimationByName fetches a saved animation by (deviceID, name). Returns ErrNotFound if there is none.
+// Mirrors the GetAnimation shape but keys on name within a device scope.
+func AnimationByName(ctx context.Context, db DBTX, deviceID, name string) (*SavedAnimation, error) {
+	var id, framesJSON, createdAt, updatedAt string
+
+	queryErr := db.QueryRowContext(
+		ctx,
+		`SELECT id, frames_json, created_at, updated_at
+		 FROM saved_animations WHERE device_id = ? AND name = ?`,
+		deviceID, name,
+	).Scan(&id, &framesJSON, &createdAt, &updatedAt)
+
+	if errors.Is(queryErr, sql.ErrNoRows) {
+		return nil, ErrNotFound
+	}
+	if queryErr != nil {
+		return nil, fmt.Errorf("failed to query animation: %w", queryErr)
+	}
+
+	frames, deserializeErr := deserializeFrames(framesJSON)
+	if deserializeErr != nil {
+		return nil, deserializeErr
+	}
+
+	createdTime, _ := time.Parse(time.RFC3339, createdAt)
+	updatedTime, _ := time.Parse(time.RFC3339, updatedAt)
+
+	return &SavedAnimation{
+		ID:        id,
+		DeviceID:  deviceID,
+		Name:      name,
+		Frames:    frames,
+		CreatedAt: createdTime,
+		UpdatedAt: updatedTime,
+	}, nil
 }

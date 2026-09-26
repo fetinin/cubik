@@ -21,8 +21,6 @@ import { mapValues } from '../runtime';
 export interface StopAnimationRequest {
 	/**
 	 * Device location in format yeelight://IP:PORT
-	 * @type {string}
-	 * @memberof StopAnimationRequest
 	 */
 	deviceLocation: string;
 }
@@ -31,7 +29,13 @@ export interface StopAnimationRequest {
  * Check if a given object implements the StopAnimationRequest interface.
  */
 export function instanceOfStopAnimationRequest(value: object): value is StopAnimationRequest {
-	if (!('deviceLocation' in value) || value['deviceLocation'] === undefined) return false;
+	if (
+		(!('deviceLocation' in (value as Record<string, any>)) &&
+			!('device_location' in (value as Record<string, any>))) ||
+		((value as Record<string, any>)['deviceLocation'] === undefined &&
+			(value as Record<string, any>)['device_location'] === undefined)
+	)
+		return false;
 	return true;
 }
 

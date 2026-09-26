@@ -14,6 +14,7 @@
 		powerOnDevice,
 		powerOffDevice
 	} from '$lib/api/client';
+	import { ResponseError } from '$lib/api/generated';
 	import DeviceBar from '$lib/components/DeviceBar.svelte';
 	import AnimationPreview from '$lib/components/AnimationPreview.svelte';
 	import ColorPickerRGB from '$lib/components/ColorPickerRGB.svelte';
@@ -22,6 +23,7 @@
 	import MatrixGrid from '$lib/components/MatrixGrid.svelte';
 	import LoadAnimationModal from '$lib/components/LoadAnimationModal.svelte';
 	import SaveAnimationModal from '$lib/components/SaveAnimationModal.svelte';
+	import AnimationLibraryActions from '$lib/components/AnimationLibraryActions.svelte';
 	import {
 		buildAnimationPayload,
 		createEditorState,
@@ -133,6 +135,10 @@
 
 			await refreshSavedAnimations(device.id);
 		} catch (e) {
+			if (e instanceof ResponseError && e.response.status === 409) {
+				error = `An animation named "${name}" already exists on this device`;
+				return;
+			}
 			console.error('Failed to save animation:', e);
 		}
 	}
@@ -584,6 +590,17 @@
 					{#if stoppedNotice}
 						<div class="mt-3 text-sm text-gray-600">Animation stopped.</div>
 					{/if}
+				</section>
+
+				<section class="rounded border border-gray-200 p-4">
+					<AnimationLibraryActions
+						animations={savedAnimations}
+						deviceId={$selectedDeviceId}
+						onrefresh={async () => {
+							const device = get(selectedDevice);
+							if (device) await refreshSavedAnimations(device.id);
+						}}
+					/>
 				</section>
 			</aside>
 		</div>

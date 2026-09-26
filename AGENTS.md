@@ -26,6 +26,9 @@ mise run test
 # Generate API code from spec.yml (both backend and frontend)
 mise run gen
 
+# Verify spec.yml ↔ api/ are in sync (detects hand-edits or stale generations)
+mise run gen-check
+
 # Development servers
 mise run dev          # Run both backend and frontend in parallel
 mise run back-dev     # Backend only
@@ -124,8 +127,9 @@ The application supports two modes via command-line flag:
 1. Update `spec.yml` with new endpoints/schemas
 2. Run `mise run gen` to regenerate backend and frontend code
 3. Implement new handler methods in `handler.go`
-4. Run `mise run lint` to check for linting issues
-5. Run `mise run build` to compile
+4. Run `mise run gen-check` to verify spec ↔ api/ are in sync (prevents hand-edits of generated code)
+5. Run `mise run lint` to check for linting issues
+6. Run `mise run build` to compile
 
 **Example workflow:**
 
@@ -281,3 +285,5 @@ Additional protocol documentation in:
 - Yeelight cube device is limited to 60 RPS. Make sure not to exceed it
 - API code in `api/` directory is auto-generated - never edit manually, regenerate from `spec.yml`
 
+## Architecture tasks
+For any architecture-related work (modeling systems, components, relationships, requirements, specs), use the `archi` CLI and its skills (`arch`, `arch-existing`, `archiplan`, `code-link`). Do not read or hand-edit `.fractal/` files directly — query the spec through `archi` subcommands instead. Run `archi help` or `archi guide` for details.
