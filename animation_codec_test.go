@@ -138,7 +138,7 @@ func TestDecodeAnimation_RejectUnknownMajor(t *testing.T) {
 	}
 	var typed *UnknownMajorVersionError
 	if !errors.As(err, &typed) {
-		t.Fatalf("errors.As failed: got %T (%v), want *UnknownMajorVersionError", err, err)
+		t.Fatalf("errors.AsType failed: got %T (%v), want *UnknownMajorVersionError", err, err)
 	}
 	if typed.GotMajor != 2 {
 		t.Errorf("GotMajor = %d, want 2", typed.GotMajor)
@@ -222,9 +222,8 @@ func TestDecodeAnimation_MalformedVersion(t *testing.T) {
 	if err == nil {
 		t.Fatalf("expected error for malformed version, got nil")
 	}
-	var mve *MalformedVersionError
-	if !errors.As(err, &mve) {
-		t.Fatalf("errors.As failed: got %T (%v), want *MalformedVersionError", err, err)
+	if _, ok := errors.AsType[*MalformedVersionError](err); !ok {
+		t.Fatalf("errors.AsType failed: got %T (%v), want *MalformedVersionError", err, err)
 	}
 }
 
@@ -339,7 +338,7 @@ func TestPersistImported_Cancel(t *testing.T) {
 	}
 	var nce *NameConflictError
 	if !errors.As(err, &nce) {
-		t.Fatalf("errors.As failed: got %T (%v), want *NameConflictError", err, err)
+		t.Fatalf("errors.AsType failed: got %T (%v), want *NameConflictError", err, err)
 	}
 	if nce.Name != "Wave" {
 		t.Errorf("Name = %q, want %q", nce.Name, "Wave")

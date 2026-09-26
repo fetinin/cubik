@@ -275,7 +275,7 @@ Additional protocol documentation in:
 
 ## Development Notes
 
-- The project uses Go 1.25.5
+- The project uses Go 1.27.1
 - External dependencies:
   - `github.com/ogen-go/ogen` - OpenAPI code generation
   - Standard library for core functionality (no deps for device discovery/control)

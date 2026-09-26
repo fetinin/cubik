@@ -11,6 +11,8 @@ import (
 	"github.com/google/uuid"
 )
 
+const msgAnimationNotFound = "animation not found"
+
 type APIHandler struct {
 	db *sql.DB
 }
@@ -121,7 +123,7 @@ func (h *APIHandler) ListAnimations(
 func (h *APIHandler) GetAnimation(ctx context.Context, params api.GetAnimationParams) (api.GetAnimationRes, error) {
 	animation, err := GetAnimation(ctx, h.db, params.ID)
 	if errors.Is(err, ErrNotFound) {
-		return &api.GetAnimationNotFound{Error: "animation not found"}, nil
+		return &api.GetAnimationNotFound{Error: msgAnimationNotFound}, nil
 	}
 	if err != nil {
 		return &api.GetAnimationInternalServerError{
@@ -144,7 +146,7 @@ func (h *APIHandler) UpdateAnimation(
 
 	animation, err := UpdateAnimation(ctx, h.db, params.ID, req.Name, frames)
 	if errors.Is(err, ErrNotFound) {
-		return &api.UpdateAnimationNotFound{Error: "animation not found"}, nil
+		return &api.UpdateAnimationNotFound{Error: msgAnimationNotFound}, nil
 	}
 	if errors.Is(err, ErrNameTaken) {
 		return &api.UpdateAnimationConflict{Error: ErrNameTaken.Error()}, nil
@@ -213,15 +215,13 @@ func classifyImportInput(anim *api.SparseAnimation) api.ImportAnimationRes {
 // other decode failure is reported with a generic reason to avoid leaking
 // internal context.
 func classifyDecodeError(err error) api.ImportAnimationRes {
-	var unkVer *UnknownMajorVersionError
-	if errors.As(err, &unkVer) {
+	if unkVer, ok := errors.AsType[*UnknownMajorVersionError](err); ok {
 		return &api.ImportError{
 			Field:  "animation.version",
 			Reason: unkVer.Error(),
 		}
 	}
-	var malformedVer *MalformedVersionError
-	if errors.As(err, &malformedVer) {
+	if malformedVer, ok := errors.AsType[*MalformedVersionError](err); ok {
 		return &api.ImportError{
 			Field:  "animation.version",
 			Reason: malformedVer.Error(),
@@ -237,8 +237,7 @@ func classifyDecodeError(err error) api.ImportAnimationRes {
 // become 409 NameConflict bodies; everything else is logged and surfaced as
 // a 500 with a sanitized message.
 func classifyPersistError(err error) api.ImportAnimationRes {
-	var conflict *NameConflictError
-	if errors.As(err, &conflict) {
+	if conflict, ok := errors.AsType[*NameConflictError](err); ok {
 		existingUUID, _ := uuid.Parse(conflict.ExistingID)
 		return &api.NameConflict{
 			ExistingID:   existingUUID,
@@ -296,7 +295,7 @@ func (h *APIHandler) DeleteAnimation(
 ) (api.DeleteAnimationRes, error) {
 	err := DeleteAnimation(ctx, h.db, params.ID)
 	if errors.Is(err, ErrNotFound) {
-		return &api.DeleteAnimationNotFound{Error: "animation not found"}, nil
+		return &api.DeleteAnimationNotFound{Error: msgAnimationNotFound}, nil
 	}
 	if err != nil {
 		return &api.DeleteAnimationInternalServerError{

@@ -56,7 +56,7 @@ func exportRouteOverride(db *sql.DB, next http.Handler) http.Handler {
 func serveExport(w http.ResponseWriter, r *http.Request, db *sql.DB, id string) {
 	saved, err := GetAnimation(r.Context(), db, id)
 	if errors.Is(err, ErrNotFound) {
-		writeExportError(w, http.StatusNotFound, "animation not found")
+		writeExportError(w, http.StatusNotFound, msgAnimationNotFound)
 		return
 	}
 	if err != nil {
