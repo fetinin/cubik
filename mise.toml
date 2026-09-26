@@ -54,6 +54,10 @@ run = [{ tasks = ["back-gen", "front-gen"] }]
 description = "Create a GitHub release with date-based tag"
 run = "bun scripts/release.ts"
 
+[tasks.anim]
+description = "Author animations as code: mise run anim -- <animation> <preview|export|play|stop|import>"
+run = "bun scripts/anims/cli.ts"
+
 [tasks.back-test]
 description = "Run Go backend tests"
 sources = ["**/*.go", "go.mod", "go.sum"]

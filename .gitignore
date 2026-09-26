@@ -13,3 +13,7 @@ benchmark_output/
 
 # Personal Claude Code settings
 **/.claude/settings.local.json
+
+# Animations authored with scripts/anims are local drafts; only the helpers are tracked
+scripts/anims/animations/*
+!scripts/anims/animations/.gitkeep
