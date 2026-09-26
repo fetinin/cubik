@@ -82,7 +82,7 @@ describe('AnimationLibraryActions', () => {
 			exportAnimation: vi.fn(async () => sparse),
 			importAnimation: vi.fn()
 		};
-		const screen = render(AnimationLibraryActions, {
+		const screen = await render(AnimationLibraryActions, {
 			animations: [makeSavedAnimation({ id: 'anim-1', name: 'Wave' })],
 			deviceId: 'device-1',
 			api: stubApi
@@ -109,7 +109,7 @@ describe('AnimationLibraryActions', () => {
 			exportAnimation: vi.fn(async () => sparse),
 			importAnimation: vi.fn()
 		};
-		const screen = render(AnimationLibraryActions, {
+		const screen = await render(AnimationLibraryActions, {
 			animations: [makeSavedAnimation({ id: 'anim-1', name: 'Wave' })],
 			deviceId: 'device-1',
 			api: stubApi
@@ -144,7 +144,7 @@ describe('AnimationLibraryActions', () => {
 				}
 			}))
 		};
-		const screen = render(AnimationLibraryActions, {
+		const screen = await render(AnimationLibraryActions, {
 			animations: [],
 			deviceId: 'device-1',
 			onrefresh,
@@ -186,7 +186,7 @@ describe('AnimationLibraryActions', () => {
 				}
 			}))
 		};
-		const screen = render(AnimationLibraryActions, {
+		const screen = await render(AnimationLibraryActions, {
 			animations: [],
 			deviceId: 'device-1',
 			onrefresh,
@@ -221,7 +221,7 @@ describe('AnimationLibraryActions', () => {
 				});
 			})
 		};
-		const screen = render(AnimationLibraryActions, {
+		const screen = await render(AnimationLibraryActions, {
 			animations: [],
 			deviceId: 'device-1',
 			api: stubApi
@@ -233,10 +233,10 @@ describe('AnimationLibraryActions', () => {
 		await expect.element(screen.getByTestId('import-status-field')).toBeInTheDocument();
 		await expect
 			.element(screen.getByTestId('import-status-field'))
-			.toHaveTextContent('frames[0].pixels[2].x');
+			.toMatchTextContent('frames[0].pixels[2].x');
 		await expect
 			.element(screen.getByTestId('import-status-reason'))
-			.toHaveTextContent('x out of range');
+			.toMatchTextContent('x out of range');
 	});
 
 	it('opens conflict modal on 409 and retries with mode=overwrite when chosen', async () => {
@@ -267,7 +267,7 @@ describe('AnimationLibraryActions', () => {
 			})
 		};
 		const onrefresh = vi.fn();
-		const screen = render(AnimationLibraryActions, {
+		const screen = await render(AnimationLibraryActions, {
 			animations: [],
 			deviceId: 'device-1',
 			onrefresh,
@@ -311,7 +311,7 @@ describe('AnimationLibraryActions', () => {
 				renamedFrom: 'Wave'
 			}))
 		};
-		const screen = render(AnimationLibraryActions, {
+		const screen = await render(AnimationLibraryActions, {
 			animations: [],
 			deviceId: 'device-1',
 			api: stubApi
@@ -320,8 +320,10 @@ describe('AnimationLibraryActions', () => {
 		await screen.getByTestId('import-button').click();
 		await screen.getByTestId('import-from-clipboard').click();
 
-		await expect.element(screen.getByTestId('import-status-success')).toHaveTextContent('Wave (2)');
-		await expect.element(screen.getByTestId('import-status-success')).toHaveTextContent('Wave');
+		await expect
+			.element(screen.getByTestId('import-status-success'))
+			.toMatchTextContent('Wave (2)');
+		await expect.element(screen.getByTestId('import-status-success')).toMatchTextContent('Wave');
 	});
 
 	it('shows parse error and does not call importAnimation on bad JSON paste', async () => {
@@ -331,7 +333,7 @@ describe('AnimationLibraryActions', () => {
 			exportAnimation: vi.fn(),
 			importAnimation: vi.fn()
 		};
-		const screen = render(AnimationLibraryActions, {
+		const screen = await render(AnimationLibraryActions, {
 			animations: [],
 			deviceId: 'device-1',
 			api: stubApi
@@ -342,7 +344,7 @@ describe('AnimationLibraryActions', () => {
 
 		await expect
 			.element(screen.getByTestId('import-status-error'))
-			.toHaveTextContent('not valid JSON');
+			.toMatchTextContent('not valid JSON');
 		expect(stubApi.importAnimation).not.toHaveBeenCalled();
 	});
 });

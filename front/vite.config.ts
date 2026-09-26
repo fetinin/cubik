@@ -6,6 +6,13 @@ import { sveltekit } from '@sveltejs/kit/vite';
 export default defineConfig({
 	plugins: [tailwindcss(), sveltekit()],
 
+	// Same-origin /api in dev, matching production where the Go backend serves the SPA
+	server: {
+		proxy: {
+			'/api': 'http://localhost:9080'
+		}
+	},
+
 	test: {
 		expect: { requireAssertions: true },
 
