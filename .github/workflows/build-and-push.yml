@@ -1,12 +1,10 @@
 name: Build and Push to GHCR
 
+# Images are published only for GitHub releases (see `mise run release`).
+# PR builds are verified by the docker-build job in pr-checks.yml.
 on:
-  push:
-    branches:
-      - master
-    tags:
-      - '*'
-  pull_request:
+  release:
+    types: [published]
 
 jobs:
   build-and-push:
@@ -18,22 +16,11 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Get version from git
-        id: version
-        run: |
-          VERSION=$(git describe --tags --always)
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      # Only login and push for 'push' events (master branch or tags).
-      # Pull requests have event_name='pull_request', so they only build without pushing.
       - name: Log in to GitHub Container Registry
-        if: github.event_name == 'push'
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
@@ -46,16 +33,18 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository }}
           tags: |
-            type=raw,value=${{ steps.version.outputs.version }}
-            type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=${{ github.event.release.tag_name }}
+            type=raw,value=latest,enable=${{ !github.event.release.prerelease }}
 
+      # Registry cache instead of type=gha: GHA caches are scoped to the git ref,
+      # and every release runs on a new tag ref, so a gha cache would never hit.
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
-          push: ${{ github.event_name == 'push' }}
+          push: true
           platforms: linux/amd64,linux/arm64
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=registry,ref=ghcr.io/${{ github.repository }}:buildcache
+          cache-to: type=registry,ref=ghcr.io/${{ github.repository }}:buildcache,mode=max
