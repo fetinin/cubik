@@ -86,7 +86,7 @@ docker run --network host \
 
 ### For Local Development
 
-- **Go**: 1.25.5 or later
+- **Go**: 1.27.1 or later
 - **Bun**: Latest version (package manager for frontend)
 - **Docker**: Optional, for containerized deployment
 

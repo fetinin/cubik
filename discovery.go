@@ -60,8 +60,7 @@ func DiscoverDevices() ([]*DeviceInfo, error) {
 	for {
 		n, _, readErr := conn.ReadFromUDP(buffer)
 		if readErr != nil {
-			var netErr net.Error
-			if errors.As(readErr, &netErr) {
+			if _, ok := errors.AsType[net.Error](readErr); ok {
 				break
 			}
 			continue
