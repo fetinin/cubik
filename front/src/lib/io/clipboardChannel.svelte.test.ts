@@ -102,7 +102,7 @@ describe('clipboardChannel', () => {
 		const onsubmit = vi.fn();
 		const oncancel = vi.fn();
 
-		const screen = render(PasteFallbackModal, { onsubmit, oncancel });
+		const screen = await render(PasteFallbackModal, { onsubmit, oncancel });
 
 		const textarea = screen.getByTestId('paste-fallback-textarea');
 		await textarea.fill('typed-text');
@@ -118,7 +118,7 @@ describe('clipboardChannel', () => {
 		const onsubmit = vi.fn();
 		const oncancel = vi.fn();
 
-		const screen = render(PasteFallbackModal, { onsubmit, oncancel });
+		const screen = await render(PasteFallbackModal, { onsubmit, oncancel });
 
 		const cancelBtn = screen.getByTestId('paste-fallback-cancel');
 		await cancelBtn.click();

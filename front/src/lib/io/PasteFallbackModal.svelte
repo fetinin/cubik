@@ -43,8 +43,7 @@
 			bind:value={text}
 			placeholder="Paste here..."
 			class="mb-4 h-40 w-full rounded border border-gray-300 px-3 py-2 font-mono text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
-			data-testid="paste-fallback-textarea"
-		></textarea>
+			data-testid="paste-fallback-textarea"></textarea>
 
 		<div class="flex justify-end gap-2">
 			<button
