@@ -7,3 +7,9 @@ cubik
 cubik.db
 cubik.db-shm
 cubik.db-wal
+
+# Benchmark output
+benchmark_output/
+
+# Personal Claude Code settings
+**/.claude/settings.local.json
