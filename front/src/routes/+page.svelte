@@ -14,6 +14,7 @@
 		powerOnDevice,
 		powerOffDevice
 	} from '$lib/api/client';
+	import { ResponseError } from '$lib/api/generated';
 	import DeviceBar from '$lib/components/DeviceBar.svelte';
 	import AnimationPreview from '$lib/components/AnimationPreview.svelte';
 	import ColorPickerRGB from '$lib/components/ColorPickerRGB.svelte';
@@ -134,6 +135,10 @@
 
 			await refreshSavedAnimations(device.id);
 		} catch (e) {
+			if (e instanceof ResponseError && e.response.status === 409) {
+				error = `An animation named "${name}" already exists on this device`;
+				return;
+			}
 			console.error('Failed to save animation:', e);
 		}
 	}

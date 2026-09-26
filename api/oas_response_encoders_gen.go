@@ -16,7 +16,6 @@ func encodeDeleteAnimationResponse(response DeleteAnimationRes, w http.ResponseW
 	case *DeleteAnimationResponse:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -29,7 +28,6 @@ func encodeDeleteAnimationResponse(response DeleteAnimationRes, w http.ResponseW
 	case *DeleteAnimationNotFound:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(404)
-		span.SetStatus(codes.Error, http.StatusText(404))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -62,7 +60,6 @@ func encodeExportAnimationResponse(response ExportAnimationRes, w http.ResponseW
 	case *SparseAnimation:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -75,7 +72,6 @@ func encodeExportAnimationResponse(response ExportAnimationRes, w http.ResponseW
 	case *ExportAnimationNotFound:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(404)
-		span.SetStatus(codes.Error, http.StatusText(404))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -108,7 +104,6 @@ func encodeGetAnimationResponse(response GetAnimationRes, w http.ResponseWriter,
 	case *GetAnimationResponse:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -121,7 +116,6 @@ func encodeGetAnimationResponse(response GetAnimationRes, w http.ResponseWriter,
 	case *GetAnimationNotFound:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(404)
-		span.SetStatus(codes.Error, http.StatusText(404))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -154,7 +148,6 @@ func encodeGetDevicesResponse(response GetDevicesRes, w http.ResponseWriter, spa
 	case *GetDevicesOK:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -187,7 +180,6 @@ func encodeImportAnimationResponse(response ImportAnimationRes, w http.ResponseW
 	case *ImportAnimationResponse:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -200,7 +192,6 @@ func encodeImportAnimationResponse(response ImportAnimationRes, w http.ResponseW
 	case *ImportError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(400)
-		span.SetStatus(codes.Error, http.StatusText(400))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -213,7 +204,6 @@ func encodeImportAnimationResponse(response ImportAnimationRes, w http.ResponseW
 	case *NameConflict:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(409)
-		span.SetStatus(codes.Error, http.StatusText(409))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -226,7 +216,6 @@ func encodeImportAnimationResponse(response ImportAnimationRes, w http.ResponseW
 	case *ImportAnimationRequestEntityTooLarge:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(413)
-		span.SetStatus(codes.Error, http.StatusText(413))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -259,7 +248,6 @@ func encodeListAnimationsResponse(response ListAnimationsRes, w http.ResponseWri
 	case *ListAnimationsResponse:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -291,14 +279,12 @@ func encodePowerOffResponse(response PowerOffRes, w http.ResponseWriter, span tr
 	switch response := response.(type) {
 	case *PowerOffNoContent:
 		w.WriteHeader(204)
-		span.SetStatus(codes.Ok, http.StatusText(204))
 
 		return nil
 
 	case *PowerOffBadRequest:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(400)
-		span.SetStatus(codes.Error, http.StatusText(400))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -330,14 +316,12 @@ func encodePowerOnResponse(response PowerOnRes, w http.ResponseWriter, span trac
 	switch response := response.(type) {
 	case *PowerOnNoContent:
 		w.WriteHeader(204)
-		span.SetStatus(codes.Ok, http.StatusText(204))
 
 		return nil
 
 	case *PowerOnBadRequest:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(400)
-		span.SetStatus(codes.Error, http.StatusText(400))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -370,7 +354,6 @@ func encodeSaveAnimationResponse(response SaveAnimationRes, w http.ResponseWrite
 	case *SaveAnimationResponse:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -383,7 +366,18 @@ func encodeSaveAnimationResponse(response SaveAnimationRes, w http.ResponseWrite
 	case *SaveAnimationBadRequest:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(400)
-		span.SetStatus(codes.Error, http.StatusText(400))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *SaveAnimationConflict:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(409)
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -416,7 +410,6 @@ func encodeStartAnimationResponse(response StartAnimationRes, w http.ResponseWri
 	case *StartAnimationResponse:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -429,7 +422,6 @@ func encodeStartAnimationResponse(response StartAnimationRes, w http.ResponseWri
 	case *StartAnimationBadRequest:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(400)
-		span.SetStatus(codes.Error, http.StatusText(400))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -462,7 +454,6 @@ func encodeStopAnimationResponse(response StopAnimationRes, w http.ResponseWrite
 	case *StopAnimationResponse:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -475,7 +466,6 @@ func encodeStopAnimationResponse(response StopAnimationRes, w http.ResponseWrite
 	case *StopAnimationBadRequest:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(400)
-		span.SetStatus(codes.Error, http.StatusText(400))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -508,7 +498,6 @@ func encodeUpdateAnimationResponse(response UpdateAnimationRes, w http.ResponseW
 	case *UpdateAnimationResponse:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -521,7 +510,6 @@ func encodeUpdateAnimationResponse(response UpdateAnimationRes, w http.ResponseW
 	case *UpdateAnimationBadRequest:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(400)
-		span.SetStatus(codes.Error, http.StatusText(400))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -534,7 +522,18 @@ func encodeUpdateAnimationResponse(response UpdateAnimationRes, w http.ResponseW
 	case *UpdateAnimationNotFound:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(404)
-		span.SetStatus(codes.Error, http.StatusText(404))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *UpdateAnimationConflict:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(409)
 
 		e := new(jx.Encoder)
 		response.Encode(e)

@@ -71,7 +71,7 @@ func (s *Server) handleDeleteAnimationRequest(args [1]string, argsEscaped bool, 
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -178,12 +178,10 @@ func (s *Server) handleDeleteAnimationRequest(args [1]string, argsEscaped bool, 
 
 // handleExportAnimationRequest handles exportAnimation operation.
 //
-// Fetches the saved animation and returns a versioned Sparse JSON
-// representation suitable for sharing across devices and users. The
-// response carries a Content-Disposition attachment header so browsers
-// treat it as a downloadable file. Note: the Content-Disposition header
-// is set by the Go HTTP layer, not by ogen; the spec documents it for
-// clients but does not drive code generation for it.
+// Fetches the saved animation and returns a versioned Sparse JSON representation suitable for sharing
+// across devices and users. The response carries a Content-Disposition attachment header so browsers
+// treat it as a downloadable file. Note: the Content-Disposition header is set by the Go HTTP layer,
+// not by ogen; the spec documents it for clients but does not drive code generation for it.
 //
 // GET /api/animation/{id}/export
 func (s *Server) handleExportAnimationRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -219,7 +217,7 @@ func (s *Server) handleExportAnimationRequest(args [1]string, argsEscaped bool, 
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -362,7 +360,7 @@ func (s *Server) handleGetAnimationRequest(args [1]string, argsEscaped bool, w h
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -505,7 +503,7 @@ func (s *Server) handleGetDevicesRequest(args [0]string, argsEscaped bool, w htt
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -630,7 +628,7 @@ func (s *Server) handleImportAnimationRequest(args [0]string, argsEscaped bool, 
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -788,7 +786,7 @@ func (s *Server) handleListAnimationsRequest(args [1]string, argsEscaped bool, w
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -931,7 +929,7 @@ func (s *Server) handlePowerOffRequest(args [0]string, argsEscaped bool, w http.
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -1074,7 +1072,7 @@ func (s *Server) handlePowerOnRequest(args [0]string, argsEscaped bool, w http.R
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -1217,7 +1215,7 @@ func (s *Server) handleSaveAnimationRequest(args [0]string, argsEscaped bool, w 
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -1324,8 +1322,8 @@ func (s *Server) handleSaveAnimationRequest(args [0]string, argsEscaped bool, w 
 
 // handleStartAnimationRequest handles startAnimation operation.
 //
-// Starts playing an animation loop on the specified device. Only one animation can run per device at
-// a time.
+// Starts playing an animation loop on the specified device. Only one animation can run per device at a
+// time.
 //
 // POST /api/animation/start
 func (s *Server) handleStartAnimationRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -1361,7 +1359,7 @@ func (s *Server) handleStartAnimationRequest(args [0]string, argsEscaped bool, w
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -1504,7 +1502,7 @@ func (s *Server) handleStopAnimationRequest(args [0]string, argsEscaped bool, w 
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -1647,7 +1645,7 @@ func (s *Server) handleUpdateAnimationRequest(args [1]string, argsEscaped bool, 
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 

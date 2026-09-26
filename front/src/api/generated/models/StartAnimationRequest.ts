@@ -29,14 +29,10 @@ import {
 export interface StartAnimationRequest {
 	/**
 	 * Device location in format yeelight://IP:PORT
-	 * @type {string}
-	 * @memberof StartAnimationRequest
 	 */
 	deviceLocation: string;
 	/**
 	 * Array of animation frames to play in sequence
-	 * @type {Array<Array<RGBPixel>>}
-	 * @memberof StartAnimationRequest
 	 */
 	frames: Array<Array<RGBPixel>>;
 }
@@ -45,7 +41,13 @@ export interface StartAnimationRequest {
  * Check if a given object implements the StartAnimationRequest interface.
  */
 export function instanceOfStartAnimationRequest(value: object): value is StartAnimationRequest {
-	if (!('deviceLocation' in value) || value['deviceLocation'] === undefined) return false;
+	if (
+		(!('deviceLocation' in (value as Record<string, any>)) &&
+			!('device_location' in (value as Record<string, any>))) ||
+		((value as Record<string, any>)['deviceLocation'] === undefined &&
+			(value as Record<string, any>)['device_location'] === undefined)
+	)
+		return false;
 	if (!('frames' in value) || value['frames'] === undefined) return false;
 	return true;
 }

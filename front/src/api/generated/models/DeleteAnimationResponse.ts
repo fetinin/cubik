@@ -21,8 +21,6 @@ import { mapValues } from '../runtime';
 export interface DeleteAnimationResponse {
 	/**
 	 * Success message
-	 * @type {string}
-	 * @memberof DeleteAnimationResponse
 	 */
 	message: string;
 }

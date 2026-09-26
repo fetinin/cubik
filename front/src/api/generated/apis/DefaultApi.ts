@@ -106,48 +106,87 @@ import {
 } from '../models/UpdateAnimationResponse';
 
 export interface DeleteAnimationRequest {
+	/**
+	 * Animation UUID
+	 */
 	id: string;
 }
 
 export interface ExportAnimationRequest {
+	/**
+	 * Unique identifier of the saved animation
+	 */
 	id: string;
 }
 
 export interface GetAnimationRequest {
+	/**
+	 * Animation UUID
+	 */
 	id: string;
 }
 
 export interface ImportAnimationOperationRequest {
+	/**
+	 *
+	 */
 	importAnimationRequest: ImportAnimationRequest;
+	/**
+	 * Conflict resolution policy when an animation with the same name already exists for the device
+	 */
 	mode?: ImportAnimationOperationModeEnum;
 }
 
 export interface ListAnimationsRequest {
+	/**
+	 * Unique device identifier
+	 */
 	deviceId: string;
 }
 
 export interface PowerOffOperationRequest {
+	/**
+	 *
+	 */
 	powerOffRequest: PowerOffRequest;
 }
 
 export interface PowerOnOperationRequest {
+	/**
+	 *
+	 */
 	powerOnRequest: PowerOnRequest;
 }
 
 export interface SaveAnimationOperationRequest {
+	/**
+	 *
+	 */
 	saveAnimationRequest: SaveAnimationRequest;
 }
 
 export interface StartAnimationOperationRequest {
+	/**
+	 *
+	 */
 	startAnimationRequest: StartAnimationRequest;
 }
 
 export interface StopAnimationOperationRequest {
+	/**
+	 *
+	 */
 	stopAnimationRequest: StopAnimationRequest;
 }
 
 export interface UpdateAnimationOperationRequest {
+	/**
+	 * Animation UUID
+	 */
 	id: string;
+	/**
+	 *
+	 */
 	updateAnimationRequest: UpdateAnimationRequest;
 }
 

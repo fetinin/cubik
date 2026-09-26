@@ -207,9 +207,9 @@ func parseMajor(version string) (int, error) {
 }
 
 // PersistImported inserts (or updates) an imported animation atomically.
-// The collision-detection SELECT and the INSERT/UPDATE happen inside a
-// single transaction so two concurrent imports can't both observe "name is
-// free" and race past each other.
+// Concurrent writers can't slip a duplicate past the collision check: SQLite
+// fails the loser's lock upgrade ("database table is locked"), and the
+// UNIQUE(device_id, name) index is the backstop invariant (ErrNameTaken).
 //
 // Modes:
 //   - ImportModeRename     append " (2)", " (3)", ... until free, then INSERT.

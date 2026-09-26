@@ -21,14 +21,10 @@ import { mapValues } from '../runtime';
 export interface ImportError {
 	/**
 	 * Dotted JSON-path to the failing field (e.g. "frames[3].pixels[7].x"); empty string when the failure is not field-specific
-	 * @type {string}
-	 * @memberof ImportError
 	 */
 	field: string;
 	/**
 	 * Human-readable, server-internal-detail-free explanation
-	 * @type {string}
-	 * @memberof ImportError
 	 */
 	reason: string;
 }

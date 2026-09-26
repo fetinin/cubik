@@ -29,32 +29,22 @@ import {
 export interface SparseAnimation {
 	/**
 	 * Semver-style major.minor of the wire format. Same major guarantees forward-compatibility (older readers ignore unknown optional fields); a different major may be rejected by older decoders.
-	 * @type {string}
-	 * @memberof SparseAnimation
 	 */
 	version: string;
 	/**
 	 * Human-readable animation name
-	 * @type {string}
-	 * @memberof SparseAnimation
 	 */
 	name: string;
 	/**
 	 * Matrix width in pixels
-	 * @type {number}
-	 * @memberof SparseAnimation
 	 */
 	width: number;
 	/**
 	 * Matrix height in pixels
-	 * @type {number}
-	 * @memberof SparseAnimation
 	 */
 	height: number;
 	/**
 	 * Sequence of sparse frames; each frame lists only non-black pixels
-	 * @type {Array<Array<SparsePixel>>}
-	 * @memberof SparseAnimation
 	 */
 	frames: Array<Array<SparsePixel>>;
 }

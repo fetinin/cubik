@@ -24,8 +24,6 @@ import { DeviceFromJSON, DeviceFromJSONTyped, DeviceToJSON, DeviceToJSONTyped } 
 export interface GetDevices200Response {
 	/**
 	 *
-	 * @type {Array<Device>}
-	 * @memberof GetDevices200Response
 	 */
 	devices: Array<Device>;
 }

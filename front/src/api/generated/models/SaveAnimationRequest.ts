@@ -29,20 +29,14 @@ import {
 export interface SaveAnimationRequest {
 	/**
 	 * Unique device identifier
-	 * @type {string}
-	 * @memberof SaveAnimationRequest
 	 */
 	deviceId: string;
 	/**
 	 * Name for the animation
-	 * @type {string}
-	 * @memberof SaveAnimationRequest
 	 */
 	name: string;
 	/**
 	 * Array of animation frames to save
-	 * @type {Array<Array<RGBPixel>>}
-	 * @memberof SaveAnimationRequest
 	 */
 	frames: Array<Array<RGBPixel>>;
 }
@@ -51,7 +45,13 @@ export interface SaveAnimationRequest {
  * Check if a given object implements the SaveAnimationRequest interface.
  */
 export function instanceOfSaveAnimationRequest(value: object): value is SaveAnimationRequest {
-	if (!('deviceId' in value) || value['deviceId'] === undefined) return false;
+	if (
+		(!('deviceId' in (value as Record<string, any>)) &&
+			!('device_id' in (value as Record<string, any>))) ||
+		((value as Record<string, any>)['deviceId'] === undefined &&
+			(value as Record<string, any>)['device_id'] === undefined)
+	)
+		return false;
 	if (!('name' in value) || value['name'] === undefined) return false;
 	if (!('frames' in value) || value['frames'] === undefined) return false;
 	return true;

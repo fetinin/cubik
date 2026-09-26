@@ -9,49 +9,19 @@ import (
 	_ "modernc.org/sqlite"
 )
 
-// setupTestDB creates an in-memory SQLite database with the schema applied.
+// setupTestDB creates an in-memory SQLite database with the real migrations applied.
 func setupTestDB(t *testing.T) *sql.DB {
 	db, err := sql.Open("sqlite", ":memory:")
 	if err != nil {
 		t.Fatalf("failed to open test database: %v", err)
 	}
+	// Every new connection to ":memory:" is a separate empty database.
+	db.SetMaxOpenConns(1)
+	t.Cleanup(func() { db.Close() })
 
-	ctx := context.Background()
-	if pingErr := db.PingContext(ctx); pingErr != nil {
-		db.Close()
-		t.Fatalf("failed to ping test database: %v", pingErr)
+	if migrateErr := RunMigrations(db); migrateErr != nil {
+		t.Fatalf("failed to run migrations: %v", migrateErr)
 	}
-
-	// Set up pragmas
-	pragmas := []string{
-		"PRAGMA foreign_keys = ON",
-	}
-	for _, pragma := range pragmas {
-		if _, execErr := db.ExecContext(ctx, pragma); execErr != nil {
-			db.Close()
-			t.Fatalf("failed to execute %s: %v", pragma, execErr)
-		}
-	}
-
-	// Create the saved_animations table
-	schema := `
-	CREATE TABLE IF NOT EXISTS saved_animations (
-		id TEXT PRIMARY KEY,
-		device_id TEXT NOT NULL,
-		name TEXT NOT NULL,
-		frames_json TEXT NOT NULL,
-		created_at TEXT NOT NULL,
-		updated_at TEXT NOT NULL
-	);
-
-	CREATE INDEX idx_device_id ON saved_animations(device_id);
-	CREATE INDEX idx_created_at ON saved_animations(created_at DESC);
-	`
-	if _, execErr := db.ExecContext(ctx, schema); execErr != nil {
-		db.Close()
-		t.Fatalf("failed to create schema: %v", execErr)
-	}
-
 	return db
 }
 

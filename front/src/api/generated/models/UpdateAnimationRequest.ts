@@ -29,14 +29,10 @@ import {
 export interface UpdateAnimationRequest {
 	/**
 	 * Updated name for the animation
-	 * @type {string}
-	 * @memberof UpdateAnimationRequest
 	 */
 	name: string;
 	/**
 	 * Updated animation frames
-	 * @type {Array<Array<RGBPixel>>}
-	 * @memberof UpdateAnimationRequest
 	 */
 	frames: Array<Array<RGBPixel>>;
 }

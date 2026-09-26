@@ -29,20 +29,14 @@ import {
 export interface SaveAnimationResponse {
 	/**
 	 * UUID of the newly saved animation
-	 * @type {string}
-	 * @memberof SaveAnimationResponse
 	 */
 	id: string;
 	/**
 	 * Success message
-	 * @type {string}
-	 * @memberof SaveAnimationResponse
 	 */
 	message: string;
 	/**
 	 *
-	 * @type {SavedAnimation}
-	 * @memberof SaveAnimationResponse
 	 */
 	animation: SavedAnimation;
 }

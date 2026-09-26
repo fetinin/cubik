@@ -21,20 +21,14 @@ import { mapValues } from '../runtime';
 export interface SparsePixel {
 	/**
 	 * Zero-based column index of the lit pixel
-	 * @type {number}
-	 * @memberof SparsePixel
 	 */
 	x: number;
 	/**
 	 * Zero-based row index of the lit pixel
-	 * @type {number}
-	 * @memberof SparsePixel
 	 */
 	y: number;
 	/**
 	 * 24-bit packed RGB color (0xRRGGBB)
-	 * @type {number}
-	 * @memberof SparsePixel
 	 */
 	c: number;
 }

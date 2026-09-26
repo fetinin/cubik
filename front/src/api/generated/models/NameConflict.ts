@@ -21,14 +21,10 @@ import { mapValues } from '../runtime';
 export interface NameConflict {
 	/**
 	 *
-	 * @type {string}
-	 * @memberof NameConflict
 	 */
 	existingId: string;
 	/**
 	 *
-	 * @type {string}
-	 * @memberof NameConflict
 	 */
 	existingName: string;
 }
@@ -37,8 +33,20 @@ export interface NameConflict {
  * Check if a given object implements the NameConflict interface.
  */
 export function instanceOfNameConflict(value: object): value is NameConflict {
-	if (!('existingId' in value) || value['existingId'] === undefined) return false;
-	if (!('existingName' in value) || value['existingName'] === undefined) return false;
+	if (
+		(!('existingId' in (value as Record<string, any>)) &&
+			!('existing_id' in (value as Record<string, any>))) ||
+		((value as Record<string, any>)['existingId'] === undefined &&
+			(value as Record<string, any>)['existing_id'] === undefined)
+	)
+		return false;
+	if (
+		(!('existingName' in (value as Record<string, any>)) &&
+			!('existing_name' in (value as Record<string, any>))) ||
+		((value as Record<string, any>)['existingName'] === undefined &&
+			(value as Record<string, any>)['existing_name'] === undefined)
+	)
+		return false;
 	return true;
 }
 

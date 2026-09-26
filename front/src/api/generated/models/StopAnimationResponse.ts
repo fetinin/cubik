@@ -21,8 +21,6 @@ import { mapValues } from '../runtime';
 export interface StopAnimationResponse {
 	/**
 	 * Success message
-	 * @type {string}
-	 * @memberof StopAnimationResponse
 	 */
 	message: string;
 }

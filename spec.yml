@@ -145,6 +145,17 @@ paths:
                   summary: Invalid device ID format
                   value:
                     error: "invalid device_id format"
+        '409':
+          description: An animation with this name already exists for the device
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                nameTaken:
+                  summary: Name already used on this device
+                  value:
+                    error: "animation name already taken"
         '500':
           description: Internal server error
           content:
@@ -430,6 +441,17 @@ paths:
                   summary: Animation does not exist
                   value:
                     error: "animation not found"
+        '409':
+          description: An animation with this name already exists for the device
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                nameTaken:
+                  summary: Name already used on this device
+                  value:
+                    error: "animation name already taken"
         '500':
           description: Internal server error
           content:

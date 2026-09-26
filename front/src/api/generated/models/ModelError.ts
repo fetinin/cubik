@@ -21,8 +21,6 @@ import { mapValues } from '../runtime';
 export interface ModelError {
 	/**
 	 * Error message
-	 * @type {string}
-	 * @memberof ModelError
 	 */
 	error: string;
 }

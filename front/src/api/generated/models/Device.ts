@@ -21,20 +21,14 @@ import { mapValues } from '../runtime';
 export interface Device {
 	/**
 	 * Unique device identifier
-	 * @type {string}
-	 * @memberof Device
 	 */
 	id: string;
 	/**
 	 * Human-readable device name
-	 * @type {string}
-	 * @memberof Device
 	 */
 	name: string;
 	/**
 	 * Device location in format yeelight://IP:PORT
-	 * @type {string}
-	 * @memberof Device
 	 */
 	location: string;
 }

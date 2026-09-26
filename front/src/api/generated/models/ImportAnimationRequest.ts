@@ -29,14 +29,10 @@ import {
 export interface ImportAnimationRequest {
 	/**
 	 * Target device for the imported animation
-	 * @type {string}
-	 * @memberof ImportAnimationRequest
 	 */
 	deviceId: string;
 	/**
 	 *
-	 * @type {SparseAnimation}
-	 * @memberof ImportAnimationRequest
 	 */
 	animation: SparseAnimation;
 }
@@ -45,7 +41,13 @@ export interface ImportAnimationRequest {
  * Check if a given object implements the ImportAnimationRequest interface.
  */
 export function instanceOfImportAnimationRequest(value: object): value is ImportAnimationRequest {
-	if (!('deviceId' in value) || value['deviceId'] === undefined) return false;
+	if (
+		(!('deviceId' in (value as Record<string, any>)) &&
+			!('device_id' in (value as Record<string, any>))) ||
+		((value as Record<string, any>)['deviceId'] === undefined &&
+			(value as Record<string, any>)['device_id'] === undefined)
+	)
+		return false;
 	if (!('animation' in value) || value['animation'] === undefined) return false;
 	return true;
 }

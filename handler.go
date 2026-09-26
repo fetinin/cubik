@@ -85,6 +85,9 @@ func (h *APIHandler) SaveAnimation(ctx context.Context, req *api.SaveAnimationRe
 	}
 
 	animation, err := SaveAnimation(ctx, h.db, req.DeviceID, req.Name, frames)
+	if errors.Is(err, ErrNameTaken) {
+		return &api.SaveAnimationConflict{Error: ErrNameTaken.Error()}, nil
+	}
 	if err != nil {
 		return &api.SaveAnimationInternalServerError{
 			Error: fmt.Sprintf("failed to save animation: %v", err),
@@ -142,6 +145,9 @@ func (h *APIHandler) UpdateAnimation(
 	animation, err := UpdateAnimation(ctx, h.db, params.ID, req.Name, frames)
 	if errors.Is(err, ErrNotFound) {
 		return &api.UpdateAnimationNotFound{Error: "animation not found"}, nil
+	}
+	if errors.Is(err, ErrNameTaken) {
+		return &api.UpdateAnimationConflict{Error: ErrNameTaken.Error()}, nil
 	}
 	if err != nil {
 		return &api.UpdateAnimationInternalServerError{

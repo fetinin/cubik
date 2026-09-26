@@ -4,6 +4,7 @@ package api
 
 import (
 	"context"
+	"io"
 	"net/url"
 	"strings"
 	"time"
@@ -35,12 +36,10 @@ type Invoker interface {
 	DeleteAnimation(ctx context.Context, params DeleteAnimationParams) (DeleteAnimationRes, error)
 	// ExportAnimation invokes exportAnimation operation.
 	//
-	// Fetches the saved animation and returns a versioned Sparse JSON
-	// representation suitable for sharing across devices and users. The
-	// response carries a Content-Disposition attachment header so browsers
-	// treat it as a downloadable file. Note: the Content-Disposition header
-	// is set by the Go HTTP layer, not by ogen; the spec documents it for
-	// clients but does not drive code generation for it.
+	// Fetches the saved animation and returns a versioned Sparse JSON representation suitable for sharing
+	// across devices and users. The response carries a Content-Disposition attachment header so browsers
+	// treat it as a downloadable file. Note: the Content-Disposition header is set by the Go HTTP layer,
+	// not by ogen; the spec documents it for clients but does not drive code generation for it.
 	//
 	// GET /api/animation/{id}/export
 	ExportAnimation(ctx context.Context, params ExportAnimationParams) (ExportAnimationRes, error)
@@ -89,8 +88,8 @@ type Invoker interface {
 	SaveAnimation(ctx context.Context, request *SaveAnimationRequest) (SaveAnimationRes, error)
 	// StartAnimation invokes startAnimation operation.
 	//
-	// Starts playing an animation loop on the specified device. Only one animation can run per device at
-	// a time.
+	// Starts playing an animation loop on the specified device. Only one animation can run per device at a
+	// time.
 	//
 	// POST /api/animation/start
 	StartAnimation(ctx context.Context, request *StartAnimationRequest) (StartAnimationRes, error)
@@ -228,7 +227,13 @@ func (c *Client) sendDeleteAnimation(ctx context.Context, params DeleteAnimation
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeDeleteAnimationResponse(resp)
@@ -241,12 +246,10 @@ func (c *Client) sendDeleteAnimation(ctx context.Context, params DeleteAnimation
 
 // ExportAnimation invokes exportAnimation operation.
 //
-// Fetches the saved animation and returns a versioned Sparse JSON
-// representation suitable for sharing across devices and users. The
-// response carries a Content-Disposition attachment header so browsers
-// treat it as a downloadable file. Note: the Content-Disposition header
-// is set by the Go HTTP layer, not by ogen; the spec documents it for
-// clients but does not drive code generation for it.
+// Fetches the saved animation and returns a versioned Sparse JSON representation suitable for sharing
+// across devices and users. The response carries a Content-Disposition attachment header so browsers
+// treat it as a downloadable file. Note: the Content-Disposition header is set by the Go HTTP layer,
+// not by ogen; the spec documents it for clients but does not drive code generation for it.
 //
 // GET /api/animation/{id}/export
 func (c *Client) ExportAnimation(ctx context.Context, params ExportAnimationParams) (ExportAnimationRes, error) {
@@ -326,7 +329,13 @@ func (c *Client) sendExportAnimation(ctx context.Context, params ExportAnimation
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeExportAnimationResponse(resp)
@@ -418,7 +427,13 @@ func (c *Client) sendGetAnimation(ctx context.Context, params GetAnimationParams
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeGetAnimationResponse(resp)
@@ -492,7 +507,13 @@ func (c *Client) sendGetDevices(ctx context.Context) (res GetDevicesRes, err err
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeGetDevicesResponse(resp)
@@ -591,7 +612,13 @@ func (c *Client) sendImportAnimation(ctx context.Context, request *ImportAnimati
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeImportAnimationResponse(resp)
@@ -683,7 +710,13 @@ func (c *Client) sendListAnimations(ctx context.Context, params ListAnimationsPa
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeListAnimationsResponse(resp)
@@ -760,7 +793,13 @@ func (c *Client) sendPowerOff(ctx context.Context, request *PowerOffRequest) (re
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodePowerOffResponse(resp)
@@ -837,7 +876,13 @@ func (c *Client) sendPowerOn(ctx context.Context, request *PowerOnRequest) (res 
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodePowerOnResponse(resp)
@@ -914,7 +959,13 @@ func (c *Client) sendSaveAnimation(ctx context.Context, request *SaveAnimationRe
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeSaveAnimationResponse(resp)
@@ -927,8 +978,8 @@ func (c *Client) sendSaveAnimation(ctx context.Context, request *SaveAnimationRe
 
 // StartAnimation invokes startAnimation operation.
 //
-// Starts playing an animation loop on the specified device. Only one animation can run per device at
-// a time.
+// Starts playing an animation loop on the specified device. Only one animation can run per device at a
+// time.
 //
 // POST /api/animation/start
 func (c *Client) StartAnimation(ctx context.Context, request *StartAnimationRequest) (StartAnimationRes, error) {
@@ -992,7 +1043,13 @@ func (c *Client) sendStartAnimation(ctx context.Context, request *StartAnimation
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeStartAnimationResponse(resp)
@@ -1069,7 +1126,13 @@ func (c *Client) sendStopAnimation(ctx context.Context, request *StopAnimationRe
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeStopAnimationResponse(resp)
@@ -1164,7 +1227,13 @@ func (c *Client) sendUpdateAnimation(ctx context.Context, request *UpdateAnimati
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeUpdateAnimationResponse(resp)

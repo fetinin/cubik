@@ -24,12 +24,10 @@ func (UnimplementedHandler) DeleteAnimation(ctx context.Context, params DeleteAn
 
 // ExportAnimation implements exportAnimation operation.
 //
-// Fetches the saved animation and returns a versioned Sparse JSON
-// representation suitable for sharing across devices and users. The
-// response carries a Content-Disposition attachment header so browsers
-// treat it as a downloadable file. Note: the Content-Disposition header
-// is set by the Go HTTP layer, not by ogen; the spec documents it for
-// clients but does not drive code generation for it.
+// Fetches the saved animation and returns a versioned Sparse JSON representation suitable for sharing
+// across devices and users. The response carries a Content-Disposition attachment header so browsers
+// treat it as a downloadable file. Note: the Content-Disposition header is set by the Go HTTP layer,
+// not by ogen; the spec documents it for clients but does not drive code generation for it.
 //
 // GET /api/animation/{id}/export
 func (UnimplementedHandler) ExportAnimation(ctx context.Context, params ExportAnimationParams) (r ExportAnimationRes, _ error) {
@@ -102,8 +100,8 @@ func (UnimplementedHandler) SaveAnimation(ctx context.Context, req *SaveAnimatio
 
 // StartAnimation implements startAnimation operation.
 //
-// Starts playing an animation loop on the specified device. Only one animation can run per device at
-// a time.
+// Starts playing an animation loop on the specified device. Only one animation can run per device at a
+// time.
 //
 // POST /api/animation/start
 func (UnimplementedHandler) StartAnimation(ctx context.Context, req *StartAnimationRequest) (r StartAnimationRes, _ error) {

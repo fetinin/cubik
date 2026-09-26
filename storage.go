@@ -9,9 +9,20 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"modernc.org/sqlite"
+	sqlite3 "modernc.org/sqlite/lib"
 )
 
 var ErrNotFound = errors.New("animation not found")
+
+// ErrNameTaken is returned when a write would violate the
+// UNIQUE(device_id, name) index on saved_animations.
+var ErrNameTaken = errors.New("animation name already taken")
+
+func isUniqueViolation(err error) bool {
+	var sqliteErr *sqlite.Error
+	return errors.As(err, &sqliteErr) && sqliteErr.Code() == sqlite3.SQLITE_CONSTRAINT_UNIQUE
+}
 
 // DBTX is the subset of [sql.DB] / [sql.Tx] that storage helpers need.
 // Both *[sql.DB] and *[sql.Tx] satisfy this interface, allowing helpers to
@@ -90,6 +101,9 @@ func SaveAnimation(ctx context.Context, db DBTX, deviceID, name string, frames [
 		 VALUES (?, ?, ?, ?, ?, ?)`,
 		id, deviceID, name, framesJSON, timestamp, timestamp,
 	)
+	if isUniqueViolation(execErr) {
+		return nil, ErrNameTaken
+	}
 	if execErr != nil {
 		return nil, fmt.Errorf("failed to insert animation: %w", execErr)
 	}
@@ -194,6 +208,9 @@ func UpdateAnimation(ctx context.Context, db DBTX, id, name string, frames [][]C
 		`UPDATE saved_animations SET name = ?, frames_json = ?, updated_at = ? WHERE id = ?`,
 		name, framesJSON, updatedAt, id,
 	)
+	if isUniqueViolation(execErr) {
+		return nil, ErrNameTaken
+	}
 	if execErr != nil {
 		return nil, fmt.Errorf("failed to update animation: %w", execErr)
 	}

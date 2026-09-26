@@ -21,14 +21,10 @@ import { mapValues } from '../runtime';
 export interface StartAnimationResponse {
 	/**
 	 * Success message
-	 * @type {string}
-	 * @memberof StartAnimationResponse
 	 */
 	message: string;
 	/**
 	 * Number of frames in the animation
-	 * @type {number}
-	 * @memberof StartAnimationResponse
 	 */
 	frameCount: number;
 }
@@ -38,7 +34,13 @@ export interface StartAnimationResponse {
  */
 export function instanceOfStartAnimationResponse(value: object): value is StartAnimationResponse {
 	if (!('message' in value) || value['message'] === undefined) return false;
-	if (!('frameCount' in value) || value['frameCount'] === undefined) return false;
+	if (
+		(!('frameCount' in (value as Record<string, any>)) &&
+			!('frame_count' in (value as Record<string, any>))) ||
+		((value as Record<string, any>)['frameCount'] === undefined &&
+			(value as Record<string, any>)['frame_count'] === undefined)
+	)
+		return false;
 	return true;
 }
 

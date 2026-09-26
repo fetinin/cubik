@@ -602,11 +602,12 @@ No authorization required
 
 ### HTTP response details
 
-| Status code | Description                      | Response headers |
-| ----------- | -------------------------------- | ---------------- |
-| **200**     | Animation saved successfully     | -                |
-| **400**     | Bad request - invalid input data | -                |
-| **500**     | Internal server error            | -                |
+| Status code | Description                                               | Response headers |
+| ----------- | --------------------------------------------------------- | ---------------- |
+| **200**     | Animation saved successfully                              | -                |
+| **400**     | Bad request - invalid input data                          | -                |
+| **409**     | An animation with this name already exists for the device | -                |
+| **500**     | Internal server error                                     | -                |
 
 [[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)
 
@@ -806,11 +807,12 @@ No authorization required
 
 ### HTTP response details
 
-| Status code | Description                      | Response headers |
-| ----------- | -------------------------------- | ---------------- |
-| **200**     | Animation updated successfully   | -                |
-| **400**     | Bad request - invalid input data | -                |
-| **404**     | Animation not found              | -                |
-| **500**     | Internal server error            | -                |
+| Status code | Description                                               | Response headers |
+| ----------- | --------------------------------------------------------- | ---------------- |
+| **200**     | Animation updated successfully                            | -                |
+| **400**     | Bad request - invalid input data                          | -                |
+| **404**     | Animation not found                                       | -                |
+| **409**     | An animation with this name already exists for the device | -                |
+| **500**     | Internal server error                                     | -                |
 
 [[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)

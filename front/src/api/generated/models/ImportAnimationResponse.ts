@@ -29,14 +29,10 @@ import {
 export interface ImportAnimationResponse {
 	/**
 	 *
-	 * @type {SavedAnimation}
-	 * @memberof ImportAnimationResponse
 	 */
 	animation: SavedAnimation;
 	/**
 	 * Original name when the server renamed to avoid a collision; absent when no rename occurred
-	 * @type {string}
-	 * @memberof ImportAnimationResponse
 	 */
 	renamedFrom?: string;
 }

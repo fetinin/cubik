@@ -259,8 +259,8 @@ func (*ImportAnimationResponse) importAnimationRes() {}
 
 // Ref: #/components/schemas/ImportError
 type ImportError struct {
-	// Dotted JSON-path to the failing field (e.g. "frames[3].pixels[7].x"); empty string when the
-	// failure is not field-specific.
+	// Dotted JSON-path to the failing field (e.g. "frames[3].pixels[7].x"); empty string when the failure
+	// is not field-specific.
 	Field string `json:"field"`
 	// Human-readable, server-internal-detail-free explanation.
 	Reason string `json:"reason"`
@@ -527,6 +527,10 @@ func (s *RGBPixel) SetB(val int32) {
 type SaveAnimationBadRequest Error
 
 func (*SaveAnimationBadRequest) saveAnimationRes() {}
+
+type SaveAnimationConflict Error
+
+func (*SaveAnimationConflict) saveAnimationRes() {}
 
 type SaveAnimationInternalServerError Error
 
@@ -909,6 +913,10 @@ func (*StopAnimationResponse) stopAnimationRes() {}
 type UpdateAnimationBadRequest Error
 
 func (*UpdateAnimationBadRequest) updateAnimationRes() {}
+
+type UpdateAnimationConflict Error
+
+func (*UpdateAnimationConflict) updateAnimationRes() {}
 
 type UpdateAnimationInternalServerError Error
 
