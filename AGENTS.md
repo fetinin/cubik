@@ -282,7 +282,7 @@ Additional protocol documentation in:
 - Matrix devices may send multiple SSDP responses (normal for UDP reliability)
 - Some commented-out code in main.go shows previous attempts at property querying
 - Demo mode runs infinite loop - user must Ctrl+C to exit
-- Yeelight cube device is limited to 60 RPS. Make sure not to exceed it
+- Yeelight cube device is limited to 60 commands per minute (not per second). Every TCP command counts, including LED frame updates, `get_prop` and power commands. Make sure not to exceed it
 - API code in `api/` directory is auto-generated - never edit manually, regenerate from `spec.yml`
 
 ## Architecture tasks
