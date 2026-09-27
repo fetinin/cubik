@@ -45,6 +45,11 @@ type Device struct {
 	Name string `json:"name"`
 	// Device location in format yeelight://IP:PORT.
 	Location string `json:"location"`
+	// Power state as last set through this backend; unknown after a backend restart (the CubeLite can't be
+	// queried).
+	Power DevicePower `json:"power"`
+	// Animation currently looping on the device, or null when nothing is playing.
+	Playback OptNilPlayback `json:"playback"`
 }
 
 // GetID returns the value of ID.
@@ -62,6 +67,16 @@ func (s *Device) GetLocation() string {
 	return s.Location
 }
 
+// GetPower returns the value of Power.
+func (s *Device) GetPower() DevicePower {
+	return s.Power
+}
+
+// GetPlayback returns the value of Playback.
+func (s *Device) GetPlayback() OptNilPlayback {
+	return s.Playback
+}
+
 // SetID sets the value of ID.
 func (s *Device) SetID(val string) {
 	s.ID = val
@@ -75,6 +90,66 @@ func (s *Device) SetName(val string) {
 // SetLocation sets the value of Location.
 func (s *Device) SetLocation(val string) {
 	s.Location = val
+}
+
+// SetPower sets the value of Power.
+func (s *Device) SetPower(val DevicePower) {
+	s.Power = val
+}
+
+// SetPlayback sets the value of Playback.
+func (s *Device) SetPlayback(val OptNilPlayback) {
+	s.Playback = val
+}
+
+// Power state as last set through this backend; unknown after a backend restart (the CubeLite can't be
+// queried).
+type DevicePower string
+
+const (
+	DevicePowerOn      DevicePower = "on"
+	DevicePowerOff     DevicePower = "off"
+	DevicePowerUnknown DevicePower = "unknown"
+)
+
+// AllValues returns all DevicePower values.
+func (DevicePower) AllValues() []DevicePower {
+	return []DevicePower{
+		DevicePowerOn,
+		DevicePowerOff,
+		DevicePowerUnknown,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s DevicePower) MarshalText() ([]byte, error) {
+	switch s {
+	case DevicePowerOn:
+		return []byte(s), nil
+	case DevicePowerOff:
+		return []byte(s), nil
+	case DevicePowerUnknown:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *DevicePower) UnmarshalText(data []byte) error {
+	switch DevicePower(data) {
+	case DevicePowerOn:
+		*s = DevicePowerOn
+		return nil
+	case DevicePowerOff:
+		*s = DevicePowerOff
+		return nil
+	case DevicePowerUnknown:
+		*s = DevicePowerUnknown
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
 }
 
 // Ref: #/components/schemas/Error
@@ -380,6 +455,120 @@ func (o OptImportAnimationMode) Or(d ImportAnimationMode) ImportAnimationMode {
 	return d
 }
 
+// NewOptNilPlayback returns new OptNilPlayback with value set to v.
+func NewOptNilPlayback(v Playback) OptNilPlayback {
+	return OptNilPlayback{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptNilPlayback is optional nullable Playback.
+type OptNilPlayback struct {
+	Value Playback
+	Set   bool
+	Null  bool
+}
+
+// IsSet returns true if OptNilPlayback was set.
+func (o OptNilPlayback) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptNilPlayback) Reset() {
+	var v Playback
+	o.Value = v
+	o.Set = false
+	o.Null = false
+}
+
+// SetTo sets value to v.
+func (o *OptNilPlayback) SetTo(v Playback) {
+	o.Set = true
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o OptNilPlayback) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *OptNilPlayback) SetToNull() {
+	o.Set = true
+	o.Null = true
+	var v Playback
+	o.Value = v
+}
+
+// IsEmpty returns true if the field was omitted from the payload (not Set and not Null).
+func (o OptNilPlayback) IsEmpty() bool {
+	return !o.Set && !o.Null
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptNilPlayback) Get() (v Playback, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptNilPlayback) Or(d Playback) Playback {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptPlayback returns new OptPlayback with value set to v.
+func NewOptPlayback(v Playback) OptPlayback {
+	return OptPlayback{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptPlayback is optional Playback.
+type OptPlayback struct {
+	Value Playback
+	Set   bool
+}
+
+// IsSet returns true if OptPlayback was set.
+func (o OptPlayback) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptPlayback) Reset() {
+	var v Playback
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptPlayback) SetTo(v Playback) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptPlayback) Get() (v Playback, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptPlayback) Or(d Playback) Playback {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptString returns new OptString with value set to v.
 func NewOptString(v string) OptString {
 	return OptString{
@@ -424,6 +613,98 @@ func (o OptString) Or(d string) string {
 		return v
 	}
 	return d
+}
+
+type PlayAnimationInternalServerError Error
+
+func (*PlayAnimationInternalServerError) playAnimationRes() {}
+
+type PlayAnimationNotFound Error
+
+func (*PlayAnimationNotFound) playAnimationRes() {}
+
+// Ref: #/components/schemas/PlayAnimationRequest
+type PlayAnimationRequest struct {
+	// Device location in format yeelight://IP:PORT.
+	DeviceLocation string `json:"device_location"`
+}
+
+// GetDeviceLocation returns the value of DeviceLocation.
+func (s *PlayAnimationRequest) GetDeviceLocation() string {
+	return s.DeviceLocation
+}
+
+// SetDeviceLocation sets the value of DeviceLocation.
+func (s *PlayAnimationRequest) SetDeviceLocation(val string) {
+	s.DeviceLocation = val
+}
+
+// Ref: #/components/schemas/PlayAnimationResponse
+type PlayAnimationResponse struct {
+	Message  string   `json:"message"`
+	Playback Playback `json:"playback"`
+}
+
+// GetMessage returns the value of Message.
+func (s *PlayAnimationResponse) GetMessage() string {
+	return s.Message
+}
+
+// GetPlayback returns the value of Playback.
+func (s *PlayAnimationResponse) GetPlayback() Playback {
+	return s.Playback
+}
+
+// SetMessage sets the value of Message.
+func (s *PlayAnimationResponse) SetMessage(val string) {
+	s.Message = val
+}
+
+// SetPlayback sets the value of Playback.
+func (s *PlayAnimationResponse) SetPlayback(val Playback) {
+	s.Playback = val
+}
+
+func (*PlayAnimationResponse) playAnimationRes() {}
+
+// Ref: #/components/schemas/Playback
+type Playback struct {
+	// Saved animation id; absent for unsaved playback.
+	AnimationID OptString `json:"animation_id"`
+	// Saved animation name; absent for unsaved playback.
+	AnimationName OptString `json:"animation_name"`
+	// Frames being played; present only for unsaved playback.
+	Frames []AnimationFrame `json:"frames"`
+}
+
+// GetAnimationID returns the value of AnimationID.
+func (s *Playback) GetAnimationID() OptString {
+	return s.AnimationID
+}
+
+// GetAnimationName returns the value of AnimationName.
+func (s *Playback) GetAnimationName() OptString {
+	return s.AnimationName
+}
+
+// GetFrames returns the value of Frames.
+func (s *Playback) GetFrames() []AnimationFrame {
+	return s.Frames
+}
+
+// SetAnimationID sets the value of AnimationID.
+func (s *Playback) SetAnimationID(val OptString) {
+	s.AnimationID = val
+}
+
+// SetAnimationName sets the value of AnimationName.
+func (s *Playback) SetAnimationName(val OptString) {
+	s.AnimationName = val
+}
+
+// SetFrames sets the value of Frames.
+func (s *Playback) SetFrames(val []AnimationFrame) {
+	s.Frames = val
 }
 
 type PowerOffBadRequest Error
@@ -843,7 +1124,8 @@ type StartAnimationResponse struct {
 	// Success message.
 	Message string `json:"message"`
 	// Number of frames in the animation.
-	FrameCount int `json:"frame_count"`
+	FrameCount int         `json:"frame_count"`
+	Playback   OptPlayback `json:"playback"`
 }
 
 // GetMessage returns the value of Message.
@@ -856,6 +1138,11 @@ func (s *StartAnimationResponse) GetFrameCount() int {
 	return s.FrameCount
 }
 
+// GetPlayback returns the value of Playback.
+func (s *StartAnimationResponse) GetPlayback() OptPlayback {
+	return s.Playback
+}
+
 // SetMessage sets the value of Message.
 func (s *StartAnimationResponse) SetMessage(val string) {
 	s.Message = val
@@ -864,6 +1151,11 @@ func (s *StartAnimationResponse) SetMessage(val string) {
 // SetFrameCount sets the value of FrameCount.
 func (s *StartAnimationResponse) SetFrameCount(val int) {
 	s.FrameCount = val
+}
+
+// SetPlayback sets the value of Playback.
+func (s *StartAnimationResponse) SetPlayback(val OptPlayback) {
+	s.Playback = val
 }
 
 func (*StartAnimationResponse) startAnimationRes() {}
@@ -896,6 +1188,8 @@ func (s *StopAnimationRequest) SetDeviceLocation(val string) {
 type StopAnimationResponse struct {
 	// Success message.
 	Message string `json:"message"`
+	// Always null after a stop.
+	Playback OptNilPlayback `json:"playback"`
 }
 
 // GetMessage returns the value of Message.
@@ -903,9 +1197,19 @@ func (s *StopAnimationResponse) GetMessage() string {
 	return s.Message
 }
 
+// GetPlayback returns the value of Playback.
+func (s *StopAnimationResponse) GetPlayback() OptNilPlayback {
+	return s.Playback
+}
+
 // SetMessage sets the value of Message.
 func (s *StopAnimationResponse) SetMessage(val string) {
 	s.Message = val
+}
+
+// SetPlayback sets the value of Playback.
+func (s *StopAnimationResponse) SetPlayback(val OptNilPlayback) {
+	s.Playback = val
 }
 
 func (*StopAnimationResponse) stopAnimationRes() {}

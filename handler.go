@@ -19,7 +19,7 @@ type APIHandler struct {
 
 var _ api.Handler = (*APIHandler)(nil)
 
-func (h *APIHandler) GetDevices(_ context.Context) (api.GetDevicesRes, error) {
+func (h *APIHandler) GetDevices(ctx context.Context) (api.GetDevicesRes, error) {
 	devices, err := DiscoverDevices()
 	if err != nil {
 		slog.Error("Discovery error", "error", err)
@@ -28,14 +28,48 @@ func (h *APIHandler) GetDevices(_ context.Context) (api.GetDevicesRes, error) {
 
 	apiDevices := make([]api.Device, 0, len(devices))
 	for _, device := range devices {
+		playback := api.OptNilPlayback{Set: true, Null: true}
+		if pb, ok := h.buildPlayback(ctx, device.Location); ok {
+			playback = api.NewOptNilPlayback(pb)
+		}
 		apiDevices = append(apiDevices, api.Device{
 			ID:       device.ID,
 			Name:     device.Name,
 			Location: device.Location,
+			Power:    api.DevicePower(TrackedPower(device.Location)),
+			Playback: playback,
 		})
 	}
 
 	return &api.GetDevicesOK{Devices: apiDevices}, nil
+}
+
+// buildPlayback describes what is looping on the device. A saved animation
+// whose row has disappeared is detached and reported as unsaved.
+func (h *APIHandler) buildPlayback(ctx context.Context, location string) (api.Playback, bool) {
+	animationID, frames, ok := PlaybackSnapshot(location)
+	if !ok {
+		return api.Playback{}, false
+	}
+	if animationID != "" {
+		anim, err := GetAnimation(ctx, h.db, animationID)
+		switch {
+		case err == nil:
+			return savedPlayback(anim), true
+		case errors.Is(err, ErrNotFound):
+			DetachAnimation(animationID)
+		default:
+			slog.Error("Playback lookup failed", "animation_id", animationID, "error", err)
+		}
+	}
+	return api.Playback{Frames: convertToAPIFrames(frames)}, true
+}
+
+func savedPlayback(anim *SavedAnimation) api.Playback {
+	return api.Playback{
+		AnimationID:   api.NewOptString(anim.ID),
+		AnimationName: api.NewOptString(anim.Name),
+	}
 }
 
 func (h *APIHandler) StartAnimation(
@@ -47,17 +81,44 @@ func (h *APIHandler) StartAnimation(
 		internalFrames[i] = ConvertAPIFrameToColors(apiFrame)
 	}
 
-	StartDeviceAnimation(req.DeviceLocation, internalFrames)
+	StartDeviceAnimation(req.DeviceLocation, "", internalFrames)
 
 	return &api.StartAnimationResponse{
 		Message:    "Animation started successfully",
 		FrameCount: len(req.Frames),
+		Playback:   api.NewOptPlayback(api.Playback{Frames: req.Frames}),
+	}, nil
+}
+
+func (h *APIHandler) PlayAnimation(
+	ctx context.Context,
+	req *api.PlayAnimationRequest,
+	params api.PlayAnimationParams,
+) (api.PlayAnimationRes, error) {
+	anim, err := GetAnimation(ctx, h.db, params.ID)
+	if errors.Is(err, ErrNotFound) {
+		return &api.PlayAnimationNotFound{Error: msgAnimationNotFound}, nil
+	}
+	if err != nil {
+		return &api.PlayAnimationInternalServerError{
+			Error: fmt.Sprintf("failed to get animation: %v", err),
+		}, nil
+	}
+
+	StartDeviceAnimation(req.DeviceLocation, anim.ID, anim.Frames)
+
+	return &api.PlayAnimationResponse{
+		Message:  "Animation started successfully",
+		Playback: savedPlayback(anim),
 	}, nil
 }
 
 func (h *APIHandler) StopAnimation(_ context.Context, req *api.StopAnimationRequest) (api.StopAnimationRes, error) {
 	StopDeviceAnimation(req.DeviceLocation)
-	return &api.StopAnimationResponse{Message: "Animation stopped successfully"}, nil
+	return &api.StopAnimationResponse{
+		Message:  "Animation stopped successfully",
+		Playback: api.OptNilPlayback{Set: true, Null: true},
+	}, nil
 }
 
 func (h *APIHandler) PowerOn(_ context.Context, req *api.PowerOnRequest) (api.PowerOnRes, error) {
@@ -67,16 +128,20 @@ func (h *APIHandler) PowerOn(_ context.Context, req *api.PowerOnRequest) (api.Po
 			Error: fmt.Sprintf("failed to power on the device: %v", err),
 		}, nil
 	}
+	SetTrackedPower(req.DeviceLocation, PowerOn)
 	return &api.PowerOnNoContent{}, nil
 }
 
 func (h *APIHandler) PowerOff(_ context.Context, req *api.PowerOffRequest) (api.PowerOffRes, error) {
+	// Stop first: the next animation frame would wake the cube right back up.
+	StopDeviceAnimation(req.DeviceLocation)
 	device := &DeviceInfo{Location: req.DeviceLocation}
 	if err := SetPower(device, "off"); err != nil {
 		return &api.PowerOffInternalServerError{
 			Error: fmt.Sprintf("failed to power off the device: %v", err),
 		}, nil
 	}
+	SetTrackedPower(req.DeviceLocation, PowerOff)
 	return &api.PowerOffNoContent{}, nil
 }
 
@@ -157,6 +222,8 @@ func (h *APIHandler) UpdateAnimation(
 		}, nil
 	}
 
+	DetachAnimation(params.ID)
+
 	return &api.UpdateAnimationResponse{
 		Message:   "Animation updated successfully",
 		Animation: convertToAPIAnimation(animation),
@@ -185,6 +252,10 @@ func (h *APIHandler) ImportAnimation(
 	persisted, persistErr := PersistImported(ctx, h.db, req.DeviceID, decoded, mode)
 	if persistErr != nil {
 		return classifyPersistError(persistErr), nil
+	}
+	if mode == ImportModeOverwrite {
+		// Overwrite keeps the existing row's id but replaces its frames.
+		DetachAnimation(persisted.ID)
 	}
 
 	response := &api.ImportAnimationResponse{
@@ -303,12 +374,14 @@ func (h *APIHandler) DeleteAnimation(
 		}, nil
 	}
 
+	DetachAnimation(params.ID)
+
 	return &api.DeleteAnimationResponse{Message: "Animation deleted successfully"}, nil
 }
 
-func convertToAPIAnimation(anim *SavedAnimation) api.SavedAnimation {
-	apiFrames := make([]api.AnimationFrame, len(anim.Frames))
-	for i, frame := range anim.Frames {
+func convertToAPIFrames(frames [][]Color) []api.AnimationFrame {
+	apiFrames := make([]api.AnimationFrame, len(frames))
+	for i, frame := range frames {
 		apiFrames[i] = make(api.AnimationFrame, len(frame))
 		for j, color := range frame {
 			apiFrames[i][j] = api.RGBPixel{
@@ -318,12 +391,15 @@ func convertToAPIAnimation(anim *SavedAnimation) api.SavedAnimation {
 			}
 		}
 	}
+	return apiFrames
+}
 
+func convertToAPIAnimation(anim *SavedAnimation) api.SavedAnimation {
 	return api.SavedAnimation{
 		ID:        anim.ID,
 		DeviceID:  anim.DeviceID,
 		Name:      anim.Name,
-		Frames:    apiFrames,
+		Frames:    convertToAPIFrames(anim.Frames),
 		CreatedAt: anim.CreatedAt,
 		UpdatedAt: anim.UpdatedAt,
 	}

@@ -2,6 +2,8 @@ export type Device = {
 	id: string;
 	name: string;
 	location: string;
+	power: 'on' | 'off' | 'unknown';
+	playback: Playback | null;
 };
 
 export type MatrixSize = {
@@ -17,7 +19,9 @@ export type AnimationPayload = {
 };
 
 import { DefaultApi, Configuration } from '$lib/api/generated';
-import type { RGBPixel } from '$lib/api/generated';
+import type { Playback, RGBPixel } from '$lib/api/generated';
+
+export type { Playback };
 import { env } from '$env/dynamic/public';
 
 const api = new DefaultApi(
@@ -33,7 +37,13 @@ function sleep(ms: number) {
 export async function getDevices(): Promise<Device[]> {
 	const response = await api.getDevices();
 	const devices = response.devices;
-	return devices.map((d) => ({ id: d.id, name: d.name, location: d.location }));
+	return devices.map((d) => ({
+		id: d.id,
+		name: d.name,
+		location: d.location,
+		power: d.power,
+		playback: d.playback ?? null
+	}));
 }
 
 export async function getMatrixSize(_deviceId: string): Promise<MatrixSize> {
@@ -46,27 +56,35 @@ export async function getMatrixSize(_deviceId: string): Promise<MatrixSize> {
 export async function applyAnimation(
 	deviceLocation: string,
 	payload: AnimationPayload
-): Promise<void> {
+): Promise<Playback> {
 	const toPixel = (packed: number): RGBPixel => ({
 		r: (packed >> 16) & 0xff,
 		g: (packed >> 8) & 0xff,
 		b: packed & 0xff
 	});
 
-	await api.startAnimation({
-		startAnimationRequest: {
-			deviceLocation,
-			frames: payload.frames.map((frame) => frame.map(toPixel))
-		}
+	const frames = payload.frames.map((frame) => frame.map(toPixel));
+	const response = await api.startAnimation({
+		startAnimationRequest: { deviceLocation, frames }
 	});
+	return response.playback ?? { frames };
 }
 
-export async function stopAnimation(deviceLocation: string): Promise<void> {
+export async function playSavedAnimation(id: string, deviceLocation: string): Promise<Playback> {
+	const response = await api.playAnimation({
+		id,
+		playAnimationRequest: { deviceLocation }
+	});
+	return response.playback;
+}
+
+export async function stopAnimation(deviceLocation: string): Promise<null> {
 	await api.stopAnimation({
 		stopAnimationRequest: {
 			deviceLocation
 		}
 	});
+	return null;
 }
 
 // Import SavedAnimation type for animation storage functions

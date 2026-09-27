@@ -24,55 +24,51 @@ import {
 /**
  *
  * @export
- * @interface StopAnimationResponse
+ * @interface PlayAnimationResponse
  */
-export interface StopAnimationResponse {
+export interface PlayAnimationResponse {
 	/**
-	 * Success message
+	 *
 	 */
 	message: string;
 	/**
-	 * Always null after a stop
+	 *
 	 */
-	playback?: Playback | null;
+	playback: Playback;
 }
 
 /**
- * Check if a given object implements the StopAnimationResponse interface.
+ * Check if a given object implements the PlayAnimationResponse interface.
  */
-export function instanceOfStopAnimationResponse(value: object): value is StopAnimationResponse {
+export function instanceOfPlayAnimationResponse(value: object): value is PlayAnimationResponse {
 	if (!('message' in value) || value['message'] === undefined) return false;
+	if (!('playback' in value) || value['playback'] === undefined) return false;
 	return true;
 }
 
-export function StopAnimationResponseFromJSON(json: any): StopAnimationResponse {
-	return StopAnimationResponseFromJSONTyped(json, false);
+export function PlayAnimationResponseFromJSON(json: any): PlayAnimationResponse {
+	return PlayAnimationResponseFromJSONTyped(json, false);
 }
 
-export function StopAnimationResponseFromJSONTyped(
+export function PlayAnimationResponseFromJSONTyped(
 	json: any,
 	ignoreDiscriminator: boolean
-): StopAnimationResponse {
+): PlayAnimationResponse {
 	if (json == null) {
 		return json;
 	}
 	return {
 		message: json['message'],
-		playback:
-			json['playback'] === undefined
-				? undefined
-				: json['playback'] === null
-					? null
-					: PlaybackFromJSON(json['playback'])
+		playback: PlaybackFromJSON(json['playback'])
 	};
 }
 
-export function StopAnimationResponseToJSON(json: any): StopAnimationResponse {
-	return StopAnimationResponseToJSONTyped(json, false);
+export function PlayAnimationResponseToJSON(json: any): PlayAnimationResponse {
+	return PlayAnimationResponseToJSONTyped(json, false);
 }
 
-export function StopAnimationResponseToJSONTyped(
-	value?: StopAnimationResponse | null,
+export function PlayAnimationResponseToJSONTyped(
+	value?: PlayAnimationResponse | null,
 	ignoreDiscriminator: boolean = false
 ): any {
 	if (value == null) {

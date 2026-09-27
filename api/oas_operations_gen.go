@@ -12,6 +12,7 @@ const (
 	GetDevicesOperation      OperationName = "GetDevices"
 	ImportAnimationOperation OperationName = "ImportAnimation"
 	ListAnimationsOperation  OperationName = "ListAnimations"
+	PlayAnimationOperation   OperationName = "PlayAnimation"
 	PowerOffOperation        OperationName = "PowerOff"
 	PowerOnOperation         OperationName = "PowerOn"
 	SaveAnimationOperation   OperationName = "SaveAnimation"

@@ -12,7 +12,9 @@
 		deleteAnimation,
 		listAnimations,
 		powerOnDevice,
-		powerOffDevice
+		powerOffDevice,
+		playSavedAnimation,
+		type Playback
 	} from '$lib/api/client';
 	import { ResponseError } from '$lib/api/generated';
 	import DeviceBar from '$lib/components/DeviceBar.svelte';
@@ -29,6 +31,9 @@
 		createEditorState,
 		createFrameFromPixels,
 		extractPaletteFromPixels,
+		framesFromApi,
+		isEditorEmpty,
+		sameFrames,
 		initPixelsForSize,
 		loadFrameIntoPixels,
 		moveSelection,
@@ -38,7 +43,7 @@
 		type EditorMode,
 		type PackedRGB
 	} from '$lib/state/editor';
-	import type { SavedAnimation } from '$lib/api/generated';
+	import type { RGBPixel, SavedAnimation } from '$lib/api/generated';
 
 	const editor = createEditorState();
 	const devices = editor.devices;
@@ -66,20 +71,81 @@
 
 	let devicePowerState = $state<Record<string, PowerState>>({});
 
+	// What the backend is looping on each device; seeded from the device list so
+	// it survives a page reload.
+	let devicePlayback = $state<Record<string, Playback | null>>({});
+	let editorInitialized = false;
+
 	// Saved animations state
 	let showLoadModal = $state(false);
 	let showSaveModal = $state(false);
 	let savedAnimations = $state<SavedAnimation[]>([]);
 	let currentAnimationId = $state<string | null>(null);
+	// Frames of currentAnimationId as stored in the library; Apply plays the
+	// saved animation by id while the editor still matches them.
+	let savedFramesSnapshot: PackedRGB[][] | null = null;
 	let currentAnimationName = $state<string | null>(null);
 
 	async function selectDevice(deviceId: string) {
 		editor.selectedDeviceId.set(deviceId);
 		const size = await getMatrixSize(deviceId);
 		editor.matrix.set(size);
-		editor.pixels.set(initPixelsForSize(size, 0x000000));
-		editor.frames.set([]);
-		editor.selectedFrameId.set(null);
+		// Only the first load resets the editor; later switches keep the drawing
+		// unless the device's playback replaces it below.
+		if (!editorInitialized) {
+			editor.pixels.set(initPixelsForSize(size, 0x000000));
+			editor.frames.set([]);
+			editor.selectedFrameId.set(null);
+			editorInitialized = true;
+		}
+
+		const playback = devicePlayback[deviceId];
+		if (!playback) return;
+		if (
+			!isEditorEmpty(get(pixels), get(frames)) &&
+			!confirm('This device is playing an animation. Replace the editor contents with it?')
+		) {
+			return;
+		}
+		if (playback.animationId) {
+			await handleLoadAnimation(playback.animationId);
+		} else if (playback.frames) {
+			loadFramesIntoEditor(playback.frames);
+			currentAnimationId = null;
+			currentAnimationName = null;
+			savedFramesSnapshot = null;
+		}
+	}
+
+	function loadFramesIntoEditor(apiFrames: RGBPixel[][]) {
+		const loadedFrames = framesFromApi(apiFrames);
+		editor.frames.set(loadedFrames);
+		if (loadedFrames[0]) {
+			editor.selectedFrameId.set(loadedFrames[0].id);
+			editor.pixels.set([...loadedFrames[0].pixels]);
+		}
+	}
+
+	// The backend unlinks playback from a saved animation once it is changed or
+	// deleted; mirror that locally so the indicator doesn't wait for a reload.
+	function detachLocalPlayback(animationId: string, apiFrames: RGBPixel[][]) {
+		for (const [deviceId, playback] of Object.entries(devicePlayback)) {
+			if (playback?.animationId === animationId) {
+				devicePlayback[deviceId] = { frames: apiFrames };
+			}
+		}
+	}
+
+	async function handlePlaySavedAnimation(animationId: string) {
+		const device = get(selectedDevice);
+		if (!device) return;
+		try {
+			devicePlayback[device.id] = await playSavedAnimation(animationId, device.location);
+			devicePowerState[device.id] = POWER_ON;
+		} catch (e) {
+			console.error('Failed to play animation:', e);
+			error = 'Failed to play animation';
+		}
 	}
 
 	async function refreshSavedAnimations(deviceId: string) {
@@ -122,6 +188,8 @@
 					framesList.map((f) => f.pixels)
 				);
 				currentAnimationName = updated.name;
+				savedFramesSnapshot = framesList.map((f) => [...f.pixels]);
+				detachLocalPlayback(updated.id, updated.frames);
 			} else {
 				// Save as new
 				const saved = await saveAnimation(
@@ -130,6 +198,7 @@
 					framesList.map((f) => f.pixels)
 				);
 				currentAnimationId = saved.id;
+				savedFramesSnapshot = framesList.map((f) => [...f.pixels]);
 				currentAnimationName = saved.name;
 			}
 
@@ -146,23 +215,10 @@
 	async function handleLoadAnimation(animationId: string) {
 		try {
 			const animation = await loadAnimation(animationId);
-
-			// Convert API frames to frontend Frame format
-			const loadedFrames = animation.frames.map((apiFrame, i) => ({
-				id: `frame-${Date.now()}-${i}`,
-				name: `Frame ${i + 1}`,
-				pixels: apiFrame.map((pixel) => (pixel.r << 16) | (pixel.g << 8) | pixel.b)
-			}));
-
-			editor.frames.set(loadedFrames);
+			loadFramesIntoEditor(animation.frames);
 			currentAnimationId = animation.id;
+			savedFramesSnapshot = get(frames).map((f) => [...f.pixels]);
 			currentAnimationName = animation.name;
-
-			// Load first frame into editor
-			if (loadedFrames[0]) {
-				editor.selectedFrameId.set(loadedFrames[0].id);
-				editor.pixels.set([...loadedFrames[0].pixels]);
-			}
 		} catch (e) {
 			console.error('Failed to load animation:', e);
 		}
@@ -170,12 +226,15 @@
 
 	async function handleDeleteAnimation(animationId: string) {
 		try {
+			const deleted = savedAnimations.find((a) => a.id === animationId);
 			await deleteAnimation(animationId);
+			detachLocalPlayback(animationId, deleted?.frames ?? []);
 
 			// Clear current animation state if it was deleted
 			if (currentAnimationId === animationId) {
 				currentAnimationId = null;
 				currentAnimationName = null;
+				savedFramesSnapshot = null;
 			}
 
 			const device = get(selectedDevice);
@@ -192,6 +251,10 @@
 			loading = true;
 			const devices = await getDevices();
 			editor.devices.set(devices);
+			for (const d of devices) {
+				devicePowerState[d.id] = d.power === POWER_ON ? POWER_ON : POWER_OFF;
+				devicePlayback[d.id] = d.playback;
+			}
 
 			const first = devices[0];
 			if (first) await selectDevice(first.id);
@@ -320,7 +383,8 @@
 	}
 
 	async function applyCurrentAnimation() {
-		const deviceLocation = get(selectedDevice)?.location ?? null;
+		const device = get(selectedDevice);
+		const deviceLocation = device?.location ?? null;
 		const size = get(matrix);
 		const framesList = get(frames);
 		if (!deviceLocation || !size || framesList.length === 0) return;
@@ -332,7 +396,14 @@
 		}
 		try {
 			const payload = buildAnimationPayload(size, framesList);
-			await applyAnimation(deviceLocation, payload);
+			const playback =
+				currentAnimationId && savedFramesSnapshot && sameFrames(payload.frames, savedFramesSnapshot)
+					? await playSavedAnimation(currentAnimationId, deviceLocation)
+					: await applyAnimation(deviceLocation, payload);
+			if (device) {
+				devicePlayback[device.id] = playback;
+				devicePowerState[device.id] = POWER_ON;
+			}
 			editor.applyStatus.set({ state: 'success' });
 			appliedNoticeTimeout = setTimeout(() => {
 				editor.applyStatus.set({ state: 'idle' });
@@ -347,9 +418,9 @@
 	}
 
 	async function stopCurrentAnimation() {
-		const deviceLocation = get(selectedDevice)?.location ?? null;
-		if (!deviceLocation) return;
-		await stopAnimation(deviceLocation);
+		const device = get(selectedDevice);
+		if (!device) return;
+		devicePlayback[device.id] = await stopAnimation(device.location);
 		stoppedNotice = true;
 		if (stoppedNoticeTimeout) clearTimeout(stoppedNoticeTimeout);
 		stoppedNoticeTimeout = setTimeout(() => {
@@ -370,6 +441,7 @@
 				await powerOnDevice(device.location);
 			} else {
 				await powerOffDevice(device.location);
+				devicePlayback[device.id] = null;
 			}
 			devicePowerState[device.id] = newState;
 		} catch (e) {
@@ -386,6 +458,8 @@
 	});
 
 	const isPowerOn = $derived(currentDevicePowerState() === POWER_ON);
+
+	const currentPlayback = $derived($selectedDeviceId ? devicePlayback[$selectedDeviceId] : null);
 </script>
 
 <main class="mx-auto max-w-6xl p-6">
@@ -577,6 +651,13 @@
 						</div>
 					</div>
 
+					{#if currentPlayback}
+						<div class="mt-3 text-sm text-gray-700" data-testid="playback-indicator">
+							Playing: {#if currentPlayback.animationName}<em>{currentPlayback.animationName}</em
+								>{:else}unsaved animation{/if}
+						</div>
+					{/if}
+
 					{#if $applyStatus.state === 'applying'}
 						<div class="mt-3 text-sm text-gray-600">Applying…</div>
 					{:else if $applyStatus.state === 'success'}
@@ -611,6 +692,7 @@
 		bind:open={showLoadModal}
 		animations={savedAnimations}
 		onload={handleLoadAnimation}
+		onplay={handlePlaySavedAnimation}
 		ondelete={handleDeleteAnimation}
 	/>
 

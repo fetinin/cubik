@@ -5,10 +5,11 @@
 		animations: SavedAnimation[];
 		open: boolean;
 		onload: (id: string) => void;
+		onplay: (id: string) => void;
 		ondelete: (id: string) => void;
 	};
 
-	let { animations, open = $bindable(), onload, ondelete }: Props = $props();
+	let { animations, open = $bindable(), onload, onplay, ondelete }: Props = $props();
 
 	function handleLoad(id: string) {
 		onload(id);
@@ -58,6 +59,13 @@
 										data-testid="load-button"
 									>
 										Load
+									</button>
+									<button
+										onclick={() => onplay(anim.id)}
+										class="rounded border border-green-600 px-3 py-1.5 text-xs font-medium text-green-700"
+										data-testid="play-button"
+									>
+										Play
 									</button>
 									<button
 										onclick={() => handleDelete(anim.id)}

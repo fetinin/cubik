@@ -2,10 +2,11 @@
 
 ## Properties
 
-| Name         | Type   |
-| ------------ | ------ |
-| `message`    | string |
-| `frameCount` | number |
+| Name         | Type                    |
+| ------------ | ----------------------- |
+| `message`    | string                  |
+| `frameCount` | number                  |
+| `playback`   | [Playback](Playback.md) |
 
 ## Example
 
@@ -16,6 +17,7 @@ import type { StartAnimationResponse } from ''
 const example = {
   "message": Animation started successfully,
   "frameCount": 30,
+  "playback": null,
 } satisfies StartAnimationResponse
 
 console.log(example)

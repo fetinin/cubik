@@ -530,6 +530,18 @@ class MusicModeConnection:
 - **Practical limit**: ~1000-2000 updates per second
 - **Use case**: Animations, real-time control, rapid color changes
 
+### 2.8 CubeLite Quirks
+
+Observed on real hardware:
+
+- `get_prop` never answers and triggers a temporary built-in animation. Never poll it.
+- The SSDP state fields (`power`, `bright`, ...) are a fixed template, not live state.
+- The device sends no push notifications, so there's no way to observe state changes.
+- An `update_leds` frame wakes a cube that's off; `activate_fx_mode` alone does not.
+- Stopping an animation freezes the last frame on the display.
+
+Cubik therefore tracks power and playback in the backend's memory. That state is lost when the backend restarts (power reports `unknown`, nothing is playing).
+
 ---
 
 ## 3. Matrix Device Specific Implementation

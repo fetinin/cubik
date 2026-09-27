@@ -13,6 +13,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { Playback } from './Playback';
+import {
+	PlaybackFromJSON,
+	PlaybackFromJSONTyped,
+	PlaybackToJSON,
+	PlaybackToJSONTyped
+} from './Playback';
+
 /**
  *
  * @export
@@ -27,6 +35,10 @@ export interface StartAnimationResponse {
 	 * Number of frames in the animation
 	 */
 	frameCount: number;
+	/**
+	 *
+	 */
+	playback?: Playback;
 }
 
 /**
@@ -57,7 +69,8 @@ export function StartAnimationResponseFromJSONTyped(
 	}
 	return {
 		message: json['message'],
-		frameCount: json['frame_count']
+		frameCount: json['frame_count'],
+		playback: json['playback'] == null ? undefined : PlaybackFromJSON(json['playback'])
 	};
 }
 
@@ -75,6 +88,7 @@ export function StartAnimationResponseToJSONTyped(
 
 	return {
 		message: value['message'],
-		frame_count: value['frameCount']
+		frame_count: value['frameCount'],
+		playback: PlaybackToJSON(value['playback'])
 	};
 }

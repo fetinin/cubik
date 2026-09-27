@@ -283,6 +283,13 @@ Additional protocol documentation in:
 - Some commented-out code in main.go shows previous attempts at property querying
 - Demo mode runs infinite loop - user must Ctrl+C to exit
 - Yeelight cube device is limited to 60 commands per minute (not per second). Every TCP command counts, including LED frame updates, `get_prop` and power commands. Make sure not to exceed it
+- CubeLite quirks (details in `docs/yeelight-protocol-guide.md` §2.8):
+  - `get_prop` never answers and triggers a temporary built-in animation. Never poll it.
+  - The SSDP state fields (`power`, `bright`, ...) are a fixed template, not live state.
+  - The device sends no push notifications, so there's no way to observe state changes.
+  - An `update_leds` frame wakes a cube that's off; `activate_fx_mode` alone does not.
+  - Stopping an animation freezes the last frame on the display.
+- Power and playback state are tracked by the backend (`animation.go`) and lost on restart; `/api/devices` must never send device commands
 - API code in `api/` directory is auto-generated - never edit manually, regenerate from `spec.yml`
 
 ## Architecture tasks

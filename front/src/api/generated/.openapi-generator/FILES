@@ -11,6 +11,9 @@ docs/ImportError.md
 docs/ListAnimationsResponse.md
 docs/ModelError.md
 docs/NameConflict.md
+docs/PlayAnimationRequest.md
+docs/PlayAnimationResponse.md
+docs/Playback.md
 docs/PowerOffRequest.md
 docs/PowerOnRequest.md
 docs/RGBPixel.md
@@ -36,6 +39,9 @@ models/ImportError.ts
 models/ListAnimationsResponse.ts
 models/ModelError.ts
 models/NameConflict.ts
+models/PlayAnimationRequest.ts
+models/PlayAnimationResponse.ts
+models/Playback.ts
 models/PowerOffRequest.ts
 models/PowerOnRequest.ts
 models/RGBPixel.ts
