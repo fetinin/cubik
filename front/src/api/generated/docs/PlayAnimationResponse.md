@@ -1,4 +1,4 @@
-# StopAnimationResponse
+# PlayAnimationResponse
 
 ## Properties
 
@@ -10,13 +10,13 @@
 ## Example
 
 ```typescript
-import type { StopAnimationResponse } from ''
+import type { PlayAnimationResponse } from ''
 
 // TODO: Update the object below with actual values
 const example = {
-  "message": Animation stopped successfully,
+  "message": Animation started successfully,
   "playback": null,
-} satisfies StopAnimationResponse
+} satisfies PlayAnimationResponse
 
 console.log(example)
 
@@ -25,7 +25,7 @@ const exampleJSON: string = JSON.stringify(example)
 console.log(exampleJSON)
 
 // Parse the JSON string back to an object
-const exampleParsed = JSON.parse(exampleJSON) as StopAnimationResponse
+const exampleParsed = JSON.parse(exampleJSON) as PlayAnimationResponse
 console.log(exampleParsed)
 ```
 

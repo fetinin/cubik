@@ -50,6 +50,16 @@ import {
 	NameConflictToJSON
 } from '../models/NameConflict';
 import {
+	type PlayAnimationRequest,
+	PlayAnimationRequestFromJSON,
+	PlayAnimationRequestToJSON
+} from '../models/PlayAnimationRequest';
+import {
+	type PlayAnimationResponse,
+	PlayAnimationResponseFromJSON,
+	PlayAnimationResponseToJSON
+} from '../models/PlayAnimationResponse';
+import {
 	type PowerOffRequest,
 	PowerOffRequestFromJSON,
 	PowerOffRequestToJSON
@@ -142,6 +152,17 @@ export interface ListAnimationsRequest {
 	 * Unique device identifier
 	 */
 	deviceId: string;
+}
+
+export interface PlayAnimationOperationRequest {
+	/**
+	 * Animation UUID
+	 */
+	id: string;
+	/**
+	 *
+	 */
+	playAnimationRequest: PlayAnimationRequest;
 }
 
 export interface PowerOffOperationRequest {
@@ -522,6 +543,72 @@ export class DefaultApi extends runtime.BaseAPI {
 		initOverrides?: RequestInit | runtime.InitOverrideFunction
 	): Promise<ListAnimationsResponse> {
 		const response = await this.listAnimationsRaw(requestParameters, initOverrides);
+		return await response.value();
+	}
+
+	/**
+	 * Creates request options for playAnimation without sending the request
+	 */
+	async playAnimationRequestOpts(
+		requestParameters: PlayAnimationOperationRequest
+	): Promise<runtime.RequestOpts> {
+		if (requestParameters['id'] == null) {
+			throw new runtime.RequiredError(
+				'id',
+				'Required parameter "id" was null or undefined when calling playAnimation().'
+			);
+		}
+
+		if (requestParameters['playAnimationRequest'] == null) {
+			throw new runtime.RequiredError(
+				'playAnimationRequest',
+				'Required parameter "playAnimationRequest" was null or undefined when calling playAnimation().'
+			);
+		}
+
+		const queryParameters: any = {};
+
+		const headerParameters: runtime.HTTPHeaders = {};
+
+		headerParameters['Content-Type'] = 'application/json';
+
+		let urlPath = `/api/animation/{id}/play`;
+		urlPath = urlPath.replace('{id}', encodeURIComponent(String(requestParameters['id'])));
+
+		return {
+			path: urlPath,
+			method: 'POST',
+			headers: headerParameters,
+			query: queryParameters,
+			body: PlayAnimationRequestToJSON(requestParameters['playAnimationRequest'])
+		};
+	}
+
+	/**
+	 * Starts looping the saved animation on the device, replacing any running playback. The playback stays linked to the saved animation until it is updated or deleted.
+	 * Play a saved animation on a device
+	 */
+	async playAnimationRaw(
+		requestParameters: PlayAnimationOperationRequest,
+		initOverrides?: RequestInit | runtime.InitOverrideFunction
+	): Promise<runtime.ApiResponse<PlayAnimationResponse>> {
+		const requestOptions = await this.playAnimationRequestOpts(requestParameters);
+		const response = await this.request(requestOptions, initOverrides);
+
+		return new runtime.JSONApiResponse(response, (jsonValue) =>
+			PlayAnimationResponseFromJSON(jsonValue)
+		);
+	}
+
+	/**
+	 * Starts looping the saved animation on the device, replacing any running playback. The playback stays linked to the saved animation until it is updated or deleted.
+	 * Play a saved animation on a device
+	 */
+	async playAnimation(
+		requestParameters: PlayAnimationOperationRequest,
+		initOverrides?: RequestInit | runtime.InitOverrideFunction
+	): Promise<PlayAnimationResponse> {
+		const response = await this.playAnimationRaw(requestParameters, initOverrides);
 		return await response.value();
 	}
 

@@ -2,11 +2,13 @@
 
 ## Properties
 
-| Name       | Type   |
-| ---------- | ------ |
-| `id`       | string |
-| `name`     | string |
-| `location` | string |
+| Name       | Type                    |
+| ---------- | ----------------------- |
+| `id`       | string                  |
+| `name`     | string                  |
+| `location` | string                  |
+| `power`    | string                  |
+| `playback` | [Playback](Playback.md) |
 
 ## Example
 
@@ -18,6 +20,8 @@ const example = {
   "id": 0x000000000abc1234,
   "name": Living Room Cube,
   "location": yeelight://192.168.1.100:55443,
+  "power": null,
+  "playback": null,
 } satisfies Device
 
 console.log(example)

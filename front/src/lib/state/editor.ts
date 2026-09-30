@@ -208,3 +208,26 @@ export function moveSelection(
 
 	return { pixels: newPixels, newSelection };
 }
+
+// True when neither the canvas nor any frame has a lit pixel, so replacing
+// the editor contents loses nothing.
+export function isEditorEmpty(pixels: PackedRGB[], frames: Frame[]): boolean {
+	const blank = (p: PackedRGB[]) => p.every((c) => c === 0x000000);
+	return blank(pixels) && frames.every((f) => blank(f.pixels));
+}
+
+export function framesFromApi(apiFrames: { r: number; g: number; b: number }[][]): Frame[] {
+	const stamp = Date.now();
+	return apiFrames.map((apiFrame, i) => ({
+		id: `frame-${stamp}-${i}`,
+		name: `Frame ${i + 1}`,
+		pixels: apiFrame.map((pixel) => packRGB(pixel.r, pixel.g, pixel.b))
+	}));
+}
+
+export function sameFrames(a: PackedRGB[][], b: PackedRGB[][]): boolean {
+	return (
+		a.length === b.length &&
+		a.every((f, i) => f.length === b[i].length && f.every((c, j) => c === b[i][j]))
+	);
+}

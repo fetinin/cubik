@@ -10,6 +10,7 @@ All URIs are relative to _http://localhost:9080_
 | [**getDevices**](DefaultApi.md#getdevices)                    | **GET** /api/devices                    | Discover Yeelight CubeLite devices               |
 | [**importAnimation**](DefaultApi.md#importanimationoperation) | **POST** /api/animation/import          | Import an animation from a Sparse JSON payload   |
 | [**listAnimations**](DefaultApi.md#listanimations)            | **GET** /api/animation/list/{device_id} | List saved animations for a device               |
+| [**playAnimation**](DefaultApi.md#playanimationoperation)     | **POST** /api/animation/{id}/play       | Play a saved animation on a device               |
 | [**powerOff**](DefaultApi.md#poweroffoperation)               | **POST** /api/device/power/off          | Power off a device                               |
 | [**powerOn**](DefaultApi.md#poweronoperation)                 | **POST** /api/device/power/on           | Power on a device                                |
 | [**saveAnimation**](DefaultApi.md#saveanimationoperation)     | **POST** /api/animation/save            | Save animation to database                       |
@@ -406,6 +407,76 @@ No authorization required
 | ----------- | ------------------------ | ---------------- |
 | **200**     | List of saved animations | -                |
 | **500**     | Internal server error    | -                |
+
+[[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)
+
+## playAnimation
+
+> PlayAnimationResponse playAnimation(id, playAnimationRequest)
+
+Play a saved animation on a device
+
+Starts looping the saved animation on the device, replacing any running playback. The playback stays linked to the saved animation until it is updated or deleted.
+
+### Example
+
+```ts
+import {
+  Configuration,
+  DefaultApi,
+} from '';
+import type { PlayAnimationOperationRequest } from '';
+
+async function example() {
+  console.log("🚀 Testing  SDK...");
+  const api = new DefaultApi();
+
+  const body = {
+    // string | Animation UUID
+    id: 550e8400-e29b-41d4-a716-446655440000,
+    // PlayAnimationRequest
+    playAnimationRequest: ...,
+  } satisfies PlayAnimationOperationRequest;
+
+  try {
+    const data = await api.playAnimation(body);
+    console.log(data);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+// Run the test
+example().catch(console.error);
+```
+
+### Parameters
+
+| Name                     | Type                                            | Description    | Notes                     |
+| ------------------------ | ----------------------------------------------- | -------------- | ------------------------- |
+| **id**                   | `string`                                        | Animation UUID | [Defaults to `undefined`] |
+| **playAnimationRequest** | [PlayAnimationRequest](PlayAnimationRequest.md) |                |                           |
+
+### Return type
+
+[**PlayAnimationResponse**](PlayAnimationResponse.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+- **Content-Type**: `application/json`
+- **Accept**: `application/json`
+
+### HTTP response details
+
+| Status code | Description                    | Response headers |
+| ----------- | ------------------------------ | ---------------- |
+| **200**     | Animation started successfully | -                |
+| **404**     | Animation not found            | -                |
+| **500**     | Internal server error          | -                |
 
 [[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)
 

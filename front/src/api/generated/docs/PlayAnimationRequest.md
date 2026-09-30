@@ -1,22 +1,20 @@
-# StopAnimationResponse
+# PlayAnimationRequest
 
 ## Properties
 
-| Name       | Type                    |
-| ---------- | ----------------------- |
-| `message`  | string                  |
-| `playback` | [Playback](Playback.md) |
+| Name             | Type   |
+| ---------------- | ------ |
+| `deviceLocation` | string |
 
 ## Example
 
 ```typescript
-import type { StopAnimationResponse } from ''
+import type { PlayAnimationRequest } from ''
 
 // TODO: Update the object below with actual values
 const example = {
-  "message": Animation stopped successfully,
-  "playback": null,
-} satisfies StopAnimationResponse
+  "deviceLocation": yeelight://192.168.1.100:55443,
+} satisfies PlayAnimationRequest
 
 console.log(example)
 
@@ -25,7 +23,7 @@ const exampleJSON: string = JSON.stringify(example)
 console.log(exampleJSON)
 
 // Parse the JSON string back to an object
-const exampleParsed = JSON.parse(exampleJSON) as StopAnimationResponse
+const exampleParsed = JSON.parse(exampleJSON) as PlayAnimationRequest
 console.log(exampleParsed)
 ```
 

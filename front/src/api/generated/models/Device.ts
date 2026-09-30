@@ -13,6 +13,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { Playback } from './Playback';
+import {
+	PlaybackFromJSON,
+	PlaybackFromJSONTyped,
+	PlaybackToJSON,
+	PlaybackToJSONTyped
+} from './Playback';
+
 /**
  *
  * @export
@@ -31,7 +39,25 @@ export interface Device {
 	 * Device location in format yeelight://IP:PORT
 	 */
 	location: string;
+	/**
+	 * Power state as last set through this backend; unknown after a backend restart (the CubeLite can't be queried)
+	 */
+	power: DevicePowerEnum;
+	/**
+	 * Animation currently looping on the device, or null when nothing is playing
+	 */
+	playback?: Playback | null;
 }
+
+/**
+ * @export
+ */
+export const DevicePowerEnum = {
+	On: 'on',
+	Off: 'off',
+	Unknown: 'unknown'
+} as const;
+export type DevicePowerEnum = (typeof DevicePowerEnum)[keyof typeof DevicePowerEnum];
 
 /**
  * Check if a given object implements the Device interface.
@@ -40,6 +66,7 @@ export function instanceOfDevice(value: object): value is Device {
 	if (!('id' in value) || value['id'] === undefined) return false;
 	if (!('name' in value) || value['name'] === undefined) return false;
 	if (!('location' in value) || value['location'] === undefined) return false;
+	if (!('power' in value) || value['power'] === undefined) return false;
 	return true;
 }
 
@@ -54,7 +81,14 @@ export function DeviceFromJSONTyped(json: any, ignoreDiscriminator: boolean): De
 	return {
 		id: json['id'],
 		name: json['name'],
-		location: json['location']
+		location: json['location'],
+		power: json['power'],
+		playback:
+			json['playback'] === undefined
+				? undefined
+				: json['playback'] === null
+					? null
+					: PlaybackFromJSON(json['playback'])
 	};
 }
 
@@ -73,6 +107,8 @@ export function DeviceToJSONTyped(
 	return {
 		id: value['id'],
 		name: value['name'],
-		location: value['location']
+		location: value['location'],
+		power: value['power'],
+		playback: PlaybackToJSON(value['playback'])
 	};
 }

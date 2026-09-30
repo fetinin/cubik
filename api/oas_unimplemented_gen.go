@@ -71,6 +71,16 @@ func (UnimplementedHandler) ListAnimations(ctx context.Context, params ListAnima
 	return r, ht.ErrNotImplemented
 }
 
+// PlayAnimation implements playAnimation operation.
+//
+// Starts looping the saved animation on the device, replacing any running playback. The playback stays
+// linked to the saved animation until it is updated or deleted.
+//
+// POST /api/animation/{id}/play
+func (UnimplementedHandler) PlayAnimation(ctx context.Context, req *PlayAnimationRequest, params PlayAnimationParams) (r PlayAnimationRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // PowerOff implements powerOff operation.
 //
 // Turns off the specified Yeelight device with a smooth transition effect.

@@ -48,6 +48,13 @@ type Handler interface {
 	//
 	// GET /api/animation/list/{device_id}
 	ListAnimations(ctx context.Context, params ListAnimationsParams) (ListAnimationsRes, error)
+	// PlayAnimation implements playAnimation operation.
+	//
+	// Starts looping the saved animation on the device, replacing any running playback. The playback stays
+	// linked to the saved animation until it is updated or deleted.
+	//
+	// POST /api/animation/{id}/play
+	PlayAnimation(ctx context.Context, req *PlayAnimationRequest, params PlayAnimationParams) (PlayAnimationRes, error)
 	// PowerOff implements powerOff operation.
 	//
 	// Turns off the specified Yeelight device with a smooth transition effect.

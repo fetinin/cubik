@@ -25,6 +25,10 @@ type ListAnimationsRes interface {
 	listAnimationsRes()
 }
 
+type PlayAnimationRes interface {
+	playAnimationRes()
+}
+
 type PowerOffRes interface {
 	powerOffRes()
 }
